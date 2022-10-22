@@ -1,11 +1,11 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.User;
+using POST.Core.Enums;
+using POST.CORE.DTO;
 using System;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Wallet
+namespace POST.Core.DTO.Wallet
 {
     public class WalletTransactionDTO : BaseDomainDTO
     {

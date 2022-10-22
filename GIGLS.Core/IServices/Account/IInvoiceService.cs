@@ -1,12 +1,12 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO.Shipments;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Account;
+using POST.Core.Enums;
+using POST.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Account
+namespace POST.Core.IServices.Account
 {
     public interface IInvoiceService : IServiceDependencyMarker
     {

@@ -1,7 +1,7 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 using System;
 
-namespace GIGLS.Core.DTO.Workshops
+namespace POST.Core.DTO.Workshops
 {
     public class WorkshopDTO : BaseDomainDTO
     {

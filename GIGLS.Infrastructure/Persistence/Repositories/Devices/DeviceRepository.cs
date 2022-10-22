@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Domain.Devices;
-using GIGLS.Core.IRepositories.Devices;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain.Devices;
+using POST.Core.IRepositories.Devices;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Devices
+namespace POST.Infrastructure.Persistence.Repositories.Devices
 {
     public class DeviceRepository : Repository<Device, GIGLSContext>, IDeviceRepository
     {

@@ -1,14 +1,14 @@
 ﻿using System.Threading.Tasks;
 using System.Configuration;
-using GIGLS.Core.IMessage;
-using GIGLS.Core.DTO;
+using POST.Core.IMessage;
+using POST.Core.DTO;
 using System.Net;
 using System;
 using System.IO;
 using System.Net.Http;
-using GIGLS.Core.IServices.MessagingLog;
-using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.Core.Enums;
+using POST.Core.IServices.MessagingLog;
+using POST.Core.DTO.MessagingLog;
+using POST.Core.Enums;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Web;
 
-namespace GIGLS.Messaging.MessageService
+namespace POST.Messaging.MessageService
 {
     public class SMSService : ISMSService
     {

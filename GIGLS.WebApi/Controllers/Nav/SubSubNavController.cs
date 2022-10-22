@@ -1,12 +1,12 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.CORE.IServices.Nav;
-using GIGLS.CORE.DTO.Nav;
+using POST.CORE.IServices.Nav;
+using POST.CORE.DTO.Nav;
 
-namespace GIGLS.WebApi.Controllers.Nav
+namespace POST.WebApi.Controllers.Nav
 {
     //[Authorize]
     [RoutePrefix("api/subsubnav")]

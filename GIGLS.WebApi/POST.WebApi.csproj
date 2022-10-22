@@ -12,8 +12,8 @@
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GIGLS.WebApi</RootNamespace>
-    <AssemblyName>GIGLS.WebApi</AssemblyName>
+    <RootNamespace>POST.WebApi</RootNamespace>
+    <AssemblyName>POST.WebApi</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <UseIISExpress>false</UseIISExpress>
     <IISExpressSSLPort />
@@ -34,7 +34,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>GIGLS.WebApi.xml</DocumentationFile>
+    <DocumentationFile>POST.WebApi.xml</DocumentationFile>
     <NoWarn>1062;1591</NoWarn>
     <PublishDatabases>false</PublishDatabases>
     <LegacyPublishPropertiesPageEnabled>true</LegacyPublishPropertiesPageEnabled>
@@ -292,7 +292,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="GIGLS.WebApi.xml" />
+    <Content Include="POST.WebApi.xml" />
     <Content Include="Global.asax" />
     <Content Include="Images\amazon.png" />
     <Content Include="Images\argos.png" />
@@ -576,21 +576,21 @@
     <Folder Include="Views\Test\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GIGLS.Core\GIGLS.Core.csproj">
+    <ProjectReference Include="..\GIGLS.Core\POST.Core.csproj">
       <Project>{e09465db-8bc7-4f1c-81d8-4ea1daa77ad4}</Project>
-      <Name>GIGLS.Core</Name>
+      <Name>POST.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GIGLS.Infrastructure\GIGLS.Infrastructure.csproj">
+    <ProjectReference Include="..\GIGLS.Infrastructure\POST.Infrastructure.csproj">
       <Project>{ca1b58fd-e1d5-48d3-a27d-d4e756cbf3e5}</Project>
-      <Name>GIGLS.Infrastructure</Name>
+      <Name>POST.Infrastructure</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GIGLS.Messaging\GIGLS.Messaging.csproj">
+    <ProjectReference Include="..\GIGLS.Messaging\POST.Messaging.csproj">
       <Project>{f5d1aa8b-bb98-43e6-a758-cbfa7563f4a7}</Project>
-      <Name>GIGLS.Messaging</Name>
+      <Name>POST.Messaging</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GIGLS.Services\GIGLS.Services.csproj">
+    <ProjectReference Include="..\GIGLS.Services\POST.Services.csproj">
       <Project>{3e97ded8-8a27-4b97-b8a9-fc3511550d91}</Project>
-      <Name>GIGLS.Services</Name>
+      <Name>POST.Services</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThirdParty.WebServices\ThirdParty.WebServices.csproj">
       <Project>{03529607-e784-45a7-b684-158ea13fb5e0}</Project>

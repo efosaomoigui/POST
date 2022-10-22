@@ -1,16 +1,16 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Stores;
-using GIGLS.Core.IRepositories.Stores;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.DTO.Stores;
+using POST.Core.IRepositories.Stores;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-using GIGLS.Core.DTO;
+using POST.Core.DTO;
 
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Stores
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Stores
 {
     public class StoreRepository : Repository<Store, GIGLSContext>, IStoreRepository
     {

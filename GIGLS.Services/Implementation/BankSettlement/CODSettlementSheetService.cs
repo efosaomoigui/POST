@@ -1,19 +1,19 @@
-﻿using GIGLS.Core.IServices.Devices;
+﻿using POST.Core.IServices.Devices;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Devices;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
+using POST.Core.DTO.Devices;
+using POST.Core;
+using POST.Infrastructure;
 using AutoMapper;
-using GIGLS.Core.Domain.Devices;
+using POST.Core.Domain.Devices;
 using System.Linq;
-using GIGLS.Core.IServices.BankSettlement;
-using GIGLS.Core.DTO.BankSettlement;
-using GIGLS.Core.Domain.BankSettlement;
-using GIGLS.Core.IServices.User;
+using POST.Core.IServices.BankSettlement;
+using POST.Core.DTO.BankSettlement;
+using POST.Core.Domain.BankSettlement;
+using POST.Core.IServices.User;
 
-namespace GIGLS.Services.Implementation.BankSettlement
+namespace POST.Services.Implementation.BankSettlement
 {
     public class CODSettlementSheetService : ICODSettlementSheetService
     {

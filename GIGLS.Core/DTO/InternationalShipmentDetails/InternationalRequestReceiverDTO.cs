@@ -1,11 +1,11 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.DTO.InternationalShipmentDetails
+namespace POST.Core.DTO.InternationalShipmentDetails
 {
     public class InternationalRequestReceiverDTO : BaseDomainDTO
     {

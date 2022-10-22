@@ -1,12 +1,12 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.Domain;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.Enums;
 using System;
 using System.Collections.Generic;
 
-namespace GIGLS.CORE.DTO.Shipments
+namespace POST.CORE.DTO.Shipments
 {
     public class GroupWaybillNumberMappingDTO : BaseDomain
     {

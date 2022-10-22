@@ -1,8 +1,8 @@
-﻿using GIGLS.WebApi.Filters.Configuration;
+﻿using POST.WebApi.Filters.Configuration;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 
-namespace GIGLS.WebApi.Filters
+namespace POST.WebApi.Filters
 {
     public class IPFilterAttribute : AuthorizeAttribute
     {

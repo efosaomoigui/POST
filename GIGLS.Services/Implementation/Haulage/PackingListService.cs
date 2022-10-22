@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.IServices.Haulage;
+﻿using POST.Core.IServices.Haulage;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Haulage;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
+using POST.Core.DTO.Haulage;
+using POST.Core;
+using POST.Infrastructure;
 using AutoMapper;
-using GIGLS.Core.Domain;
+using POST.Core.Domain;
 
-namespace GIGLS.Services.Implementation.Haulage
+namespace POST.Services.Implementation.Haulage
 {
     public class PackingListService : IPackingListService
     {

@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Shipments;
+using POST.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Shipments
+namespace POST.Core.IServices.Shipments
 {
     public interface IMobileShipmentTrackingService : IServiceDependencyMarker
     {

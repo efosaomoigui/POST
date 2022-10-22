@@ -1,11 +1,11 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Report;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.Partnership;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Partnership
+namespace POST.Core.IRepositories.Partnership
 {
     public interface IPartnerPayoutRepository : IRepository<PartnerPayout>
     {

@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.IServices;
+﻿using POST.Core.DTO;
+using POST.Core.IServices;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IMessage
+namespace POST.Core.IMessage
 {
     public interface IEmailService : IServiceDependencyMarker
     {

@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.ShipmentScan;
-using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.ShipmentScan;
+using POST.Core.IRepositories.Shipments;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
+namespace POST.Infrastructure.Persistence.Repositories.Shipments
 {
     public class MobileShipmentTrackingRepository : Repository<MobileShipmentTracking, GIGLSContext>, IMobileShipmentTrackingRepository
     {

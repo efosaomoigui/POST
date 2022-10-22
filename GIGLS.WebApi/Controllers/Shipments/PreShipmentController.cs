@@ -1,18 +1,18 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.Node;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.Node;
+using POST.Core.DTO.Shipments;
+using POST.Core.IServices;
+using POST.Core.IServices.Shipments;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Shipments
+namespace POST.WebApi.Controllers.Shipments
 {
     [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/preshipment")]

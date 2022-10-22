@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.OnlinePayment;
+using POST.Core.IServices;
+using POST.Core.IServices.Wallet;
+using POST.CORE.DTO.Report;
+using POST.Services.Implementation;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.PaymentWebhook
+namespace POST.WebApi.Controllers.PaymentWebhook
 {
     [Authorize]
     [RoutePrefix("api/cellulant")]

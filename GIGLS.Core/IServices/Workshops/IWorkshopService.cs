@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.DTO.Workshops;
+﻿using POST.Core.DTO.Workshops;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Workshops
+namespace POST.Core.IServices.Workshops
 {
     public interface IWorkshopService : IServiceDependencyMarker
     {

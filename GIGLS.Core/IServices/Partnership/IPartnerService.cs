@@ -1,12 +1,12 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.CORE.DTO.Report;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.Shipments;
+using POST.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Partnership
+namespace POST.Core.IServices.Partnership
 {
     public interface IPartnerService : IServiceDependencyMarker
     {

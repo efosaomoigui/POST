@@ -1,6 +1,6 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 
-namespace GIGLS.Core.Domain.Wallet
+namespace POST.Core.Domain.Wallet
 {
     public class AccountSummary : BaseDomain, IAuditable
     {

@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.Domain;
+using POST.Core.Enums;
+using POST.CORE.DTO;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Zone
+namespace POST.Core.DTO.Zone
 {
     public class SpecialDomesticPackageDTO : BaseDomainDTO
     {

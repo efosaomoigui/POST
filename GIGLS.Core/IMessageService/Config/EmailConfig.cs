@@ -1,4 +1,4 @@
-﻿using GIGLS.Core.Config;
+﻿using POST.Core.Config;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IMessage.Config
+namespace POST.Core.IMessage.Config
 {
     public class EmailConfig : IMessageConfig
     {

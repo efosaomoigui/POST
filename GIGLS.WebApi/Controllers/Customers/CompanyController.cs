@@ -1,19 +1,19 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Core.DTO.Customers;
+using POST.Core.IServices.Customers;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.Enums;
-using GIGLS.WebApi.Filters;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.OnlinePayment;
+using POST.Core.Enums;
+using POST.WebApi.Filters;
+using POST.CORE.DTO.Report;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.OnlinePayment;
 using Newtonsoft.Json.Linq;
-using GIGLS.Core.DTO;
+using POST.Core.DTO;
 
-namespace GIGLS.WebApi.Controllers.Customers
+namespace POST.WebApi.Controllers.Customers
 {
     [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/company")]

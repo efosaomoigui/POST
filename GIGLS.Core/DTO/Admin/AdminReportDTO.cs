@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Account;
-using GIGLS.Core.View.AdminReportView;
+﻿using POST.Core.DTO.Account;
+using POST.Core.View.AdminReportView;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Admin
+namespace POST.Core.DTO.Admin
 {
     public class AdminReportDTO
     {

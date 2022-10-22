@@ -1,13 +1,13 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.View;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Wallet;
+using POST.Core.View;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GIGLS.Core.DTO.Dashboard
+namespace POST.Core.DTO.Dashboard
 {
     public class DashboardDTO
     {

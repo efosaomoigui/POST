@@ -1,11 +1,11 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core;
-using GIGLS.Core.Domain.Utility;
-using GIGLS.Core.IRepositories;
-using GIGLS.CORE.Domain;
-using GIGLS.Infrastructure.IdentityInfrastrure;
-using GIGLS.Infrastructure.Persistence.Repositories;
+﻿using GIGL.POST.Core.Domain;
+using GIGL.POST.Core.Repositories;
+using POST.Core;
+using POST.Core.Domain.Utility;
+using POST.Core.IRepositories;
+using POST.CORE.Domain;
+using POST.Infrastructure.IdentityInfrastrure;
+using POST.Infrastructure.Persistence.Repositories;
 using LinqKit;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
@@ -17,7 +17,7 @@ using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence.Repository
+namespace POST.Infrastructure.Persistence.Repository
 {
     public class Repository<TEntity, TContext> : IRepository<TEntity>
         where TEntity : class

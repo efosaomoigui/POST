@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.IServices.Fleets;
+using POST.Core.DTO.Fleets;
+using POST.Core.IServices.Fleets;
 
-namespace GIGLS.Services.Implementation.Fleets
+namespace POST.Services.Implementation.Fleets
 {
     public class FleetPartInventoryService : IFleetPartInventoryService
     {

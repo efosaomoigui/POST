@@ -1,8 +1,8 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.Wallet;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.Wallet;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Wallet
+namespace POST.Core.IRepositories.Wallet
 {
     public interface IWalletNumberRepository : IRepository<WalletNumber>
     {

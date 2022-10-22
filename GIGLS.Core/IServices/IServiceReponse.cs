@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.BankSettlement;
+﻿using POST.Core.DTO.BankSettlement;
 using System.Collections.Generic;
 using ThirdParty.WebServices.Magaya.Services;
 
-namespace GIGLS.Core.IServices
+namespace POST.Core.IServices
 {
     public interface IServiceResponse<TResponse>
     {

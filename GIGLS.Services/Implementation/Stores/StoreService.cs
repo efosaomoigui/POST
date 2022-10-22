@@ -5,14 +5,14 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core;
-using GIGLS.Core.DTO.Stores;
-using GIGLS.Core.IServices.Stores;
-using GIGLS.Infrastructure;
-using GIGLS.Services.Implementation.Shipments;
+using GIGL.POST.Core.Domain;
+using POST.Core;
+using POST.Core.DTO.Stores;
+using POST.Core.IServices.Stores;
+using POST.Infrastructure;
+using POST.Services.Implementation.Shipments;
 
-namespace GIGLS.Services.Implementation.Stores
+namespace POST.Services.Implementation.Stores
 {
     public class StoreService : IStoreService
     {   

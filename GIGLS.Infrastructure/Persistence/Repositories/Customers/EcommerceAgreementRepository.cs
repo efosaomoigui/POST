@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.Customers;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.IRepositories.Customers;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Customers
+namespace POST.Infrastructure.Persistence.Repositories.Customers
 {
     public class EcommerceAgreementRepository : Repository<EcommerceAgreement, GIGLSContext>, IEcommerceAgreementRepository
     {

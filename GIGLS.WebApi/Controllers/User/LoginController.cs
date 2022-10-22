@@ -1,16 +1,16 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Services.Implementation;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System;
-using GIGLS.Infrastructure;
+using POST.Infrastructure;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Collections.Generic;
 using EfeAuthen.Models;
 
-namespace GIGLS.WebApi.Controllers.User
+namespace POST.WebApi.Controllers.User
 {
     [Authorize]
     public class LoginController : BaseWebApiController
@@ -34,7 +34,7 @@ namespace GIGLS.WebApi.Controllers.User
                 userLoginModel.Password = userLoginModel.Password.Trim();
             }
 
-            //const string apiBaseUri = "http://localhost/GIGLS.WebApi/";
+            //const string apiBaseUri = "http://localhost/POST.WebApi/";
             const string apiBaseUri = "http://giglsresourceapi.azurewebsites.net/api/";
             string getTokenResponse;
 

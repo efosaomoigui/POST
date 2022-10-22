@@ -1,11 +1,11 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Account;
+﻿using POST.Core;
+using POST.Core.DTO.Account;
+using POST.Core.Enums;
+using POST.Core.IServices.Account;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Account
+namespace POST.Services.Implementation.Account
 {
     public class IncomeService : IIncomeService
     {

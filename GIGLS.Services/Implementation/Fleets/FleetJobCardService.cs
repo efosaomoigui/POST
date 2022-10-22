@@ -4,26 +4,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core;
-using GIGLS.Core.DTO.Captains;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Fleets;
-using GIGLS.Core.IServices.Partnership;
-using GIGLS.Core.IServices.User;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.Node;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Node;
+using GIGL.POST.Core.Domain;
+using POST.Core;
+using POST.Core.DTO.Captains;
+using POST.Core.DTO.Fleets;
+using POST.Core.DTO.MessagingLog;
+using POST.CORE.DTO.Report;
+using POST.Core.DTO.User;
+using POST.Core.Enums;
+using POST.Core.IMessageService;
+using POST.Core.IServices;
+using POST.Core.IServices.Fleets;
+using POST.Core.IServices.Partnership;
+using POST.Core.IServices.User;
+using POST.Infrastructure;
+using POST.Core.IServices.Node;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.Node;
 
-namespace GIGLS.Services.Implementation.Fleets
+namespace POST.Services.Implementation.Fleets
 {
     public class FleetJobCardService : IFleetJobCardService
     {

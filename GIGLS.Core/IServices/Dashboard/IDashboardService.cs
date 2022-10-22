@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Core.DTO.Report;
+﻿using POST.Core.DTO.Dashboard;
+using POST.Core.DTO.Report;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Dashboard
+namespace POST.Core.IServices.Dashboard
 {
     public interface IDashboardService : IServiceDependencyMarker
     {

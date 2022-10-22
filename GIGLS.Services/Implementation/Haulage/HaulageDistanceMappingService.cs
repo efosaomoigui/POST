@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
-using GIGLS.Core.DTO.Zone;
+using GIGL.POST.Core.Domain;
+using POST.Core;
+using POST.Infrastructure;
+using POST.Core.DTO.Zone;
 using AutoMapper;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.IServices;
 using System.Linq;
 using System.Net;
 
-namespace GIGLS.Services.Implementation
+namespace POST.Services.Implementation
 {
     public class HaulageDistanceMappingService : IHaulageDistanceMappingService
     {

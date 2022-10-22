@@ -1,20 +1,20 @@
 ﻿using EfeAuthen.Models;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.ThirdPartyAPI;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Infrastructure;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+using POST.Core.DTO;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.OnlinePayment;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.User;
+using POST.Core.DTO.Wallet;
+using POST.Core.IServices;
+using POST.Core.IServices.ThirdPartyAPI;
+using POST.CORE.DTO.Report;
+using POST.Infrastructure;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
+namespace POST.WebApi.Controllers.ThirdPartyAPI
 {
     [Authorize(Roles = "ThirdParty")]
     [RoutePrefix("api/thirdparty")]

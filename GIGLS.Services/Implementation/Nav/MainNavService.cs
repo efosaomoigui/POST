@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.CORE.Domain;
-using GIGLS.CORE.DTO.Nav;
-using GIGLS.CORE.IServices.Nav;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.CORE.Domain;
+using POST.CORE.DTO.Nav;
+using POST.CORE.IServices.Nav;
+using POST.Infrastructure;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Nav
+namespace POST.Services.Implementation.Nav
 {
     public class MainNavService : IMainNavService
     {

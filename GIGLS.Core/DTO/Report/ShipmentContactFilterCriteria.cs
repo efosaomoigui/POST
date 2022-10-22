@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO.Report;
+﻿using POST.Core.Enums;
+using POST.CORE.DTO.Report;
 
-namespace GIGLS.Core.DTO.Report
+namespace POST.Core.DTO.Report
 {
     public class ShipmentContactFilterCriteria : BaseFilterCriteria
     {

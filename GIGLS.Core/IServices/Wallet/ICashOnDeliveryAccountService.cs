@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
+﻿using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.CashOnDeliveryAccount
+namespace POST.Core.IServices.CashOnDeliveryAccount
 {
     public interface ICashOnDeliveryAccountService : IServiceDependencyMarker
     {

@@ -1,10 +1,10 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.Devices;
-using GIGLS.Core.DTO.Devices;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.Devices;
+using POST.Core.DTO.Devices;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Devices
+namespace POST.Core.IRepositories.Devices
 {
     public interface IDeviceManagementRepository : IRepository<DeviceManagement>
     {

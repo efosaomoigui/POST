@@ -1,10 +1,10 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
+﻿using POST.Core;
+using POST.Core.Domain;
+using POST.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GIGLS.CORE.Domain
+namespace POST.CORE.Domain
 {
     public class OverdueShipment : BaseDomain, IAuditable
     {

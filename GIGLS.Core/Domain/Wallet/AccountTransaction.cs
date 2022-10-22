@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System;
 
-namespace GIGLS.Core.Domain.Wallet
+namespace POST.Core.Domain.Wallet
 {
     public class AccountTransaction : BaseDomain, IAuditable
     {

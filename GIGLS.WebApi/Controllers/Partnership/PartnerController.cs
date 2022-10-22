@@ -1,16 +1,16 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.IServices.Partnership;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Core.DTO.Partnership;
+using POST.Core.IServices.Partnership;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.WebApi.Filters;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Shipments;
+using POST.WebApi.Filters;
+using POST.Core.DTO.Report;
+using POST.Core.DTO;
+using POST.Core.DTO.Shipments;
 
-namespace GIGLS.WebApi.Controllers.Partnership
+namespace POST.WebApi.Controllers.Partnership
 {
     [Authorize(Roles = "Admin, ViewAdmin, CaptainManagement")]
     [RoutePrefix("api/partner")]

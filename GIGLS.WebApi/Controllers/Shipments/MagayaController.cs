@@ -1,25 +1,25 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Core.IServices.Shipments;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.IServices.User;
+using POST.Core.IServices.User;
 using ThirdParty.WebServices.Magaya.DTO;
 using ThirdParty.WebServices.Magaya.Business.New;
 using ThirdParty.WebServices.Magaya.Services;
 using System.ServiceModel;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.CORE.DTO.Shipments;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Customers;
+using POST.CORE.DTO.Shipments;
 using System;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.WebApi.Filters;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.Enums;
-using GIGLS.Core.DTO.Account;
+using POST.Core.DTO.Shipments;
+using POST.WebApi.Filters;
+using POST.CORE.DTO.Report;
+using POST.Core.Enums;
+using POST.Core.DTO.Account;
 
-namespace GIGLS.WebApi.Controllers.Shipments
+namespace POST.WebApi.Controllers.Shipments
 {
     [Authorize(Roles = "Shipment, ViewAdmin")]
     /// <summary>

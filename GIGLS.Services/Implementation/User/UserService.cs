@@ -1,15 +1,15 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.CORE.Domain;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.DTO;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.User;
+using POST.Core.Enums;
+using POST.Core.IServices;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Utility;
+using POST.CORE.Domain;
+using POST.Infrastructure;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
@@ -19,7 +19,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace GIGLS.Services.Implementation.User
+namespace POST.Services.Implementation.User
 {
     public class UserService : IUserService
     {
@@ -50,7 +50,7 @@ namespace GIGLS.Services.Implementation.User
                 throw new GenericException($"User with email: {userDto.Email} already exist", $"{(int)HttpStatusCode.Forbidden}");
             }
 
-            var user = Mapper.Map<GIGL.GIGLS.Core.Domain.User>(userDto);
+            var user = Mapper.Map<GIGL.POST.Core.Domain.User>(userDto);
 
             user.Id = Guid.NewGuid().ToString();
             user.DateCreated = DateTime.Now.Date;
@@ -72,22 +72,22 @@ namespace GIGLS.Services.Implementation.User
         }
 
         //Get all users
-        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers()
+        public Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetUsers()
         {
             return _unitOfWork.User.GetUsers();
         }
 
-        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers(string email)
+        public Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetCustomerUsers(string email)
         {
             return _unitOfWork.User.GetCustomerUsers(email);
         }
 
-        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers()
+        public Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetCustomerUsers()
         {
             return _unitOfWork.User.GetCustomerUsers();
         }
 
-        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCorporateCustomerUsers()
+        public Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetCorporateCustomerUsers()
         {
             return _unitOfWork.User.GetCorporateCustomerUsers();
         }
@@ -97,28 +97,28 @@ namespace GIGLS.Services.Implementation.User
             return await _serviceCentreService.GetServiceCentreById(ServiceCenterId);
         }
 
-        public IQueryable<GIGL.GIGLS.Core.Domain.User> GetCorporateCustomerUsersAsQueryable()
+        public IQueryable<GIGL.POST.Core.Domain.User> GetCorporateCustomerUsersAsQueryable()
         {
             return _unitOfWork.User.GetCorporateCustomerUsersAsQueryable();
         }
 
-        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers()
+        public Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetPartnerUsers()
         {
             return _unitOfWork.User.GetPartnerUsers();
         }
 
         //Get all system users
-        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetSystemUsers()
+        public Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetSystemUsers()
         {
             return _unitOfWork.User.GetSystemUsers();
         }
 
-        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchCaptains()
+        public Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetDispatchCaptains()
         {
             return _unitOfWork.User.GetDispatchCaptains();
         }
 
-        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchRiders()
+        public Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetDispatchRiders()
         {
             return _unitOfWork.User.GetDispatchRiders();
         }
@@ -1538,7 +1538,7 @@ namespace GIGLS.Services.Implementation.User
             return Mapper.Map<UserDTO>(user);
         }
 
-        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsersByEmail(string email)
+        public Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetPartnerUsersByEmail(string email)
         {
             email = string.IsNullOrEmpty(email) ? throw new GenericException("Email is empty or Not Valid!") : email.Trim();
             return  _unitOfWork.User.GetPartnerUsersByEmail2(email);

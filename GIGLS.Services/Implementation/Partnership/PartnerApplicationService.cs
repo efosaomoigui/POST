@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Partnership;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain.Partnership;
+using POST.Core.DTO.Partnership;
+using POST.Core.Enums;
+using POST.Core.IServices.Partnership;
+using POST.Infrastructure;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Partnership
+namespace POST.Services.Implementation.Partnership
 {
     public class PartnerApplicationService : IPartnerApplicationService
     {

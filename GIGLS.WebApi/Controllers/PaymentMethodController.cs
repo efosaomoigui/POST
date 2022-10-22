@@ -1,11 +1,11 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.IServices;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.DTO;
+using POST.Core.IServices;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers
+namespace POST.WebApi.Controllers
 {
     [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/paymentmethod")]

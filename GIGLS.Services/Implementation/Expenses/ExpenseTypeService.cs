@@ -1,15 +1,15 @@
-﻿using GIGLS.Core.IServices.Expenses;
+﻿using POST.Core.IServices.Expenses;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Expenses;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
+using POST.Core.DTO.Expenses;
+using POST.Core;
+using POST.Infrastructure;
 using AutoMapper;
-using GIGLS.Core.Domain.Expenses;
+using POST.Core.Domain.Expenses;
 using System.Linq;
 
-namespace GIGLS.Services.Implementation.Expenses
+namespace POST.Services.Implementation.Expenses
 {
     public class ExpenseTypeService : IExpenseTypeService
     {

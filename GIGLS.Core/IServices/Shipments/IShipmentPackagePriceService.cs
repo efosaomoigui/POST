@@ -1,11 +1,11 @@
-﻿using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Stores;
-using GIGLS.CORE.DTO.Report;
+﻿using POST.Core.DTO.Report;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.Stores;
+using POST.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Shipments
+namespace POST.Core.IServices.Shipments
 {
     public interface IShipmentPackagePriceService : IServiceDependencyMarker
     {

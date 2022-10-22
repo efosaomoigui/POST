@@ -1,12 +1,12 @@
 ﻿using AftershipAPI;
-using GIGLS.Core;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.ShipmentScan;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Business;
-using GIGLS.Core.IServices.DHL;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.ShipmentScan;
+using POST.Core.Enums;
+using POST.Core.IServices.Business;
+using POST.Core.IServices.DHL;
+using POST.Core.IServices.Shipments;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -14,7 +14,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Business.Tracking
+namespace POST.Services.Business.Tracking
 {
     public class ShipmentTrackService : IShipmentTrackService
     {

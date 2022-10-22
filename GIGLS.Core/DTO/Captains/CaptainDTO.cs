@@ -1,4 +1,4 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace GIGLS.Core.DTO.Captains
+namespace POST.Core.DTO.Captains
 {
     public class RegCaptainDTO
     {

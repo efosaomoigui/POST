@@ -1,7 +1,7 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 using System;
 
-namespace GIGLS.Core.DTO.Stores
+namespace POST.Core.DTO.Stores
 {
     public class StoreDTO : BaseDomainDTO
     {

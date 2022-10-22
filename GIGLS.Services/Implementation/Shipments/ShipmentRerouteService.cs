@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core;
-using GIGLS.Core.IServices.User;
-using GIGLS.Infrastructure;
+using POST.Core.DTO.Shipments;
+using POST.Core.IServices.Shipments;
+using POST.Core;
+using POST.Core.IServices.User;
+using POST.Infrastructure;
 using AutoMapper;
-using GIGLS.Core.Domain;
+using POST.Core.Domain;
 using System.Collections.Generic;
 using System.Linq;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.IServices.Shipments;
-using GIGLS.Core.IServices.Business;
+using POST.Core.Enums;
+using POST.CORE.IServices.Shipments;
+using POST.Core.IServices.Business;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class ShipmentRerouteService : IShipmentRerouteService
     {

@@ -1,18 +1,18 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IRepositories.Account;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Dashboard;
+using POST.Core.DTO.Report;
+using POST.Core.Enums;
+using POST.Core.IRepositories.Account;
+using POST.CORE.DTO.Report;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Account
+namespace POST.Infrastructure.Persistence.Repositories.Account
 {
     public class FinancialReportRepository : Repository<FinancialReport, GIGLSContext>, IFinancialReportRepository
     {

@@ -1,14 +1,14 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.DTO;
-using GIGLS.Core.IServices;
+﻿using POST.Core;
+using POST.Core.DTO;
+using POST.Core.IServices;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.Enums;
-using GIGLS.Infrastructure;
+using POST.Core.Enums;
+using POST.Infrastructure;
 using AutoMapper;
-using GIGLS.Core.Domain;
+using POST.Core.Domain;
 
-namespace GIGLS.Services.Implementation.Messaging
+namespace POST.Services.Implementation.Messaging
 {
     public class MessageService : IMessageService
     {

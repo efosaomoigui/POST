@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 
-namespace GIGLS.WebApi.Helper
+namespace POST.WebApi.Helper
 {
     internal static class DbExtensions
     {

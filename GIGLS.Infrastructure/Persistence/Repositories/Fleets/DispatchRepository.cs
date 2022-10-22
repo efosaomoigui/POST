@@ -1,16 +1,16 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.Fleets;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.IRepositories.Fleets;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Fleets;
+using POST.Core.DTO.Fleets;
 using System.Linq;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.Enums;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.User;
+using POST.Core.Enums;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
+namespace POST.Infrastructure.Persistence.Repositories.Fleets
 {
     public class DispatchRepository : Repository<Dispatch, GIGLSContext>, IDispatchRepository
     {

@@ -1,26 +1,26 @@
-﻿using GIGLS.Core.IServices.PaymentTransactions;
+﻿using POST.Core.IServices.PaymentTransactions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core;
 using AutoMapper;
-using GIGLS.Infrastructure;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
+using POST.Infrastructure;
+using POST.Core.Domain;
+using POST.Core.Enums;
 using System;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.IMessageService;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Wallet;
+using POST.Core.Domain.Wallet;
+using POST.Core.IMessageService;
 using System.Security.Cryptography;
 using System.Text;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.IServices.Account;
-using GIGL.GIGLS.Core.Domain;
+using POST.Core.DTO.Account;
+using POST.Core.IServices.Account;
+using GIGL.POST.Core.Domain;
 using System.Linq;
-using GIGLS.Core.IServices.Utility;
+using POST.Core.IServices.Utility;
 
-namespace GIGLS.Services.Implementation.PaymentTransactions
+namespace POST.Services.Implementation.PaymentTransactions
 {
     public class PaymentPartialTransactionService : IPaymentPartialTransactionService
     {

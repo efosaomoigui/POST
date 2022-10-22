@@ -1,10 +1,10 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Shipments;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Shipments
+namespace POST.Core.IServices.Shipments
 {
     public interface IShipmentCancelService : IServiceDependencyMarker
     {

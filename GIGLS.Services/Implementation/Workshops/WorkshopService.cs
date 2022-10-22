@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Workshops;
-using GIGLS.Core.IServices.Workshops;
+using POST.Core.DTO.Workshops;
+using POST.Core.IServices.Workshops;
 
-namespace GIGLS.Services.Implementation.Workshops
+namespace POST.Services.Implementation.Workshops
 {
     public class WorkshopService : IWorkshopService
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GIGLS.CORE.DTO.Shipments
+namespace POST.CORE.DTO.Shipments
 {
     public class FilterOptionsDto
     {

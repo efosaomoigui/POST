@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Shipments;
+using POST.CORE.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.DTO
+namespace POST.Core.DTO
 {
     public class PreShipmentSummaryDTO : BaseDomainDTO
     {

@@ -1,17 +1,17 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using GIGL.POST.Core.Domain;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-using GIGLS.Core.DTO;
-using GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.Enums;
+using POST.Core.DTO;
+using POST.Core.Domain;
+using POST.Core.IRepositories;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.Enums;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
 {
     public class PriceCategoryRepository : Repository<PriceCategory, GIGLSContext>, IPriceCategoryRepository
     {

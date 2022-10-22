@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.Haulage;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.IRepositories.Haulage;
+using POST.Infrastructure.Persistence.Repository;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Haulage;
+using POST.Core.DTO.Haulage;
 using AutoMapper;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Haulage
+namespace POST.Infrastructure.Persistence.Repositories.Haulage
 {
     public class PackingListRepository : Repository<PackingList, GIGLSContext>, IPackingListRepository
     {

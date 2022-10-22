@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Utility
+namespace POST.Core.IServices.Utility
 {
     public interface IPasswordGenerator : IServiceDependencyMarker
     {

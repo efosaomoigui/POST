@@ -1,16 +1,16 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.CORE.Domain;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.CORE.IServices.Shipments;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Utility;
+using POST.CORE.Domain;
+using POST.CORE.DTO.Shipments;
+using POST.CORE.IServices.Shipments;
+using POST.Infrastructure;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class OverdueShipmentService : IOverdueShipmentService
     {

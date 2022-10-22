@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Report;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Report;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices
+namespace POST.Core.IServices
 {
     public interface IRiderDeliveryService : IServiceDependencyMarker
     {

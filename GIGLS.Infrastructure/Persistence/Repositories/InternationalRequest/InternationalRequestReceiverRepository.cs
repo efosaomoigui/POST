@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.InternationalRequest;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.IRepositories.InternationalRequest;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.InternationalShipmentDetails;
+using POST.Core.DTO.InternationalShipmentDetails;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.InternationalRequest
+namespace POST.Infrastructure.Persistence.Repositories.InternationalRequest
 {
     public class InternationalRequestReceiverRepository : Repository<InternationalRequestReceiver, GIGLSContext>, IInternationalRequestReceiverRepository
     {

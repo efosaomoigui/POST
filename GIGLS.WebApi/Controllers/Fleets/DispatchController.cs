@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Fleets;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO.Fleets;
+using POST.Core.IServices;
+using POST.Core.IServices.Fleets;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.dispatchs
+namespace POST.WebApi.Controllers.dispatchs
 {
     [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/dispatch")]

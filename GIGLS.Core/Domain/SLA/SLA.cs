@@ -1,6 +1,6 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 
-namespace GIGLS.Core.Domain.SLA
+namespace POST.Core.Domain.SLA
 {
     public class SLA : BaseDomain, IAuditable
     {

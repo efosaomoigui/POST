@@ -1,18 +1,18 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Account;
+﻿using POST.Core;
+using POST.Core.DTO.Account;
+using POST.Core.Enums;
+using POST.Core.IServices.Account;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Expenses;
-using GIGLS.Core.DTO.Report;
+using POST.Core.DTO.Expenses;
+using POST.Core.DTO.Report;
 using System;
-using GIGLS.Core.IServices.User;
+using POST.Core.IServices.User;
 using AutoMapper;
-using GIGLS.Core.Domain.Expenses;
-using GIGLS.Core.Domain;
+using POST.Core.Domain.Expenses;
+using POST.Core.Domain;
 
-namespace GIGLS.Services.Implementation.Account
+namespace POST.Services.Implementation.Account
 {
     public class ExpenditureService : IExpenditureService
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain.Audit
+namespace POST.Core.Domain.Audit
 {
     public class AuditTrailEvent
     {

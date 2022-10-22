@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.OnlinePayment
+namespace POST.Core.DTO.OnlinePayment
 {
     public class PaystackWebhookDTO
     {

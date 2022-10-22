@@ -1,27 +1,27 @@
-﻿using GIGLS.Core.IServices.Business;
-using GIGLS.Core.IServices.Zone;
+﻿using POST.Core.IServices.Business;
+using POST.Core.IServices.Zone;
 using System.Threading.Tasks;
-using GIGLS.Core.Enums;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core;
-using GIGLS.Core.IServices.User;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices;
+using POST.Core.Enums;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core;
+using POST.Core.IServices.User;
+using POST.Infrastructure;
+using POST.Core.IServices;
 using System.Linq;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Shipments;
+using POST.Core.IServices.Utility;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.DTO.Zone;
+using POST.Core.DTO.Shipments;
+using POST.Core.IServices.Shipments;
 using System;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using System.Configuration;
-using GIGLS.Core.Domain.Utility;
+using POST.Core.Domain.Utility;
 using System.Collections.Generic;
-using GIGLS.Core.DTO;
+using POST.Core.DTO;
 
-namespace GIGLS.Services.Business.Pricing
+namespace POST.Services.Business.Pricing
 {
     public class PricingService : IPricingService
     {

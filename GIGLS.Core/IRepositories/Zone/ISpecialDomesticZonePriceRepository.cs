@@ -1,10 +1,10 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.DTO.Zone;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.DTO.Zone;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
+using GIGL.POST.Core.Domain;
 
-namespace GIGLS.Core.IRepositories.Zone
+namespace POST.Core.IRepositories.Zone
 {
     public interface ISpecialDomesticZonePriceRepository : IRepository<SpecialDomesticZonePrice>
     {

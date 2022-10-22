@@ -1,12 +1,12 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
+﻿using GIGL.POST.Core.Domain;
+using GIGL.POST.Core.Repositories;
+using POST.Core.DTO.Shipments;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Shipments
+namespace POST.Core.IRepositories.Shipments
 {
     public interface IGroupWaybillNumberMappingRepository : IRepository<GroupWaybillNumberMapping>
     {

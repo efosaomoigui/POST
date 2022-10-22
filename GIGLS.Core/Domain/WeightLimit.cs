@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class WeightLimit : BaseDomain, IAuditable
     {

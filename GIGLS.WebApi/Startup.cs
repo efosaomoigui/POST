@@ -6,17 +6,17 @@ using Owin;
 using System.Web.Http;
 using System.Net.Http.Formatting;
 using Newtonsoft.Json.Serialization;
-using GIGLS.WebApi.Providers;
+using POST.WebApi.Providers;
 using Hangfire;
 using System.Timers;
-using GIGLS.CORE.IServices.Report;
+using POST.CORE.IServices.Report;
 //using GlobalConfiguration = Hangfire.GlobalConfiguration;
 //using Hangfire.SqlServer;
 //using Ninject;
 
-[assembly: OwinStartup(typeof(GIGLS.WebApi.Startup))]
+[assembly: OwinStartup(typeof(POST.WebApi.Startup))]
 
-namespace GIGLS.WebApi
+namespace POST.WebApi
 {
     public partial class Startup
     {

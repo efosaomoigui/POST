@@ -4,14 +4,14 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.OAuth;
-using GIGLS.Infrastructure.Persistence.Repository;
-using GIGLS.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
+using POST.Infrastructure.Persistence;
 using Microsoft.AspNet.Identity.EntityFramework;
-using GIGL.GIGLS.Core.Domain;
+using GIGL.POST.Core.Domain;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 
-namespace GIGLS.WebApi.App_Start 
+namespace POST.WebApi.App_Start 
 {
     public class GiglsSimpleCustomOAuthProvider: OAuthAuthorizationServerProvider
     {

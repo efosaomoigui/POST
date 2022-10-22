@@ -1,21 +1,21 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.DHL;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.DHL;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.User;
+using POST.Core.DTO.Zone;
+using POST.Core.Enums;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.TickectMan
+namespace POST.Core.IServices.TickectMan
 {
     public interface ITickectManService : IServiceDependencyMarker
     {

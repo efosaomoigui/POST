@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain.Utility
+namespace POST.Core.Domain.Utility
 {
     public class GlobalProperty : BaseDomain, IAuditable
     {

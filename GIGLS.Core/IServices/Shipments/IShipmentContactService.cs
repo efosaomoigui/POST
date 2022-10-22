@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Shipments;
+﻿using POST.Core.DTO.Report;
+using POST.Core.DTO.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Shipments
+namespace POST.Core.IServices.Shipments
 {
     public interface IShipmentContactService : IServiceDependencyMarker
     {

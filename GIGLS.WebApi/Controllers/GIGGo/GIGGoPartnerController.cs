@@ -1,18 +1,18 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.ShipmentScan;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.CustomerPortal;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Infrastructure;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Fleets;
+using POST.Core.DTO.MessagingLog;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.ShipmentScan;
+using POST.Core.DTO.User;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.Core.IServices;
+using POST.Core.IServices.CustomerPortal;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
+using POST.Infrastructure;
+using POST.Services.Implementation;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -23,7 +23,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.GIGGo
+namespace POST.WebApi.Controllers.GIGGo
 {
     [Authorize]
     [RoutePrefix("api/giggopartner")]

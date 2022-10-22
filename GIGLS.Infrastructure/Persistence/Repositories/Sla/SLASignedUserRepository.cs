@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Domain.SLA;
-using GIGLS.Core.IRepositories.Sla;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain.SLA;
+using POST.Core.IRepositories.Sla;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Sla
+namespace POST.Infrastructure.Persistence.Repositories.Sla
 {
     public class SLASignedUserRepository : Repository<SLASignedUser, GIGLSContext>, ISLASignedUserRepository
     {

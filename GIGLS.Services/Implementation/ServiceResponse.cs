@@ -1,10 +1,10 @@
-﻿using GIGLS.Core.DTO.BankSettlement;
-using GIGLS.Core.IServices;
+﻿using POST.Core.DTO.BankSettlement;
+using POST.Core.IServices;
 using System.Collections.Generic;
-using GIGLS.Core.DTO.Partnership;
+using POST.Core.DTO.Partnership;
 using ThirdParty.WebServices.Magaya.Services;
 
-namespace GIGLS.Services.Implementation
+namespace POST.Services.Implementation
 {
     public class ServiceResponse<TResponse> : IServiceResponse<TResponse>
     {

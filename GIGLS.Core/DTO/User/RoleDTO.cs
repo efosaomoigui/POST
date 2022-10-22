@@ -1,4 +1,4 @@
-﻿namespace GIGLS.Core.DTO.User
+﻿namespace POST.Core.DTO.User
 {
     public class RoleDTO
     {
@@ -11,8 +11,8 @@
     //public class RoleEditModel
     //{
     //    public UserRole Role { get; set; }
-    //    public IEnumerable<GIGL.GIGLS.Core.Domain.User> Members { get; set; }
-    //    public IEnumerable<GIGL.GIGLS.Core.Domain.User> NonMembers { get; set; }
+    //    public IEnumerable<GIGL.POST.Core.Domain.User> Members { get; set; }
+    //    public IEnumerable<GIGL.POST.Core.Domain.User> NonMembers { get; set; }
     //}
     //public class RoleModificationModel
     //{

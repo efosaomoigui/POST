@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Fleets;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.Fleets;
+using POST.CORE.DTO;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Stocks
+namespace POST.Core.DTO.Stocks
 {
     public class StockRequestPartDTO : BaseDomainDTO
     {

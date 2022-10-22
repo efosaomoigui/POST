@@ -1,10 +1,10 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class PreShipmentMobile : BaseDomain, IAuditable
     {

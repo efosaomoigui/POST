@@ -1,11 +1,11 @@
-﻿using GIGLS.Core.DTO.InternationalShipmentDetails;
+﻿using POST.Core.DTO.InternationalShipmentDetails;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.InternationalRequest
+namespace POST.Core.IServices.InternationalRequest
 {
     public interface IInternationalRequestReceiverService : IServiceDependencyMarker
     {

@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.Common.Helpers;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Routes;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.RouteServices;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.Common.Helpers;
+using POST.Core.DTO;
+using POST.Core.DTO.Routes;
+using POST.Core.IServices;
+using POST.Core.IServices.RouteServices;
+using POST.Services.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Routes
+namespace POST.WebApi.Controllers.Routes
 {
     //[Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/routes")]

@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.DHL;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.UPS;
+﻿using POST.Core.DTO.DHL;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.UPS;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.UPS
+namespace POST.Core.IServices.UPS
 {
     public interface IUPSService : IServiceDependencyMarker
     {

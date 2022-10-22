@@ -1,9 +1,9 @@
-﻿using GIGL.GIGLS.Core.Domain;
+﻿using GIGL.POST.Core.Domain;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 
-namespace GIGLS.WebApi.Models
+namespace POST.WebApi.Models
 {
     public class ExtendedClaimsProvider
     {

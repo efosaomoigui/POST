@@ -1,13 +1,13 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.ShipmentScan;
-using GIGLS.Core.DTO.ShipmentScan;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.ShipmentScan;
+using POST.Core.DTO.ShipmentScan;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.ShipmentScan
+namespace POST.Core.IRepositories.ShipmentScan
 {
     public interface IMobileScanStatusRepository : IRepository<MobileScanStatus>
     {

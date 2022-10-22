@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core;
+using POST.Core.DTO.Shipments;
+using POST.Core.IServices.Shipments;
+using POST.Core;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class ShipmentPackageService : IShipmentPackageService
     {

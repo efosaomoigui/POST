@@ -1,18 +1,18 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IMessage;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.CORE.IServices.Report;
-using GIGLS.Infrastructure;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Messaging.MessageService;
-using GIGLS.Services.Implementation.Report;
-using GIGLS.Services.Implementation.User;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core;
+using POST.Core.DTO;
+using POST.Core.DTO.Account;
+using POST.Core.Enums;
+using POST.Core.IMessage;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Utility;
+using POST.CORE.IServices.Report;
+using POST.Infrastructure;
+using POST.Infrastructure.Persistence;
+using POST.Messaging.MessageService;
+using POST.Services.Implementation.Report;
+using POST.Services.Implementation.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +22,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.CustomerInvoice
+namespace POST.WebApi.Controllers.CustomerInvoice
 {
     [RoutePrefix("api/customerinvoice")]
     public class CustomerInvoiceController : BaseWebApiController

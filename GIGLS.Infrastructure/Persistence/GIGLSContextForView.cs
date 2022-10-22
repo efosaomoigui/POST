@@ -1,14 +1,14 @@
 ﻿using System.Data.Entity;
-using GIGLS.INFRASTRUCTURE.SoftDeleteHandler;
-using GIGLS.Core.View;
+using POST.INFRASTRUCTURE.SoftDeleteHandler;
+using POST.Core.View;
 using System.Data.Entity.ModelConfiguration.Conventions;
-using GIGLS.Core.Domain.Wallet;
+using POST.Core.Domain.Wallet;
 using System.Configuration;
 using System;
-using GIGLS.Core.View.AdminReportView;
-using GIGLS.Core.View.Archived;
+using POST.Core.View.AdminReportView;
+using POST.Core.View.Archived;
 
-namespace GIGLS.Infrastructure.Persistence
+namespace POST.Infrastructure.Persistence
 {
     [DbConfigurationType(typeof(EntityFrameworkConfiguration))]
     public class GIGLSContextForView : DbContext

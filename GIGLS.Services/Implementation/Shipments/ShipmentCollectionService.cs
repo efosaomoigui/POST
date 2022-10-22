@@ -1,32 +1,32 @@
 ﻿using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Alpha;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Alpha;
-using GIGLS.Core.IServices.CashOnDeliveryAccount;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.CORE.Domain;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.CORE.IServices.Shipments;
-using GIGLS.Infrastructure;
+using GIGL.POST.Core.Domain;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO;
+using POST.Core.DTO.Alpha;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.Core.IServices.Alpha;
+using POST.Core.IServices.CashOnDeliveryAccount;
+using POST.Core.IServices.Shipments;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Utility;
+using POST.Core.IServices.Wallet;
+using POST.CORE.Domain;
+using POST.CORE.DTO.Shipments;
+using POST.CORE.IServices.Shipments;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class ShipmentCollectionService : IShipmentCollectionService
     {

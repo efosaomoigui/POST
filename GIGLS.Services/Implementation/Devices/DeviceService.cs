@@ -1,15 +1,15 @@
-﻿using GIGLS.Core.IServices.Devices;
+﻿using POST.Core.IServices.Devices;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Devices;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
+using POST.Core.DTO.Devices;
+using POST.Core;
+using POST.Infrastructure;
 using AutoMapper;
-using GIGLS.Core.Domain.Devices;
+using POST.Core.Domain.Devices;
 using System.Linq;
 
-namespace GIGLS.Services.Implementation.Devices
+namespace POST.Services.Implementation.Devices
 {
     public class DeviceService : IDeviceService
     {

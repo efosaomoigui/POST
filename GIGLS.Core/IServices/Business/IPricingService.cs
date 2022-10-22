@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.Shipments;
+﻿using POST.Core.DTO.PaymentTransactions;
+using POST.Core.DTO.Shipments;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Business
+namespace POST.Core.IServices.Business
 {
     public interface IPricingService : IServiceDependencyMarker
     {

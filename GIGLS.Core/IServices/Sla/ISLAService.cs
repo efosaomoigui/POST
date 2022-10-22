@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.SLA;
-using GIGLS.Core.Enums;
+﻿using POST.Core.DTO.SLA;
+using POST.Core.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Sla
+namespace POST.Core.IServices.Sla
 {
     public interface ISLAService : IServiceDependencyMarker
     {

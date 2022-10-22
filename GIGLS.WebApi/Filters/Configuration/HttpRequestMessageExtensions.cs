@@ -3,7 +3,7 @@ using System.Linq;
 using System.Net.Http;
 using System.ServiceModel.Channels;
 
-namespace GIGLS.WebApi.Filters.Configuration
+namespace POST.WebApi.Filters.Configuration
 {
     public static class HttpRequestMessageExtensions
     {

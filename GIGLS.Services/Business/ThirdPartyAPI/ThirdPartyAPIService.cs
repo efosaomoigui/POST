@@ -1,28 +1,28 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.IServices.ThirdPartyAPI;
-using GIGLS.Core.IServices.CustomerPortal;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.IServices.Business;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Infrastructure;
+using POST.Core.DTO.Shipments;
+using POST.Core;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.IServices.ThirdPartyAPI;
+using POST.Core.IServices.CustomerPortal;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.User;
+using POST.Core.IServices.Utility;
+using POST.Core.IServices.Shipments;
+using POST.CORE.DTO.Report;
+using POST.Core.IServices.Business;
+using POST.Core.IServices.Wallet;
+using POST.Core.DTO;
+using POST.Core.DTO.Wallet;
+using POST.Infrastructure;
 using System.Net;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.DTO.Customers;
+using POST.Core.IServices.Wallet;
+using POST.Core.IServices.Customers;
+using POST.Core.DTO.OnlinePayment;
+using POST.Core.DTO.Customers;
 
-namespace GIGLS.Services.Business.CustomerPortal
+namespace POST.Services.Business.CustomerPortal
 {
     public class ThirdPartyAPIService : IThirdPartyAPIService
     {

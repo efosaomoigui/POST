@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.IServices.Fleets;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.WebApi.Filters;
+using POST.Core.IServices.Fleets;
+using POST.Core.DTO.Fleets;
+using POST.WebApi.Filters;
 
-namespace GIGLS.WebApi.Controllers.Vehicles
+namespace POST.WebApi.Controllers.Vehicles
 {
     [Authorize(Roles = "Shipment")]
     [RoutePrefix("api/fleettrip")]

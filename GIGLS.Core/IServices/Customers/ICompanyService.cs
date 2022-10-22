@@ -1,15 +1,15 @@
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO.Report;
+using POST.Core.DTO;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.OnlinePayment;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.User;
+using POST.Core.Enums;
+using POST.CORE.DTO.Report;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Customers
+namespace POST.Core.IServices.Customers
 {
     public interface ICompanyService : IServiceDependencyMarker
     {

@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.User;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.User;
+using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO.Devices
+namespace POST.Core.DTO.Devices
 {
     public class DeviceManagementDTO : BaseDomainDTO
     {

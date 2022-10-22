@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class FleetMovement : BaseDomain, IAuditable
     {

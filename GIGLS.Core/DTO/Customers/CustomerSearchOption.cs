@@ -1,6 +1,6 @@
-﻿using GIGLS.CORE.Enums;
+﻿using POST.CORE.Enums;
 
-namespace GIGLS.Core.DTO.Customers
+namespace POST.Core.DTO.Customers
 {
     public class CustomerSearchOption
     {

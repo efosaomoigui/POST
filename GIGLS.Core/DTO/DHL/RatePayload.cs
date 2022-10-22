@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.DHL
+namespace POST.Core.DTO.DHL
 {
     /// <summary>
     /// DHL request payload

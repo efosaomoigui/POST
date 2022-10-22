@@ -1,14 +1,14 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Common.Helpers;
-using GIGLS.Core.Domain.Route;
-using GIGLS.Core.DTO.Routes;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Common.Helpers;
+using POST.Core.Domain.Route;
+using POST.Core.DTO.Routes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Routes
+namespace POST.Core.IRepositories.Routes
 {
     public interface IRouteRepository : IRepository<Domain.Route.Route>
     {

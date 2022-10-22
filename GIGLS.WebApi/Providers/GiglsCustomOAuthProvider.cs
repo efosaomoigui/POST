@@ -2,19 +2,19 @@
 using System.Threading.Tasks;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.OAuth;
-using GIGLS.Infrastructure.Persistence.Repository;
-using GIGLS.Infrastructure.Persistence;
-using GIGL.GIGLS.Core.Domain;
+using POST.Infrastructure.Persistence.Repository;
+using POST.Infrastructure.Persistence;
+using GIGL.POST.Core.Domain;
 using Microsoft.AspNet.Identity.Owin;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.DTO.User;
-using GIGLS.Services.Implementation.Messaging;
+using POST.Core.Enums;
+using POST.Core.IMessageService;
+using POST.Core.DTO.User;
+using POST.Services.Implementation.Messaging;
 
-namespace GIGLS.WebApi.Providers
+namespace POST.WebApi.Providers
 {
     public class GiglsCustomOAuthProvider : OAuthAuthorizationServerProvider
     {

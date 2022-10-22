@@ -1,27 +1,27 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.IServices.Account;
-using GIGLS.Core.IServices.Business;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.View;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.Enums;
+using POST.Core.IMessageService;
+using POST.Core.IServices.Account;
+using POST.Core.IServices.Business;
+using POST.Core.IServices.Shipments;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Utility;
+using POST.Core.IServices.Wallet;
+using POST.Core.View;
+using POST.CORE.DTO.Shipments;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Account
+namespace POST.Services.Implementation.Account
 {
     public class InvoiceService : IInvoiceService
     {

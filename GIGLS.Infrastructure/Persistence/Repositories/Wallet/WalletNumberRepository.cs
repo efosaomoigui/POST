@@ -1,12 +1,12 @@
-﻿using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.IRepositories.Wallet;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain.Wallet;
+using POST.Core.IRepositories.Wallet;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
     public class WalletNumberRepository : Repository<WalletNumber, GIGLSContext>, IWalletNumberRepository
     {

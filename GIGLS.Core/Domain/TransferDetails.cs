@@ -1,4 +1,4 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class TransferDetails : BaseDomain, IAuditable
     {

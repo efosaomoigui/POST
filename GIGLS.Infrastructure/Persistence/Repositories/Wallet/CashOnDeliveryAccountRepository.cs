@@ -1,21 +1,21 @@
-﻿using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.IRepositories.Wallet;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain.Wallet;
+using POST.Core.IRepositories.Wallet;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Wallet;
+using POST.Core.DTO.Wallet;
 using AutoMapper;
 using System.Linq;
-using GIGLS.Core.Enums;
+using POST.Core.Enums;
 using System.Data.SqlClient;
-using GIGLS.Core.DTO.Account;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Shipments;
+using POST.Core.DTO.Account;
+using GIGL.POST.Core.Domain;
+using POST.Core.DTO.Shipments;
 using System.Configuration;
-using GIGLS.Core.Domain.BankSettlement;
+using POST.Core.Domain.BankSettlement;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Wallet
+namespace POST.Infrastructure.Persistence.Repositories.Wallet
 {
     public class CashOnDeliveryAccountRepository : Repository<CashOnDeliveryAccount, GIGLSContext>, ICashOnDeliveryAccountRepository
     {

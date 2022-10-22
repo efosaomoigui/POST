@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.CashOnDeliveryBalance;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO.Wallet;
+using POST.Core.IServices;
+using POST.Core.IServices.CashOnDeliveryBalance;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.CashOnDeliveryBalance
+namespace POST.WebApi.Controllers.CashOnDeliveryBalance
 {
     [Authorize(Roles = "Account")]
     [RoutePrefix("api/cashondeliverybalance")]

@@ -1,4 +1,4 @@
-﻿namespace GIGLS.CORE.DTO.User
+﻿namespace POST.CORE.DTO.User
 {
     public class AddClaimDto
     {

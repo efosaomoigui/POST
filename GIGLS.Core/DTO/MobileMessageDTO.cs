@@ -1,8 +1,8 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.Enums;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.Enums;
 
-namespace GIGLS.Core.DTO
+namespace POST.Core.DTO
 {
     public class MobileMessageDTO
     {

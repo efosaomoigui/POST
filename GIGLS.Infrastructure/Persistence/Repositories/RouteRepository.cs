@@ -1,16 +1,16 @@
-﻿using GIGLS.Core.Common.Extensions;
-using GIGLS.Core.Common.Helpers;
-using GIGLS.Core.Domain.Route;
-using GIGLS.Core.DTO.Routes;
-using GIGLS.Core.IRepositories.Routes;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Common.Extensions;
+using POST.Core.Common.Helpers;
+using POST.Core.Domain.Route;
+using POST.Core.DTO.Routes;
+using POST.Core.IRepositories.Routes;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories
+namespace POST.Infrastructure.Persistence.Repositories
 {
     public class RouteRepository : Repository<Route, GIGLSContext>, IRouteRepository
     {

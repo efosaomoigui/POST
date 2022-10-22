@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.IRepositories.Fleets;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using GIGL.POST.Core.Domain;
+using POST.Core.DTO.Fleets;
+using POST.Core.IRepositories.Fleets;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Linq;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Fleets
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Fleets
 {
     public class FleetModelRepository : Repository<FleetModel, GIGLSContext>, IFleetModelRepository
     {

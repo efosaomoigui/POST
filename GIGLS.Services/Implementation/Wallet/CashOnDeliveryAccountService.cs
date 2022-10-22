@@ -1,25 +1,25 @@
-﻿using GIGLS.Core.IServices.CashOnDeliveryAccount;
+﻿using POST.Core.IServices.CashOnDeliveryAccount;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
+using POST.Core.DTO.Wallet;
+using POST.Core;
+using POST.Infrastructure;
 using AutoMapper;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.IServices.CashOnDeliveryBalance;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Account;
-using GIGLS.Core.DTO.Account;
+using POST.Core.Enums;
+using POST.Core.IServices.Wallet;
+using POST.Core.IServices.CashOnDeliveryBalance;
+using POST.Core.Domain.Wallet;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Account;
+using POST.Core.DTO.Account;
 using System.Linq;
-using GIGLS.Core.IServices.BankSettlement;
-using GIGLS.Core.DTO.BankSettlement;
+using POST.Core.IServices.BankSettlement;
+using POST.Core.DTO.BankSettlement;
 using System;
 using System.Net;
-using GIGLS.Core.DTO;
+using POST.Core.DTO;
 
-namespace GIGLS.Services.Implementation.Wallet
+namespace POST.Services.Implementation.Wallet
 {
     public class CashOnDeliveryAccountService : ICashOnDeliveryAccountService
     {

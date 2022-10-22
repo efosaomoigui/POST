@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.IServices;
-using GIGLS.Core.View;
-using GIGLS.CORE.DTO.Report;
+﻿using POST.Core.DTO.Account;
+using POST.Core.DTO.Dashboard;
+using POST.Core.DTO.Report;
+using POST.Core.IServices;
+using POST.Core.View;
+using POST.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.CORE.IServices.Report
+namespace POST.CORE.IServices.Report
 {
     public interface IAccountReportService : IServiceDependencyMarker
     {

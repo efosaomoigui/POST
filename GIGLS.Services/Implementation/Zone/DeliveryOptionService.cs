@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core;
-using GIGL.GIGLS.Core.Domain;
+using POST.Core;
+using GIGL.POST.Core.Domain;
 using System.Collections.Generic;
-using GIGLS.Core.IServices.Zone;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Infrastructure;
+using POST.Core.IServices.Zone;
+using POST.Core.DTO.Zone;
+using POST.Infrastructure;
 using System.Net;
 
-namespace GIGLS.Services.Implementation.Zone
+namespace POST.Services.Implementation.Zone
 {
     public class DeliveryOptionService : IDeliveryOptionService
     {

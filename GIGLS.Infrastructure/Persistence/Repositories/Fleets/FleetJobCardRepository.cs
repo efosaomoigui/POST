@@ -4,16 +4,16 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IRepositories.Fleets;
-using GIGLS.Infrastructure.Persistence.Repository;
+using GIGL.POST.Core.Domain;
+using POST.Core.DTO.Fleets;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.Shipments;
+using POST.Core.Enums;
+using POST.Core.IRepositories.Fleets;
+using POST.Infrastructure.Persistence.Repository;
 using Ninject.Activation;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
+namespace POST.Infrastructure.Persistence.Repositories.Fleets
 {
     public class FleetJobCardRepository : Repository<FleetJobCard, GIGLSContext>, IFleetJobCardRepository
     {

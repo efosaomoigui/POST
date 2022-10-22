@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain.MessagingLog
+namespace POST.Core.Domain.MessagingLog
 {
     public class SmsSendLog : BaseDomain, IAuditable
     {

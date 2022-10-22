@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
+﻿using POST.Core.Domain;
+using POST.Core.Enums;
 
-namespace GIGLS.Core.DTO.DHL
+namespace POST.Core.DTO.DHL
 {
     public class InternationalShipmentWaybillDTO : BaseDomain
     {

@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.BankSettlement;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.IRepositories.BankSettlement;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
+namespace POST.Infrastructure.Persistence.Repositories.BankSettlement
 {
     public class BankRepository: Repository<Bank, GIGLSContext>, IBankRepository
     {

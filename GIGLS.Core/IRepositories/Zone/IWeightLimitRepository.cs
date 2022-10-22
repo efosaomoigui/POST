@@ -1,7 +1,7 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain;
 
-namespace GIGLS.Core.IRepositories.Zone
+namespace POST.Core.IRepositories.Zone
 {
     public interface IWeightLimitRepository : IRepository<WeightLimit>
     {

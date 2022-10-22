@@ -1,4 +1,4 @@
-﻿namespace GIGLS.Core.DTO.UPS
+﻿namespace POST.Core.DTO.UPS
 {
     public class LabelImageFormat
     {

@@ -1,16 +1,16 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Report;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.Fleets;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Report;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Partnership
+namespace POST.Core.IServices.Partnership
 {
     public interface IFleetPartnerService : IServiceDependencyMarker
     {

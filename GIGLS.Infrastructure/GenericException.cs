@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GIGLS.Infrastructure
+namespace POST.Infrastructure
 {
     [Serializable]
     public class GenericException : Exception

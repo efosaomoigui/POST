@@ -1,8 +1,8 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories
+namespace POST.Core.IRepositories
 {
     public interface IUserLoginEmailRepository : IRepository<UserLoginEmail>
     {

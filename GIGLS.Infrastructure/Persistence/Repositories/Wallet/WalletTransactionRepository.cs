@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IRepositories.Wallet;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.User;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.Core.IRepositories.Wallet;
+using POST.CORE.DTO.Report;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -17,7 +17,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.UI.WebControls;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
     public class WalletTransactionRepository : Repository<WalletTransaction, GIGLSContext>, IWalletTransactionRepository
     {

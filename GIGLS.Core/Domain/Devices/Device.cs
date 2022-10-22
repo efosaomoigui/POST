@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain.Devices
+namespace POST.Core.Domain.Devices
 {
     public class Device : BaseDomain
     {

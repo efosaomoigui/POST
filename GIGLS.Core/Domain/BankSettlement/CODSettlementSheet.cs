@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GIGLS.Core.Domain.BankSettlement
+namespace POST.Core.Domain.BankSettlement
 {
     public class CODSettlementSheet : BaseDomain, IAuditable
     {

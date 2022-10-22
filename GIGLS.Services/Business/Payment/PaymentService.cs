@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.IServices.Business;
-using GIGLS.Core.IServices.PaymentTransactions;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.IServices.Business;
+using POST.Core.IServices.PaymentTransactions;
 
-namespace GIGLS.Services.Business.Payment
+namespace POST.Services.Business.Payment
 {
     public class PaymentService : IPaymentService
     {

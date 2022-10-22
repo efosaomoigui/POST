@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO
+namespace POST.Core.DTO
 {
     public class ApproveShipmentDTO
     {

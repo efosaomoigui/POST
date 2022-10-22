@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Account;
+﻿using POST.Core.DTO.Account;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Account
+namespace POST.Core.IServices.Account
 {
     public interface IIncomeService : IServiceDependencyMarker
     {

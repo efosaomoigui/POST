@@ -1,11 +1,11 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Core.IServices.Shipments;
+using POST.Services.Implementation;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.CORE.IServices.Report;
+using POST.CORE.IServices.Report;
 
-namespace GIGLS.WebApi.Controllers.Shipments
+namespace POST.WebApi.Controllers.Shipments
 {
     [RoutePrefix("api/webjobs")]
     public class ForWebJobsController : BaseWebApiController

@@ -1,10 +1,10 @@
-﻿using GIGL.GIGLS.Core.Repositories;
+﻿using GIGL.POST.Core.Repositories;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Zone;
+using GIGL.POST.Core.Domain;
+using POST.Core.DTO.Zone;
 
-namespace GIGLS.Core.IRepositories.Zone
+namespace POST.Core.IRepositories.Zone
 {
     public interface IDeliveryOptionRepository : IRepository<DeliveryOption>
     {

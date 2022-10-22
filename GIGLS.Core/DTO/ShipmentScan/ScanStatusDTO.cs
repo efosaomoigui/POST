@@ -1,6 +1,6 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO.ShipmentScan
+namespace POST.Core.DTO.ShipmentScan
 {
     public class ScanStatusDTO : BaseDomainDTO
     {

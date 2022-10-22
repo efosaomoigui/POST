@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO.Shipments;
+using POST.Core.IServices;
+using POST.Core.IServices.Shipments;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Shipments
+namespace POST.WebApi.Controllers.Shipments
 {
     [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/manifestvisitmonitoring")]

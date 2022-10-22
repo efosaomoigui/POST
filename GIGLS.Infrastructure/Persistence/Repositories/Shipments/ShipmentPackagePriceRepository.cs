@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.DTO.Shipments;
+using POST.Core.IRepositories.Shipments;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-using GIGLS.Core.DTO;
+using POST.Core.DTO;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
+namespace POST.Infrastructure.Persistence.Repositories.Shipments
 {
     public class ShipmentPackagePriceRepository : Repository<ShipmentPackagePrice, GIGLSContext>, IShipmentPackagePriceRepository
     {

@@ -1,6 +1,6 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO.Wallet
+namespace POST.Core.DTO.Wallet
 {
     public class CashOnDeliveryBalanceDTO : BaseDomainDTO
     {

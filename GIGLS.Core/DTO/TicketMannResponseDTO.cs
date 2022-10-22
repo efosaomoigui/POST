@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.DTO
+namespace POST.Core.DTO
 {
     public class TicketMannResponseDTO
     {

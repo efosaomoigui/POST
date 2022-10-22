@@ -1,14 +1,14 @@
 using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IRepositories.Customers;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using GIGL.POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.Dashboard;
+using POST.Core.DTO.Report;
+using POST.Core.Enums;
+using POST.Core.IRepositories.Customers;
+using POST.CORE.DTO.Report;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -17,7 +17,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Customers
 {
     public class CompanyRepository : Repository<Company, GIGLSContext>, ICompanyRepository
     {

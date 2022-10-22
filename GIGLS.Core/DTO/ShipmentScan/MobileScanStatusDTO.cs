@@ -1,11 +1,11 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.DTO.ShipmentScan
+namespace POST.Core.DTO.ShipmentScan
 {
    public class MobileScanStatusDTO : BaseDomainDTO
     {

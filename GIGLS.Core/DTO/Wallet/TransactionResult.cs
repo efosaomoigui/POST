@@ -1,7 +1,7 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 using Newtonsoft.Json;
 
-namespace GIGLS.Core.DTO.Wallet
+namespace POST.Core.DTO.Wallet
 {
     public class TransactionResult : BaseDomainDTO
     {

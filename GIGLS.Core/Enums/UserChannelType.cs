@@ -1,4 +1,4 @@
-﻿namespace GIGLS.Core.Enums
+﻿namespace POST.Core.Enums
 {
     public enum UserChannelType
     {

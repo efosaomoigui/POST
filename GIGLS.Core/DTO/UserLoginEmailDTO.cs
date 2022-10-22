@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GIGLS.Core.DTO
+namespace POST.Core.DTO
 {
     public class UserLoginEmailDTO
     {

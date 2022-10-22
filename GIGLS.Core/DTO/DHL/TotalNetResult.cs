@@ -1,6 +1,6 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 
-namespace GIGLS.Core.DTO.DHL
+namespace POST.Core.DTO.DHL
 {
     public class TotalNetResult
     {

@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
+﻿using POST.Core.DTO.Shipments;
+using POST.Core.Enums;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Business
+namespace POST.Core.IServices.Business
 {
     public interface IInternationalPriceService : IServiceDependencyMarker
     {

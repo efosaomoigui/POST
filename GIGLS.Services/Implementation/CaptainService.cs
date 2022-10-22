@@ -1,34 +1,34 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.DTO.Captains;
-using GIGLS.Core.IServices.User;
+﻿using POST.Core;
+using POST.Core.DTO.Captains;
+using POST.Core.IServices.User;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
+using GIGL.POST.Core.Domain;
 using System;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Services.Implementation.Messaging;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.IServices.Partnership;
-using GIGLS.Infrastructure;
+using POST.Core.IServices.Utility;
+using POST.Services.Implementation.Messaging;
+using POST.Core.Enums;
+using POST.Core.IServices;
+using POST.Core.Domain.Partnership;
+using POST.Core.IServices.Partnership;
+using POST.Infrastructure;
 using System.Collections.Generic;
-using GIGLS.Core.DTO;
-using GIGLS.CORE.DTO.Report;
+using POST.Core.DTO;
+using POST.CORE.DTO.Report;
 using System.Linq;
 using AutoMapper;
-using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.Core.IMessage;
-using GIGLS.Core.IRepositories.Fleets;
-using GIGLS.Core.IRepositories.Partnership;
-using GIGLS.Core.IServices.MessagingLog;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Fleets;
+using POST.Core.DTO.MessagingLog;
+using POST.Core.IMessage;
+using POST.Core.IRepositories.Fleets;
+using POST.Core.IRepositories.Partnership;
+using POST.Core.IServices.MessagingLog;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Fleets;
 using System.Data.Entity;
-using GIGLS.Core.DTO.Pagination;
-using GIGLS.Core.IServices.Fleets;
-using GIGLS.Services.Implementation.Utility;
+using POST.Core.DTO.Pagination;
+using POST.Core.IServices.Fleets;
+using POST.Services.Implementation.Utility;
 
-namespace GIGLS.Services.Implementation
+namespace POST.Services.Implementation
 {
     public class CaptainService : ICaptainService
     {
@@ -126,7 +126,7 @@ namespace GIGLS.Services.Implementation
                 // add new user and captain if user info and captain not exist
                 if (confirmUser == null && !captain.Any())
                 {
-                    var user = new GIGL.GIGLS.Core.Domain.User
+                    var user = new GIGL.POST.Core.Domain.User
                     {
                         Organisation = captainDTO.Organisation,
                         Status = (int)UserStatus.Active,
@@ -285,7 +285,7 @@ namespace GIGLS.Services.Implementation
                     // add new user and captain if user info and captain not exist
                     if (confirmUser == null && !captain.Any())
                     {
-                        var user = new GIGL.GIGLS.Core.Domain.User
+                        var user = new GIGL.POST.Core.Domain.User
                         {
                             Organisation = captainInfo.Organisation,
                             Status = (int)UserStatus.Active,

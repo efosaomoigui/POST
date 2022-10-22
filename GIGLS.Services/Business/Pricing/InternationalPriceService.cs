@@ -1,10 +1,10 @@
-﻿using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Business;
-using GIGLS.Core.IServices.Zone;
+﻿using POST.Core.DTO.Shipments;
+using POST.Core.Enums;
+using POST.Core.IServices.Business;
+using POST.Core.IServices.Zone;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Business.Pricing
+namespace POST.Services.Business.Pricing
 {
     public class InternationalPriceService : IInternationalPriceService
     {

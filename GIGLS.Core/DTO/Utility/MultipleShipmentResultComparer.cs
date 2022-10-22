@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Utility
+namespace POST.Core.DTO.Utility
 {
     public class MultipleShipmentResultComparer : IEqualityComparer<MultipleShipmentResult>
     {

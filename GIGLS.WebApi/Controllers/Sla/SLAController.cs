@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.DTO.SLA;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Sla;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO.SLA;
+using POST.Core.Enums;
+using POST.Core.IServices;
+using POST.Core.IServices.Sla;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Sla
+namespace POST.WebApi.Controllers.Sla
 {
     [Authorize(Roles = "Admin")]
     [RoutePrefix("api/sla")]

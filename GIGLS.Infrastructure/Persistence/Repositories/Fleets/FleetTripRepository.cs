@@ -1,9 +1,9 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.Fleets;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.IRepositories.Fleets;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Fleets
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Fleets
 {
     public class FleetTripRepository : Repository<FleetTrip, GIGLSContext>, IFleetTripRepository
     {

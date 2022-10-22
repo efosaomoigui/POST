@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain.Archived
+namespace POST.Core.Domain.Archived
 {
     public  class TransitWaybillNumber_Archive : BaseDomain_Archive
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GIGLS.Services.Implementation.Utility.FlutterWaveEncryptionService
+namespace POST.Services.Implementation.Utility.FlutterWaveEncryptionService
 {
     public interface IPaymentDataEncryption
     {

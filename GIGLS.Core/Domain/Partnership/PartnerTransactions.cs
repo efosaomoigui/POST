@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain.Partnership
+namespace POST.Core.Domain.Partnership
 {
     public class PartnerTransactions: BaseDomain, IAuditable
     {

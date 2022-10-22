@@ -1,11 +1,11 @@
-﻿using GIGLS.Core;
+﻿using POST.Core;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 
-namespace GIGLS.WebApi.Models
+namespace POST.WebApi.Models
 {
     public class CreateUserBindingModel 
     {

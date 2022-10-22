@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class GiglgoStation: BaseDomain, IAuditable
     {

@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.Shipments;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.Shipments;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Website
+namespace POST.Core.IServices.Website
 {
     public interface IWebsiteService : IServiceDependencyMarker
     {

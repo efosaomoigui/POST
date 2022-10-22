@@ -1,9 +1,9 @@
 ﻿using System.Net.Mail;
-using GIGLS.Core.Config;
-using GIGLS.Core.IMessage.Config;
+using POST.Core.Config;
+using POST.Core.IMessage.Config;
 using System.Net;
 
-namespace GIGLS.INFRASTRUCTURE.MessageService
+namespace POST.INFRASTRUCTURE.MessageService
 {
     public class EmailSender
     {

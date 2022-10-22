@@ -1,12 +1,12 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.IServices;
+﻿using POST.Core.DTO;
+using POST.Core.IServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IMessageService
+namespace POST.Core.IMessageService
 {
     public interface IWhatsappService : IServiceDependencyMarker
     {

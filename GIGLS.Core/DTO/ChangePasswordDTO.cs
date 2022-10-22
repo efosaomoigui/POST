@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.DTO
+namespace POST.Core.DTO
 {
     public class ChangePasswordDTO
     {

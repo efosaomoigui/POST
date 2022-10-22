@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.IServices.PaymentTransactions;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.IServices.PaymentTransactions;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.WebApi.Filters;
+using POST.WebApi.Filters;
 
-namespace GIGLS.WebApi.Controllers.PaymentTransactions
+namespace POST.WebApi.Controllers.PaymentTransactions
 {
     [Authorize(Roles = "Account")]
     [RoutePrefix("api/paymenttransaction")]

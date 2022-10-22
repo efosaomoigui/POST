@@ -1,7 +1,7 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGL.GIGLS.Core.Repositories;
+﻿using GIGL.POST.Core.Domain;
+using GIGL.POST.Core.Repositories;
 
-namespace GIGLS.Core.IRepositories.Zone
+namespace POST.Core.IRepositories.Zone
 {
     public interface IDomesticRouteZoneMapRepository : IRepository<DomesticRouteZoneMap>
     {

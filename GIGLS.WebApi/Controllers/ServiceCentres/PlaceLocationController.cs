@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO.ServiceCentres;
+using POST.Core.IServices;
+using POST.Core.IServices.ServiceCentres;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.ServiceCentres
+namespace POST.WebApi.Controllers.ServiceCentres
 {
     [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/placelocation")]

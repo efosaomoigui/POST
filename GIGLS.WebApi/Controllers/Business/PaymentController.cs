@@ -1,12 +1,12 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.IServices.Business;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.IServices.Business;
+using POST.Services.Implementation;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.WebApi.Filters;
+using POST.WebApi.Filters;
 
-namespace GIGLS.WebApi.Controllers.Business
+namespace POST.WebApi.Controllers.Business
 {
     [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/payment")]

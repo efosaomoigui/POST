@@ -1,15 +1,15 @@
 using System.Web.Http;
 using WebActivatorEx;
-using GIGLS.WebApi;
+using POST.WebApi;
 using Swashbuckle.Application;
 using System.Reflection;
 using System.IO;
 using System;
-using GIGLS.WebApi.App_Start;
+using POST.WebApi.App_Start;
 
 [assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
 
-namespace GIGLS.WebApi
+namespace POST.WebApi
 {
     public class SwaggerConfig
     {
@@ -40,7 +40,7 @@ namespace GIGLS.WebApi
                     // hold additional metadata for an API. Version and title are required but you can also provide
                     // additional fields by chaining methods off SingleApiVersion.
                     //
-                    c.SingleApiVersion("v1", "GIGLS.WebApi");
+                    c.SingleApiVersion("v1", "POST.WebApi");
 
                     // If you want the output Swagger docs to be indented properly, enable the "PrettyPrint" option.
                     //

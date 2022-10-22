@@ -1,19 +1,19 @@
-﻿using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.DTO.Captains;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IRepositories;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain.Partnership;
+using POST.Core.DTO.Captains;
+using POST.Core.Enums;
+using POST.Core.IRepositories;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Account;
-using GIGLS.CORE.DTO.Report;
+using GIGL.POST.Core.Domain;
+using POST.Core.DTO.Account;
+using POST.CORE.DTO.Report;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories
+namespace POST.Infrastructure.Persistence.Repositories
 {
     public class CaptainRepository : Repository<Partner, GIGLSContext>, ICaptainRepository
     {

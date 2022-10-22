@@ -1,14 +1,14 @@
-﻿using GIGLS.CORE.Domain;
-using GIGLS.CORE.DTO.Nav;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.CORE.Domain;
+using POST.CORE.DTO.Nav;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.CORE.IRepositories.Nav;
+using POST.CORE.IRepositories.Nav;
 using System.Linq;
 using System;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Nav
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Nav
 {
     public class MainNavRepository : Repository<MainNav, GIGLSContext>, IMainNavRepository
     {

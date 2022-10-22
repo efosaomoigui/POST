@@ -1,31 +1,31 @@
 ﻿using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Business;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.IServices.Partnership;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Infrastructure;
+using GIGL.POST.Core.Domain;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.Domain.Partnership;
+using POST.Core.DTO;
+using POST.Core.DTO.Fleets;
+using POST.Core.DTO.MessagingLog;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.User;
+using POST.Core.Enums;
+using POST.Core.IMessageService;
+using POST.Core.IServices;
+using POST.Core.IServices.Business;
+using POST.Core.IServices.Customers;
+using POST.Core.IServices.Partnership;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Utility;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Partnership
+namespace POST.Services.Implementation.Partnership
 {
     public class FleetPartnerService : IFleetPartnerService
     {
@@ -99,7 +99,7 @@ namespace GIGLS.Services.Implementation.Partnership
 
             string password = await _passwordGenerator.Generate();
 
-            var user = new GIGL.GIGLS.Core.Domain.User
+            var user = new GIGL.POST.Core.Domain.User
             {
                 Email = fleetPartner.Email,
                 FirstName = fleetPartner.FirstName,

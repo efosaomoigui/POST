@@ -1,18 +1,18 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Domain.Utility;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.CORE.Enums;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.Domain.Utility;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Utility;
+using POST.Core.IServices.Wallet;
+using POST.CORE.Enums;
+using POST.Infrastructure;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Wallet
+namespace POST.Services.Implementation.Wallet
 {
     public class CODTransferLogService : ICODTransferLogService
     {

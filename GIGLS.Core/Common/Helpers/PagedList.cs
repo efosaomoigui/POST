@@ -1,5 +1,5 @@
-﻿using GIGLS.Core.Common.Extensions;
-using GIGLS.Core.Enums;
+﻿using POST.Core.Common.Extensions;
+using POST.Core.Enums;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.Common.Helpers
+namespace POST.Core.Common.Helpers
 {
     public class PagedList<T>
     {

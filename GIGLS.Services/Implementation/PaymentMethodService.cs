@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.IRepositories;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.User;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.IRepositories;
+using POST.Core.IServices;
+using POST.Core.IServices.User;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation
+namespace POST.Services.Implementation
 {
     public class PaymentMethodService : IPaymentMethodService
     {

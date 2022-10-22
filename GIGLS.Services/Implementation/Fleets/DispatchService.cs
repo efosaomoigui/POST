@@ -1,26 +1,26 @@
-﻿using GIGLS.Core.IServices.Fleets;
+﻿using POST.Core.IServices.Fleets;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core;
+using POST.Core.DTO.Fleets;
+using POST.Core;
 using AutoMapper;
-using GIGLS.Core.Domain;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.Core.DTO.ServiceCentres;
+using POST.Core.Domain;
+using POST.Infrastructure;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Wallet;
+using POST.Core.Enums;
+using POST.Core.DTO.ServiceCentres;
 using System.Linq;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.Domain.Expenses;
+using GIGL.POST.Core.Domain;
+using POST.Core.DTO.User;
+using POST.Core.Domain.Expenses;
 using System.Net;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Partnership;
+using POST.Core.IServices.Shipments;
+using POST.Core.DTO.Shipments;
+using POST.Core.IServices.Partnership;
 
-namespace GIGLS.Services.Implementation.Fleets
+namespace POST.Services.Implementation.Fleets
 {
     public class DispatchService : IDispatchService
     {

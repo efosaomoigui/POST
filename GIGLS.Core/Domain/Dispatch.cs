@@ -1,9 +1,9 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class Dispatch : BaseDomain, IAuditable
     {

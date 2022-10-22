@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.UPS
+namespace POST.Core.DTO.UPS
 {
     public class UPSShipmentResponseFinalPayload
     {

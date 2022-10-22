@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace GIGLS.Messaging.MessageService
+namespace POST.Messaging.MessageService
 {
     public class ResponseData
     {

@@ -1,17 +1,17 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.Archived;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.Enums;
-using GIGLS.Core.View;
-using GIGLS.Core.View.AdminReportView;
-using GIGLS.Core.View.Archived;
-using GIGLS.CORE.DTO.Report;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.Archived;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Report;
+using POST.Core.Enums;
+using POST.Core.View;
+using POST.Core.View.AdminReportView;
+using POST.Core.View.Archived;
+using POST.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Archived
+namespace POST.Core.IRepositories.Archived
 {
     public interface IInvoiceArchiveRepository : IRepository<Invoice_Archive>
     {

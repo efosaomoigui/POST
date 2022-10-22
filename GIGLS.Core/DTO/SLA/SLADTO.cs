@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.Enums;
+using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO.SLA
+namespace POST.Core.DTO.SLA
 {
     public class SLADTO : BaseDomainDTO
     {

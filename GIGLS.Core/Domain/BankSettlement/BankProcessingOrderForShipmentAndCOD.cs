@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain.BankSettlement
+namespace POST.Core.Domain.BankSettlement
 {
 
     public class BankProcessingOrderForShipmentAndCOD : BaseDomain, IAuditable  

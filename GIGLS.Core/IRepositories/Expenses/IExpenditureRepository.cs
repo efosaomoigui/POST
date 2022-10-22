@@ -1,11 +1,11 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.Expenses;
-using GIGLS.Core.DTO.Expenses;
-using GIGLS.Core.DTO.Report;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.Expenses;
+using POST.Core.DTO.Expenses;
+using POST.Core.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Expenses
+namespace POST.Core.IRepositories.Expenses
 {
     public interface IExpenditureRepository : IRepository<Expenditure>
     {

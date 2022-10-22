@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain.SLA
+namespace POST.Core.Domain.SLA
 {
     public class SLASignedUser : BaseDomain, IAuditable
     {

@@ -1,11 +1,11 @@
-﻿using GIGLS.CORE.DTO.Report;
+﻿using POST.CORE.DTO.Report;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.DTO
+namespace POST.Core.DTO
 {
     public class GatewayActivityFilterCriteria : BaseFilterCriteria
     {

@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.IServices.Shipments;
+﻿using POST.Core.IServices.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core;
+using POST.Core.DTO.Shipments;
+using POST.Core;
 using System;
-using GIGLS.Core.Domain;
+using POST.Core.Domain;
 using AutoMapper;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class ShipmentDeliveryOptionMappingService : IShipmentDeliveryOptionMappingService
     {

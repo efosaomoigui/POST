@@ -1,17 +1,17 @@
 ﻿using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Zone;
-using GIGLS.Infrastructure;
+using GIGL.POST.Core.Domain;
+using POST.Core;
+using POST.Core.DTO.Zone;
+using POST.Core.Enums;
+using POST.Core.IServices.Zone;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Zone
+namespace POST.Services.Implementation.Zone
 {
     public class ZoneService : IZoneService
     {

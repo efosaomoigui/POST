@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GIGLS.CORE.DTO.Report
+namespace POST.CORE.DTO.Report
 {
     public class DateFilterCriteria
     {

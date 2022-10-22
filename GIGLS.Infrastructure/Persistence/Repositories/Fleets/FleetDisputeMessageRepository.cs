@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.Fleets;
-using GIGLS.Infrastructure.Persistence.Repository;
+using POST.Core.Domain;
+using POST.Core.IRepositories.Fleets;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
+namespace POST.Infrastructure.Persistence.Repositories.Fleets
 {
     public class FleetDisputeMessageRepository : Repository<FleetDisputeMessage, GIGLSContext>, IFleetDisputeMessageRepository
     {

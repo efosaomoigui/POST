@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.IRepositories.Wallet;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using POST.Core.DTO.Wallet;
+using POST.Core.IRepositories.Wallet;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Linq;
 using AutoMapper;
 using System.Data.SqlClient;
-using GIGLS.Core.Enums;
-using GIGLS.Core.DTO;
-using GIGLS.Core.Domain.Wallet;
+using POST.Core.Enums;
+using POST.Core.DTO;
+using POST.Core.Domain.Wallet;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
     public class CODTransferRegisterRepository : Repository<Core.Domain.Wallet.CODTransferRegister, GIGLSContext>, ICODTransferRegisterRepository
     {

@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
+﻿using POST.Core.DTO.ServiceCentres;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.ServiceCentres
+namespace POST.Core.IServices.ServiceCentres
 {
     public interface IServiceCentreService : IServiceDependencyMarker
     {

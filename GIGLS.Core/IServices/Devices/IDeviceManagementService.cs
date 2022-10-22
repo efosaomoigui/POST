@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Devices;
+﻿using POST.Core.DTO.Devices;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Devices
+namespace POST.Core.IServices.Devices
 {
     public interface IDeviceManagementService : IServiceDependencyMarker
     {

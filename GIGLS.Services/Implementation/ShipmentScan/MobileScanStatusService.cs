@@ -1,16 +1,16 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain.ShipmentScan;
-using GIGLS.Core.DTO.ShipmentScan;
-using GIGLS.Core.IServices.ShipmentScan;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain.ShipmentScan;
+using POST.Core.DTO.ShipmentScan;
+using POST.Core.IServices.ShipmentScan;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.ShipmentScan
+namespace POST.Services.Implementation.ShipmentScan
 {
     public class MobileScanStatusService : IMobileScanStatusService
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.ShipmentScan
+namespace POST.Core.DTO.ShipmentScan
 {
     public class ScanStatusReportDTO
     {

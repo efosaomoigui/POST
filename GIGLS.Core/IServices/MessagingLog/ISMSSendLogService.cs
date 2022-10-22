@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.CORE.DTO.Shipments;
+﻿using POST.Core.DTO.MessagingLog;
+using POST.CORE.DTO.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.MessagingLog
+namespace POST.Core.IServices.MessagingLog
 {
     public interface ISmsSendLogService : IServiceDependencyMarker
     {

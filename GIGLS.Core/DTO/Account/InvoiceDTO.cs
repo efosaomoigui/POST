@@ -1,11 +1,11 @@
-﻿using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.Customers;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.DTO.Shipments;
+using POST.Core.Enums;
+using POST.CORE.DTO;
 using System;
 
-namespace GIGLS.Core.DTO.Account
+namespace POST.Core.DTO.Account
 {
     public class InvoiceDTO : BaseDomainDTO
     {

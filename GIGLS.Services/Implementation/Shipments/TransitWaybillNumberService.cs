@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.IServices.Shipments;
+﻿using POST.Core.IServices.Shipments;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
-using GIGLS.Core.Domain;
+using POST.Core;
+using POST.Infrastructure;
+using POST.Core.Domain;
 using AutoMapper;
-using GIGLS.Core.DTO.Shipments;
+using POST.Core.DTO.Shipments;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class TransitWaybillNumberService : ITransitWaybillNumberService
     {

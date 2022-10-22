@@ -4,7 +4,7 @@ using System.Net;
 using Newtonsoft.Json.Linq;
 using System.Configuration;
 using System;
-using GIGLS.Core.DTO.ServiceCentres;
+using POST.Core.DTO.ServiceCentres;
 
 namespace ApiProcessor
 {

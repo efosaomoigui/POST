@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain.DHL
+namespace POST.Core.Domain.DHL
 {
     public class InternationalShipmentWaybill : BaseDomain
     {

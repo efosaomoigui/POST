@@ -1,9 +1,9 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.Domain;
+﻿using POST.Core;
+using POST.Core.Domain;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GIGL.GIGLS.Core.Domain
+namespace GIGL.POST.Core.Domain
 {
     public class ServiceCentre : BaseDomain, IAuditable
     {

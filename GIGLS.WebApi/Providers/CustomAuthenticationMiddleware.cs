@@ -1,14 +1,14 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Infrastructure.Persistence;
+﻿using POST.Core;
+using POST.Core.Domain;
+using POST.Core.Domain.Wallet;
+using POST.Infrastructure.Persistence;
 using Microsoft.Owin;
 using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace GIGLS.WebApi.Providers
+namespace POST.WebApi.Providers
 {
     //This class handles all the OwinMiddleware responses, so the name should 
     //not just focus on invalid authentication

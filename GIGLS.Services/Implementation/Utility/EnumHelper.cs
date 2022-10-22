@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Reflection;
 
-namespace GIGLS.Services.Implementation.Utility
+namespace POST.Services.Implementation.Utility
 {
     public static class EnumHelper
     {

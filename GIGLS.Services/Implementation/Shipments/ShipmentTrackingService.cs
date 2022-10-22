@@ -1,28 +1,28 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core;
-using GIGLS.Core.Enums;
-using GIGLS.Infrastructure;
+using POST.Core.DTO.Shipments;
+using POST.Core.IServices.Shipments;
+using POST.Core;
+using POST.Core.Enums;
+using POST.Infrastructure;
 using System.Collections.Generic;
-using GIGLS.CORE.Domain;
-using GIGLS.Core.IServices.User;
+using POST.CORE.Domain;
+using POST.Core.IServices.User;
 using System.Linq;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.DTO.User;
+using GIGL.POST.Core.Domain;
+using POST.Core.IMessageService;
+using POST.Core.DTO.User;
 using AutoMapper;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.IServices.DHL;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Customers;
+using POST.Core.IServices.DHL;
 using System.Globalization;
-using GIGLS.Core.DTO.ShipmentScan;
+using POST.Core.DTO.ShipmentScan;
 using System.Configuration;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class ShipmentTrackingService : IShipmentTrackingService
     {

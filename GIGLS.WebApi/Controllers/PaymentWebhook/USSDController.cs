@@ -1,12 +1,12 @@
-﻿using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.DTO.OnlinePayment;
+using POST.Core.IServices;
+using POST.Core.IServices.Wallet;
+using POST.Services.Implementation;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.PaymentWebhook
+namespace POST.WebApi.Controllers.PaymentWebhook
 {
     [RoutePrefix("api/ussd")]
     public class USSDController : BaseWebApiController

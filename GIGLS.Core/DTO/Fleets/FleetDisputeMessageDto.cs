@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.DTO.Fleets
+namespace POST.Core.DTO.Fleets
 {
     public class FleetDisputeMessageDto
     {

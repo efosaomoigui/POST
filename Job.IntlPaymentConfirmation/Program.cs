@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ApiProcessor;
-using GIGLS.Core.DTO.Wallet;
+using POST.Core.DTO.Wallet;
 using Newtonsoft.Json.Linq;
 
 namespace Job.IntlPaymentConfirmation

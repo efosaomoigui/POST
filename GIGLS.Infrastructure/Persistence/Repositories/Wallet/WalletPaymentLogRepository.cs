@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.IRepositories.Wallet;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using POST.Core.DTO.Wallet;
+using POST.Core.IRepositories.Wallet;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Linq;
 using AutoMapper;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Core.View;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Infrastructure;
-using GIGLS.Core.DTO.Report;
+using POST.Core.Domain.Wallet;
+using POST.CORE.DTO.Shipments;
+using POST.Core.View;
+using POST.CORE.DTO.Report;
+using POST.Infrastructure;
+using POST.Core.DTO.Report;
 using System.Data.SqlClient;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
+using POST.Core.Domain;
+using POST.Core.DTO;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
     public class WalletPaymentLogRepository : Repository<WalletPaymentLog, GIGLSContext>, IWalletPaymentLogRepository
     {

@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.User;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.User;
+using POST.CORE.DTO;
 using System;
 
-namespace GIGLS.Core.DTO
+namespace POST.Core.DTO
 {
     public class RiderDeliveryDTO : BaseDomainDTO     
     {

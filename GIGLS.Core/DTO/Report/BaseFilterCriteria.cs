@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System;
 
-namespace GIGLS.CORE.DTO.Report
+namespace POST.CORE.DTO.Report
 {
     public class BaseFilterCriteria
     {

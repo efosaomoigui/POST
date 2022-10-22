@@ -1,6 +1,6 @@
-﻿using GIGLS.CORE.Enums;
+﻿using POST.CORE.Enums;
 
-namespace GIGLS.CORE.DTO.Report
+namespace POST.CORE.DTO.Report
 {
     public class ShipmentFilterCriteria : BaseFilterCriteria
     {

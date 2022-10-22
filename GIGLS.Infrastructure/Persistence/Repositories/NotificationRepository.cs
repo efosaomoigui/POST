@@ -1,15 +1,15 @@
 ﻿using AutoMapper;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.IRepositories;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.IRepositories;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories
+namespace POST.INFRASTRUCTURE.Persistence.Repositories
 {
     public class NotificationRepository : Repository<Notification, GIGLSContext>, INotificationRepository
     {

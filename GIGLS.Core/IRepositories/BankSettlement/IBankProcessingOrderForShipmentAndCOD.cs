@@ -1,18 +1,18 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.BankSettlement;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO.BankSettlement;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO.Report;
+﻿using GIGL.POST.Core.Domain;
+using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.BankSettlement;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO.BankSettlement;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.BankSettlement
+namespace POST.Core.IRepositories.BankSettlement
 {
     public interface IBankProcessingOrderForShipmentAndCODRepository : IRepository<BankProcessingOrderForShipmentAndCOD>
     {

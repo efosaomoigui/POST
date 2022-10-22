@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.IServices.Account;
-using GIGLS.Core.IServices.User;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.DTO.Account;
+using POST.Core.IServices.Account;
+using POST.Core.IServices.User;
+using POST.Infrastructure;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Account
+namespace POST.Services.Implementation.Account
 {
     public class VATService : IVATService
     {

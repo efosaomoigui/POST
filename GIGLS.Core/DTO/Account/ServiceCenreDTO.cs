@@ -1,4 +1,4 @@
-﻿namespace GIGLS.Core.DTO.Account
+﻿namespace POST.Core.DTO.Account
 {
     public class ServiceCenreDTO
     {

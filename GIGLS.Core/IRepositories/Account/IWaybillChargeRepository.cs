@@ -1,9 +1,9 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Account;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain;
+using POST.Core.DTO.Account;
 
 
-namespace GIGLS.Core.IRepositories.Account
+namespace POST.Core.IRepositories.Account
 {
     public interface IWaybillChargeRepository : IRepository<WaybillCharge>
     {

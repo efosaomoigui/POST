@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Customers;
+﻿using POST.Core.DTO.Customers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Customers
+namespace POST.Core.IServices.Customers
 {
     public interface IIndividualCustomerService : IServiceDependencyMarker
     {

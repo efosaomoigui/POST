@@ -1,30 +1,30 @@
 using System.Data.Entity;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Domain;
+using GIGL.POST.Core.Domain;
+using POST.Core.Domain;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Threading.Tasks;
-using GIGLS.Core;
+using POST.Core;
 using System;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.INFRASTRUCTURE.SoftDeleteHandler;
-using GIGLS.Core.Domain.Audit;
-using GIGLS.CORE.Domain;
+using POST.Core.Domain.Partnership;
+using POST.Core.Domain.Wallet;
+using POST.INFRASTRUCTURE.SoftDeleteHandler;
+using POST.Core.Domain.Audit;
+using POST.CORE.Domain;
 using Microsoft.AspNet.Identity.EntityFramework;
-using GIGLS.Core.Domain.MessagingLog;
-using GIGLS.Core.Domain.ShipmentScan;
-using GIGLS.Core.Domain.Utility;
-using GIGLS.Core.Domain.Devices;
-using GIGLS.Core.Domain.BankSettlement;
-using GIGLS.Core.Domain.SLA;
-using GIGLS.Core.Domain.Expenses;
-using GIGLS.Core.Domain.Route;
-using GIGLS.Core.Domain.DHL;
-using GIGLS.Core.Domain.Archived;
+using POST.Core.Domain.MessagingLog;
+using POST.Core.Domain.ShipmentScan;
+using POST.Core.Domain.Utility;
+using POST.Core.Domain.Devices;
+using POST.Core.Domain.BankSettlement;
+using POST.Core.Domain.SLA;
+using POST.Core.Domain.Expenses;
+using POST.Core.Domain.Route;
+using POST.Core.Domain.DHL;
+using POST.Core.Domain.Archived;
 using System.Data.Entity.Infrastructure.Annotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GIGLS.Infrastructure.Persistence
+namespace POST.Infrastructure.Persistence
 {
     [DbConfigurationType(typeof(EntityFrameworkConfiguration))]
     public class GIGLSContext : IdentityDbContext<User, AppRole, string, IdentityUserLogin, IdentityUserRole, AppUserClaim>

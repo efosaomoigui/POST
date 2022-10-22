@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Stocks;
-using GIGLS.Core.IServices.Stocks;
+using POST.Core.DTO.Stocks;
+using POST.Core.IServices.Stocks;
 
-namespace GIGLS.Services.Implementation.Stocks
+namespace POST.Services.Implementation.Stocks
 {
     public class StockRequestService : IStockRequestService
     {

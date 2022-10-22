@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Client;
-using GIGLS.Core.IRepositories.Client;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.DTO.Client;
+using POST.Core.IRepositories.Client;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Client
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Client
 {
     public class ClientNodeRepository : Repository<ClientNode, GIGLSContext>, IClientNodeRepository
     {

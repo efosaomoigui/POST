@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.User;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.Shipments;
+using POST.Core.DTO.User;
+using POST.CORE.DTO;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.ServiceCentres
+namespace POST.Core.DTO.ServiceCentres
 {
     public class ServiceCentreDTO : BaseDomainDTO
     {

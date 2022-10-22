@@ -1,17 +1,17 @@
-﻿using GIGLS.Core.IServices.CashOnDeliveryBalance;
+﻿using POST.Core.IServices.CashOnDeliveryBalance;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
+using POST.Core.DTO.Wallet;
+using POST.Core;
+using POST.Infrastructure;
 using AutoMapper;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Wallet;
+using POST.Core.Enums;
+using POST.Core.IServices.Wallet;
 using System.Linq;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.IServices.User;
+using POST.Core.Domain.Wallet;
+using POST.Core.IServices.User;
 
-namespace GIGLS.Services.Implementation.Wallet
+namespace POST.Services.Implementation.Wallet
 {
     public class CashOnDeliveryBalanceService : ICashOnDeliveryBalanceService
     {

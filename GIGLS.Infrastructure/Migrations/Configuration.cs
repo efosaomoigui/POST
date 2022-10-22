@@ -1,12 +1,12 @@
-namespace GIGLS.Infrastructure.Migrations
+namespace POST.Infrastructure.Migrations
 {
-    using GIGLS.Core.Domain;
+    using POST.Core.Domain;
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<GIGLS.Infrastructure.Persistence.GIGLSContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<POST.Infrastructure.Persistence.GIGLSContext>
     {
         public Configuration()
         {
@@ -15,7 +15,7 @@ namespace GIGLS.Infrastructure.Migrations
 
         }
 
-        protected override void Seed(GIGLS.Infrastructure.Persistence.GIGLSContext context)
+        protected override void Seed(POST.Infrastructure.Persistence.GIGLSContext context)
         {
             //  This method will be called after migrating to the latest version.
 

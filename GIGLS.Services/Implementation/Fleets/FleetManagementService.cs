@@ -1,10 +1,10 @@
-﻿using GIGLS.Core.IServices.Fleets;
+﻿using POST.Core.IServices.Fleets;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Fleets;
+using POST.Core.DTO.Fleets;
 
-namespace GIGLS.Services.Implementation.Fleets
+namespace POST.Services.Implementation.Fleets
 {
     public class FleetManagementService : IFleetManagementService
     {

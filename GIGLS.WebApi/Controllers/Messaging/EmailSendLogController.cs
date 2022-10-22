@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.MessagingLog;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO.MessagingLog;
+using POST.Core.IServices;
+using POST.Core.IServices.MessagingLog;
+using POST.CORE.DTO.Shipments;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Messaging
+namespace POST.WebApi.Controllers.Messaging
 {
     [Authorize(Roles = "Admin, Shipment, ViewAdmin")]
     [RoutePrefix("api/emailsendlog")]

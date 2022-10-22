@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.DHL;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.UPS;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.UPS;
-using GIGLS.Infrastructure;
+﻿using POST.Core.DTO.DHL;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.UPS;
+using POST.Core.Enums;
+using POST.Core.IServices.UPS;
+using POST.Infrastructure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -17,7 +17,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Business.UPS
+namespace POST.Services.Business.UPS
 {
     public class UPSService : IUPSService
     {

@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.ServiceCentres;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.IRepositories.ServiceCentres;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
 {
     public class RegionRepository : Repository<Region, GIGLSContext>, IRegionRepository
     {

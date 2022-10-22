@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GIGLS.Core.DTO.Report
+namespace POST.Core.DTO.Report
 {
     public class MobileShipmentFilterCriteria
     {

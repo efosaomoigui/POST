@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.IServices.Fleets;
-using GIGLS.Core;
-using GIGL.GIGLS.Core.Domain;
+using POST.Core.DTO.Fleets;
+using POST.Core.IServices.Fleets;
+using POST.Core;
+using GIGL.POST.Core.Domain;
 using System.Linq;
 using System.Collections.Generic;
-using GIGLS.Infrastructure;
+using POST.Infrastructure;
 
-namespace GIGLS.Services.Implementation.Fleets
+namespace POST.Services.Implementation.Fleets
 {
     public class FleetTripService : IFleetTripService
     {

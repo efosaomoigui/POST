@@ -1,7 +1,7 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.Domain;
+﻿using POST.Core;
+using POST.Core.Domain;
 
-namespace GIGLS.CORE.Domain
+namespace POST.CORE.Domain
 {
     public class SubSubNav : BaseDomain, IAuditable
     {

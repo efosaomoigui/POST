@@ -1,4 +1,4 @@
-﻿namespace GIGLS.CORE.Enums
+﻿namespace POST.CORE.Enums
 {
     public enum FilterCustomerType
     {

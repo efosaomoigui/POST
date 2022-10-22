@@ -1,6 +1,6 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO.Zone
+namespace POST.Core.DTO.Zone
 {
     public class WeightLimitDTO : BaseDomainDTO
     {

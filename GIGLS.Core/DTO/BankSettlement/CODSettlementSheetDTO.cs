@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.Enums;
+using POST.CORE.DTO;
 using System;
 
-namespace GIGLS.Core.DTO.BankSettlement
+namespace POST.Core.DTO.BankSettlement
 {
     public class CODSettlementSheetDTO : BaseDomainDTO
     {

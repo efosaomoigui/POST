@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.WebApi.Filters;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.DTO.ServiceCentres;
+using POST.WebApi.Filters;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.DTO.ServiceCentres;
 
-namespace GIGLS.WebApi.Controllers.ServiceCentres
+namespace POST.WebApi.Controllers.ServiceCentres
 {
     [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/region")]

@@ -5,7 +5,7 @@ using System.Configuration;
 using System.IdentityModel.Tokens;
 using Thinktecture.IdentityModel.Tokens;
 
-namespace GIGLS.WebApi.App_Start
+namespace POST.WebApi.App_Start
 {
     //API to issue JWT tokens instead of default access tokens
     public class GiglsCustomJwtFormat: ISecureDataFormat<AuthenticationTicket>

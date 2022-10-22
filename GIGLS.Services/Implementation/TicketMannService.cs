@@ -1,11 +1,11 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.DTO;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.CustomerPortal;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Infrastructure;
+﻿using POST.Core;
+using POST.Core.DTO;
+using POST.Core.Enums;
+using POST.Core.IServices;
+using POST.Core.IServices.CustomerPortal;
+using POST.Core.IServices.Wallet;
+using POST.CORE.DTO.Report;
+using POST.Infrastructure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -18,7 +18,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation
+namespace POST.Services.Implementation
 {
     public class TicketMannService : ITicketMannService
     {

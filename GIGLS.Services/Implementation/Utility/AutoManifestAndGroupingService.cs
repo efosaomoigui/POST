@@ -1,4 +1,4 @@
-﻿using GIGLS.Core.IServices.Utility;
+﻿using POST.Core.IServices.Utility;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
@@ -11,19 +11,19 @@ using System.Drawing.Imaging;
 using QRCoder;
 using BarcodeLib;
 using System.Web.Hosting;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Services.Implementation.Shipments;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core;
-using GIGLS.Core.IServices.User;
-using GIGLS.Infrastructure;
+using POST.Core.DTO.Shipments;
+using POST.Services.Implementation.Shipments;
+using POST.Core.Domain;
+using POST.Core.Enums;
+using GIGL.POST.Core.Domain;
+using POST.Core;
+using POST.Core.IServices.User;
+using POST.Infrastructure;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace GIGLS.Services.Implementation.Utility
+namespace POST.Services.Implementation.Utility
 {
     public class AutoManifestAndGroupingService : IAutoManifestAndGroupingService
     {

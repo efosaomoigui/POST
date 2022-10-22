@@ -1,15 +1,15 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.Archived;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.Archived;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Shipments;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Archived
+namespace POST.Core.IRepositories.Archived
 {
     public interface IShipmentArchiveRepository : IRepository<Shipment_Archive>
     {

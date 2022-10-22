@@ -1,7 +1,7 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain;
 
-namespace GIGLS.Core.IRepositories
+namespace POST.Core.IRepositories
 {
     public interface ICouponManagementRepository : IRepository<CouponCodeManagement>
     {

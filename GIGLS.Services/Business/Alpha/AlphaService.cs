@@ -1,6 +1,6 @@
-﻿using GIGLS.Core.DTO.Alpha;
-using GIGLS.Core.IServices.Alpha;
-using GIGLS.Infrastructure;
+﻿using POST.Core.DTO.Alpha;
+using POST.Core.IServices.Alpha;
+using POST.Infrastructure;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Business.Alpha
+namespace POST.Services.Business.Alpha
 {
     public class AlphaService : IAlphaService
     {

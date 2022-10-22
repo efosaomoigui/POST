@@ -1,10 +1,10 @@
-﻿using GIGLS.Core.DTO.BankSettlement;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
+﻿using POST.Core.DTO.BankSettlement;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.BankSettlement
+namespace POST.Core.IServices.BankSettlement
 {
     public interface ICODSettlementSheetService : IServiceDependencyMarker
     {

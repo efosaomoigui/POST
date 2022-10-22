@@ -1,21 +1,21 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Services.Implementation;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.Enums;
-using GIGLS.WebApi.Filters;
+using POST.Core.IServices.Customers;
+using POST.Core.DTO.Customers;
+using POST.Core.Enums;
+using POST.WebApi.Filters;
 using System.Collections.Generic;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.User;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.DTO.Account;
+using POST.Core.IServices.Wallet;
+using POST.Core.DTO.Wallet;
+using POST.Core.DTO.Shipments;
+using POST.Core.Domain;
+using POST.Core.DTO.User;
+using POST.CORE.DTO.Report;
+using POST.Core.DTO.Account;
 
-namespace GIGLS.WebApi.Controllers
+namespace POST.WebApi.Controllers
 {
     [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/Customer")]

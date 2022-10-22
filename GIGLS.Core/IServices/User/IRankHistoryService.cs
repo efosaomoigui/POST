@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Stores;
-using GIGLS.Core.DTO.User;
+﻿using POST.Core.DTO.Stores;
+using POST.Core.DTO.User;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.User
+namespace POST.Core.IServices.User
 {
     public interface IRankHistoryService
     {

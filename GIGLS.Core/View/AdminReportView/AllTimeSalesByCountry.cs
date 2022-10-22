@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.View.AdminReportView
+namespace POST.Core.View.AdminReportView
 {
     public class Report_AllTimeSalesByCountry
     {

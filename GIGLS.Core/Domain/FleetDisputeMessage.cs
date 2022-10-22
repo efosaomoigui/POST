@@ -5,9 +5,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
+using GIGL.POST.Core.Domain;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class FleetDisputeMessage : BaseDomain, IAuditable
     {

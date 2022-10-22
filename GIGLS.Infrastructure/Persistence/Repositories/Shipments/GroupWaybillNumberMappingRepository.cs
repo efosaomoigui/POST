@@ -1,16 +1,16 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.IRepositories.Shipments;
+using POST.CORE.DTO.Shipments;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.DTO.Shipments;
+using POST.Core.DTO.ServiceCentres;
+using POST.CORE.DTO.Report;
+using POST.Core.DTO.Shipments;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
     public class GroupWaybillNumberMappingRepository : Repository<GroupWaybillNumberMapping, GIGLSContext>, IGroupWaybillNumberMappingRepository
     {

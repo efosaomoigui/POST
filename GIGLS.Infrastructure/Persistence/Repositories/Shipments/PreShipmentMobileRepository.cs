@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.Infrastructure.Persistence.Repository;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.Shipments;
+using POST.Core.Enums;
+using POST.Core.IRepositories.Shipments;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -14,7 +14,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
+namespace POST.Infrastructure.Persistence.Repositories.Shipments
 {
     public class PreShipmentMobileRepository : Repository<PreShipmentMobile, GIGLSContext>, IPreShipmentMobileRepository
     {

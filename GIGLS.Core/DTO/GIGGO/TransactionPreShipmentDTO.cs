@@ -1,7 +1,7 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Shipments
+namespace POST.Core.DTO.Shipments
 {
     public class TransactionPreShipmentDTO : BaseDomainDTO
     {

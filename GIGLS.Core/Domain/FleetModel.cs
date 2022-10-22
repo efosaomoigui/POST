@@ -1,10 +1,10 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.Domain;
+﻿using POST.Core;
+using POST.Core.Domain;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGL.GIGLS.Core.Domain
+namespace GIGL.POST.Core.Domain
 {
     public class FleetModel : BaseDomain, IAuditable
     {      

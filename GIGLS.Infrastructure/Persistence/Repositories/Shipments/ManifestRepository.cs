@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using GIGL.POST.Core.Domain;
+using POST.Core.DTO.Shipments;
+using POST.Core.IRepositories.Shipments;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Linq;
-using GIGLS.Core.DTO.ServiceCentres;
+using POST.Core.DTO.ServiceCentres;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
     public class ManifestRepository : Repository<Manifest, GIGLSContext>, IManifestRepository
     {

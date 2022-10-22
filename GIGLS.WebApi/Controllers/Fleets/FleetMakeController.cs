@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.IServices.Fleets;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Core.DTO.Fleets;
+using POST.Core.IServices.Fleets;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.WebApi.Filters;
+using POST.WebApi.Filters;
 
-namespace GIGLS.WebApi.Controllers.Fleets
+namespace POST.WebApi.Controllers.Fleets
 {
     [Authorize(Roles = "Shipment")]
     [RoutePrefix("api/fleetmake")]

@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.DTO.User;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.User;
+using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO.SLA
+namespace POST.Core.DTO.SLA
 {
     public class SLASignedUserDTO : BaseDomainDTO
     {

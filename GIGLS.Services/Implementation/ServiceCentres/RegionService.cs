@@ -1,16 +1,16 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.IServices.ServiceCentres;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.ServiceCentres
+namespace POST.Services.Implementation.ServiceCentres
 {
     public class RegionService : IRegionService
     {

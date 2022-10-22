@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.Enums;
+using POST.CORE.DTO;
 using System;
 
-namespace GIGLS.Core.DTO.Shipments
+namespace POST.Core.DTO.Shipments
 {
     public class ShipmentItemDTO : BaseDomainDTO
     {

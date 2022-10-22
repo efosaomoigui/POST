@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.IServices;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.IServices;
+using POST.Infrastructure;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation
+namespace POST.Services.Implementation
 {
     public class DeliveryLocationService : IDeliveryLocationService
     {

@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.DTO.Devices;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Devices;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO.Devices;
+using POST.Core.IServices;
+using POST.Core.IServices.Devices;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Devices
+namespace POST.WebApi.Controllers.Devices
 {
     [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/devicemanagement")]

@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO.OnlinePayment;
+using POST.Core.DTO.Wallet;
+using POST.Core.IServices;
+using POST.Core.IServices.Wallet;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Wallet
+namespace POST.WebApi.Controllers.Wallet
 {
     [Authorize(Roles = "Account, Shipment")]
     [RoutePrefix("api/waybillpaymentlog")]

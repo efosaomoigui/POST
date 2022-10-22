@@ -1,7 +1,7 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.Expenses;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.Expenses;
 
-namespace GIGLS.Core.IRepositories.Expenses
+namespace POST.Core.IRepositories.Expenses
 {
     public interface IExpenseTypeRepository : IRepository<ExpenseType>
     {

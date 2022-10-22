@@ -1,5 +1,5 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.IMessage;
+﻿using POST.Core.DTO;
+using POST.Core.IMessage;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using SendGrid;
@@ -11,7 +11,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Messaging.MessageService
+namespace POST.Messaging.MessageService
 {
     public class EmailService : IEmailService
     {

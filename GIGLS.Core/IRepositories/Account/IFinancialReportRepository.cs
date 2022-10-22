@@ -1,15 +1,15 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO.Report;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Dashboard;
+using POST.Core.DTO.Report;
+using POST.Core.Enums;
+using POST.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Account
+namespace POST.Core.IRepositories.Account
 {
     public interface IFinancialReportRepository : IRepository<FinancialReport>
     {

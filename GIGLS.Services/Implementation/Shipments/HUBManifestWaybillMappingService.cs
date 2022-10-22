@@ -1,25 +1,25 @@
 ﻿using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.IServices.User;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.CORE.IServices.Shipments;
-using GIGLS.Infrastructure;
+using GIGL.POST.Core.Domain;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.Zone;
+using POST.Core.Enums;
+using POST.Core.IServices.Customers;
+using POST.Core.IServices.Shipments;
+using POST.Core.IServices.User;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
+using POST.CORE.IServices.Shipments;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class HUBManifestWaybillMappingService : IHUBManifestWaybillMappingService
     {

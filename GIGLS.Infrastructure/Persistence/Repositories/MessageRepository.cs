@@ -1,16 +1,16 @@
 ﻿using AutoMapper;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.IRepositories;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.IRepositories;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
-using GIGLS.Core.Enums;
+using POST.Core.Enums;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories
+namespace POST.INFRASTRUCTURE.Persistence.Repositories
 {
     public class MessageRepository : Repository<Message, GIGLSContext>, IMessageRepository
     {

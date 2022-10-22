@@ -1,4 +1,4 @@
-﻿namespace GIGLS.Core.DTO.DHL.Enum
+﻿namespace POST.Core.DTO.DHL.Enum
 {
 
     //SI (KG, CM) SU (LB, IN)

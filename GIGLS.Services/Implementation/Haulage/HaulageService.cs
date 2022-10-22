@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.IServices;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.IServices;
+using POST.Infrastructure;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Haulage;
+using POST.Core.DTO.Haulage;
 using System.Net;
 
-namespace GIGLS.Services.Implementation
+namespace POST.Services.Implementation
 {
     public class HaulageService : IHaulageService
     {

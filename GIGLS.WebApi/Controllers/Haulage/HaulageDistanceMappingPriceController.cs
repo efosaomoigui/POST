@@ -1,12 +1,12 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.DTO.Haulage;
-using GIGLS.WebApi.Filters;
+using POST.Core.DTO.Haulage;
+using POST.WebApi.Filters;
 
-namespace GIGLS.WebApi.Controllers.Haulage
+namespace POST.WebApi.Controllers.Haulage
 {
     [Authorize(Roles = "Admin")]
     [RoutePrefix("api/haulagedistancemappingprice")]

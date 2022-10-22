@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.Enums;
+using POST.CORE.DTO;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.DTO.PaymentTransactions
+namespace POST.Core.DTO.PaymentTransactions
 {
     public class ThirdPartyPricingDTO
     {

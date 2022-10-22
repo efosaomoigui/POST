@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.IRepositories;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.User;
+using POST.Core.IRepositories;
+using POST.Infrastructure.Persistence.Repository;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories
+namespace POST.Infrastructure.Persistence.Repositories
 {
     public class RiderDeliveryRepository : Repository<RiderDelivery, GIGLSContext>, IRiderDeliveryRepository
     {

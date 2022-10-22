@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Stores;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Stores;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Stores;
+using POST.Core.IServices;
+using POST.Core.IServices.Stores;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers
+namespace POST.WebApi.Controllers
 {
     [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/store")]

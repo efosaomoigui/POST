@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.IRepositories.Shipments;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
+namespace POST.Infrastructure.Persistence.Repositories.Shipments
 {
     public class DemurrageRepository : Repository<Demurrage, GIGLSContext>, IDemurrageRepository
     {

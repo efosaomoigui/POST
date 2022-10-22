@@ -1,6 +1,6 @@
-﻿using GIGLS.Core.DTO.Account;
+﻿using POST.Core.DTO.Account;
 
-namespace GIGLS.CORE.DTO.Shipments
+namespace POST.CORE.DTO.Shipments
 {
     public class ShipmentReturnDTO : BaseDomainDTO
     {

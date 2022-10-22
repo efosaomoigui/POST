@@ -1,10 +1,10 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.CORE.Domain;
-using GIGLS.CORE.DTO.Nav;
+﻿using GIGL.POST.Core.Repositories;
+using POST.CORE.Domain;
+using POST.CORE.DTO.Nav;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.CORE.IRepositories.Nav
+namespace POST.CORE.IRepositories.Nav
 {
     public interface IMainNavRepository : IRepository<MainNav>
     {

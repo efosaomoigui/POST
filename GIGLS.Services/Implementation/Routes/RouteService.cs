@@ -1,16 +1,16 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.Common.Helpers;
-using GIGLS.Core.Domain.Route;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Routes;
-using GIGLS.Core.IServices.RouteServices;
+﻿using POST.Core;
+using POST.Core.Common.Helpers;
+using POST.Core.Domain.Route;
+using POST.Core.DTO;
+using POST.Core.DTO.Routes;
+using POST.Core.IServices.RouteServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Routes
+namespace POST.Services.Implementation.Routes
 {
     public class RouteService : IRouteService
     {

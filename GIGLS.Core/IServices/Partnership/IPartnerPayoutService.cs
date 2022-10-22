@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.DTO.Partnership;
+﻿using POST.Core.DTO.Partnership;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Partnership
+namespace POST.Core.IServices.Partnership
 {
     public interface IPartnerPayoutService : IServiceDependencyMarker
     {

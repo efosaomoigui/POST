@@ -1,12 +1,12 @@
-﻿using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.Customers;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Zone;
+using POST.Core.Enums;
+using POST.CORE.DTO;
 using System;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Account
+namespace POST.Core.DTO.Account
 {
     public class InvoiceViewDTO : BaseDomainDTO
     {

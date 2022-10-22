@@ -1,4 +1,4 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.Common.Helpers
+namespace POST.Core.Common.Helpers
 {
     public interface IPagedQueryBuilder<TEntity> : IQueryCommand<PagedList<TEntity>>
     {

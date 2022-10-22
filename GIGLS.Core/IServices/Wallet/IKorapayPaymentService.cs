@@ -1,11 +1,11 @@
-﻿using GIGLS.Core.DTO.OnlinePayment;
+﻿using POST.Core.DTO.OnlinePayment;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Wallet
+namespace POST.Core.IServices.Wallet
 {
     public interface IKorapayPaymentService : IServiceDependencyMarker
     {

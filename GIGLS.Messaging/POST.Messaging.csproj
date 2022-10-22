@@ -162,9 +162,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GIGLS.Core\GIGLS.Core.csproj">
+    <ProjectReference Include="..\GIGLS.Core\POST.Core.csproj">
       <Project>{e09465db-8bc7-4f1c-81d8-4ea1daa77ad4}</Project>
-      <Name>GIGLS.Core</Name>
+      <Name>POST.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

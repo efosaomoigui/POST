@@ -1,6 +1,6 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO
+namespace POST.Core.DTO
 {
     public class LocationDTO : BaseDomainDTO
     {

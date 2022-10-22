@@ -1,7 +1,7 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Infrastructure;
+﻿using POST.Core;
+using POST.Core.DTO.Shipments;
+using POST.Core.IServices.Shipments;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class MobileGroupCodeWaybillMappingService : IMobileGroupCodeWaybillMappingService
     {

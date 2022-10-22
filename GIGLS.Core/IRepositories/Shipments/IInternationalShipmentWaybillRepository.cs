@@ -1,11 +1,11 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.DHL;
-using GIGLS.Core.DTO.DHL;
-using GIGLS.CORE.DTO.Report;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.DHL;
+using POST.Core.DTO.DHL;
+using POST.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Shipments
+namespace POST.Core.IRepositories.Shipments
 {
     public interface IInternationalShipmentWaybillRepository : IRepository<InternationalShipmentWaybill>
     {

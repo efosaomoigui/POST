@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.Zone;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.IRepositories.Zone;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Zone;
+using POST.Core.DTO.Zone;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Zone
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Zone
 {
     public class WeightLimitPriceRepository : Repository<WeightLimitPrice, GIGLSContext>, IWeightLimitPriceRepository
     {

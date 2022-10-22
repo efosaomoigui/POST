@@ -1,20 +1,20 @@
 ﻿using EfeAuthen.Models;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.DHL;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.CustomerPortal;
-using GIGLS.Core.IServices.TickectMan;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Infrastructure;
-using GIGLS.Services.Implementation;
-using GIGLS.Services.Implementation.Utility;
+using POST.Core.DTO;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.DHL;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.Zone;
+using POST.Core.Enums;
+using POST.Core.IServices;
+using POST.Core.IServices.CustomerPortal;
+using POST.Core.IServices.TickectMan;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
+using POST.Infrastructure;
+using POST.Services.Implementation;
+using POST.Services.Implementation.Utility;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -25,7 +25,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Scanner
+namespace POST.WebApi.Controllers.Scanner
 {
     [Authorize(Roles = "Shipment, ViewAdmin, Agent")]
     [RoutePrefix("api/giglexpress")]

@@ -1,18 +1,18 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.CORE.DTO.Report;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.OnlinePayment;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.User;
+using POST.Core.DTO.Wallet;
+using POST.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.ThirdPartyAPI
+namespace POST.Core.IServices.ThirdPartyAPI
 {
     public interface IThirdPartyAPIService : IServiceDependencyMarker
     {

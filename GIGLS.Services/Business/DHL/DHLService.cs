@@ -1,13 +1,13 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.DHL;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.DHL;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Infrastructure;
+﻿using POST.Core;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.DHL;
+using POST.Core.DTO.Shipments;
+using POST.Core.Enums;
+using POST.Core.IServices;
+using POST.Core.IServices.DHL;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Utility;
+using POST.Infrastructure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
@@ -20,7 +20,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Business.DHL
+namespace POST.Services.Business.DHL
 {
     public class DHLService : IDHLService
     {

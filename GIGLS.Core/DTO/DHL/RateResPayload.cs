@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.DTO.DHL
+namespace POST.Core.DTO.DHL
 {
     /// <summary>
     /// DHL response payload

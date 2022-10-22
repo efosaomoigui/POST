@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core;
-using GIGL.GIGLS.Core.Domain;
+using POST.Core.DTO.Shipments;
+using POST.Core.IServices.Shipments;
+using POST.Core;
+using GIGL.POST.Core.Domain;
 using System.Linq;
-using GIGLS.Infrastructure;
+using POST.Infrastructure;
 using AutoMapper;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.User;
+using POST.Core.IServices.Utility;
+using POST.Core.Enums;
+using POST.Core.IServices.User;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class ManifestService : IManifestService
     {

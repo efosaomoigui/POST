@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.ShipmentScan;
+﻿using POST.Core.DTO.ShipmentScan;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.ShipmentScan
+namespace POST.Core.IServices.ShipmentScan
 {
     public interface IScanStatusService : IServiceDependencyMarker
     {

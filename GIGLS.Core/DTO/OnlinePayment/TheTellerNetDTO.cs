@@ -1,4 +1,4 @@
-﻿namespace GIGLS.Core.DTO.OnlinePayment
+﻿namespace POST.Core.DTO.OnlinePayment
 {
     public class TheTellerNetDTO
     {

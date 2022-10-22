@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core;
-using GIGL.GIGLS.Core.Domain;
+using POST.Core;
+using GIGL.POST.Core.Domain;
 using System.Collections.Generic;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Core.IServices.User;
+using POST.Infrastructure;
+using POST.Core.IServices.Shipments;
+using POST.Core.DTO.Shipments;
+using POST.CORE.DTO.Shipments;
+using POST.Core.IServices.User;
 using System.Linq;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.Domain;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.CORE.IServices.Shipments;
-using GIGLS.CORE.Domain;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.Domain;
+using POST.Core.IServices.ServiceCentres;
+using POST.CORE.IServices.Shipments;
+using POST.CORE.Domain;
+using POST.Core.Enums;
+using POST.CORE.DTO.Report;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class GroupWaybillNumberMappingService : IGroupWaybillNumberMappingService
     {

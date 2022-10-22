@@ -1,14 +1,14 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.IServices.Utility;
+﻿using POST.Core;
+using POST.Core.Enums;
+using POST.Core.IServices.Shipments;
+using POST.Core.IServices.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class SuperManifestService : ISuperManifestService
     {

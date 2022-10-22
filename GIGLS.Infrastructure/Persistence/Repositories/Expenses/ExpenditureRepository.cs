@@ -1,16 +1,16 @@
-﻿using GIGLS.Core.Domain.Expenses;
-using GIGLS.Core.IRepositories.Expenses;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain.Expenses;
+using POST.Core.IRepositories.Expenses;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Expenses;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Expenses;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Expenses
+namespace POST.Infrastructure.Persistence.Repositories.Expenses
 {
     public class ExpenditureRepository : Repository<Expenditure, GIGLSContext>, IExpenditureRepository
     {

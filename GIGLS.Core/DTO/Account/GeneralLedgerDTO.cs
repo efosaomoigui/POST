@@ -1,10 +1,10 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.DTO.User;
+using POST.Core.Enums;
+using POST.CORE.DTO;
 using System;
 
-namespace GIGLS.Core.DTO.Account
+namespace POST.Core.DTO.Account
 {
     public class GeneralLedgerDTO : BaseDomainDTO
     {

@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.ServiceCentres;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using POST.Core.Domain;
+using POST.Core.IRepositories.ServiceCentres;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Linq;
-using GIGLS.Core.DTO.ServiceCentres;
+using POST.Core.DTO.ServiceCentres;
 using System;
-using GIGLS.Core.DTO;
+using POST.Core.DTO;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
 {
     public class StationRepository : Repository<Station, GIGLSContext>, IStationRepository
     {

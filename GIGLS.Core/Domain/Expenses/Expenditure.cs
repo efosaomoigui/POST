@@ -1,7 +1,7 @@
-﻿using GIGL.GIGLS.Core.Domain;
+﻿using GIGL.POST.Core.Domain;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain.Expenses
+namespace POST.Core.Domain.Expenses
 {
     public class Expenditure : BaseDomain, IAuditable
     {

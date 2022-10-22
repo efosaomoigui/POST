@@ -1,6 +1,6 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO.Fleets
+namespace POST.Core.DTO.Fleets
 {
     public class FleetPartInventoryDTO : BaseDomainDTO
     {

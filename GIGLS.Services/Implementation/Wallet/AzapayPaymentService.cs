@@ -1,15 +1,15 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.IServices.Node;
-using GIGLS.Core.IServices.PaymentTransactions;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.Enums;
+using POST.Core.IMessageService;
+using POST.Core.IServices.Node;
+using POST.Core.IServices.PaymentTransactions;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Wallet;
+using POST.Infrastructure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -22,7 +22,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Wallet
+namespace POST.Services.Implementation.Wallet
 {
    public  class AzapayPaymentService : IAzapayPaymentService
     {

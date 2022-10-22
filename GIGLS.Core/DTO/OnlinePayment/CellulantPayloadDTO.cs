@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.DTO.OnlinePayment
+namespace POST.Core.DTO.OnlinePayment
 {
     public class CellulantPayloadDTO
     {

@@ -1,6 +1,6 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO.Expenses
+namespace POST.Core.DTO.Expenses
 {
     public class ExpenseTypeDTO : BaseDomainDTO
     {

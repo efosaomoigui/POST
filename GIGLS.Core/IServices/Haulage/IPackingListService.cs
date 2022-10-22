@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Haulage;
+﻿using POST.Core.DTO.Haulage;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Haulage
+namespace POST.Core.IServices.Haulage
 {
     public interface IPackingListService : IServiceDependencyMarker
     {

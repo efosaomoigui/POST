@@ -1,7 +1,7 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGL.GIGLS.Core.Repositories;
+﻿using GIGL.POST.Core.Domain;
+using GIGL.POST.Core.Repositories;
 
-namespace GIGLS.Core.IRepositories.Haulage
+namespace POST.Core.IRepositories.Haulage
 {
     public interface IHaulageDistanceMappingRepository : IRepository<HaulageDistanceMapping>
     {

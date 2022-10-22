@@ -1,7 +1,7 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.CORE.Domain;
+﻿using GIGL.POST.Core.Repositories;
+using POST.CORE.Domain;
 
-namespace GIGLS.CORE.IRepositories.Shipments
+namespace POST.CORE.IRepositories.Shipments
 {
     public interface IShipmentReturnRepository : IRepository<ShipmentReturn>
     {

@@ -1,18 +1,18 @@
-﻿using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.Domain;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.CORE.IRepositories.Shipments;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.Enums;
+using POST.CORE.Domain;
+using POST.CORE.DTO.Shipments;
+using POST.CORE.IRepositories.Shipments;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
     public class ShipmentCollectionRepository : Repository<ShipmentCollection, GIGLSContext>, IShipmentCollectionRepository
     {

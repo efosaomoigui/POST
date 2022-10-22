@@ -1,4 +1,4 @@
-﻿namespace GIGLS.Core.Domain
+﻿namespace POST.Core.Domain
 {
     public class Haulage : BaseDomain, IAuditable
     {

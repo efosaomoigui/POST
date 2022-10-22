@@ -1,10 +1,10 @@
-﻿using GIGLS.Core.DTO.Account;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.Account;
+using POST.Core.Enums;
+using POST.CORE.DTO;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO
+namespace POST.Core.DTO
 {
     public class MessageDTO : BaseDomainDTO
     {

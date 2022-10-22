@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Wallet;
+﻿using POST.Core.DTO.Wallet;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.CashOnDeliveryBalance
+namespace POST.Core.IServices.CashOnDeliveryBalance
 {
     public interface ICashOnDeliveryBalanceService : IServiceDependencyMarker
     {

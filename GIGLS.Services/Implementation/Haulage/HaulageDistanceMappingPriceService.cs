@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.IServices;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.IServices;
+using POST.Infrastructure;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Haulage;
-using GIGLS.Core.IServices.Zone;
+using POST.Core.DTO.Haulage;
+using POST.Core.IServices.Zone;
 
-namespace GIGLS.Services.Implementation
+namespace POST.Services.Implementation
 {
     public class HaulageDistanceMappingPriceService : IHaulageDistanceMappingPriceService
     {

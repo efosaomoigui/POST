@@ -1,21 +1,21 @@
-﻿using GIGLS.CORE.IServices.Shipments;
+﻿using POST.CORE.IServices.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Core;
+using POST.CORE.DTO.Shipments;
+using POST.Core;
 using AutoMapper;
-using GIGLS.Infrastructure;
-using GIGLS.CORE.Domain;
+using POST.Infrastructure;
+using POST.CORE.Domain;
 using System;
-using GIGLS.Core.IServices.Shipments;
+using POST.Core.IServices.Shipments;
 using System.Linq;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Business;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.Enums;
+using POST.Core.IServices.User;
+using POST.Core.DTO.Shipments;
+using POST.Core.IServices.Business;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.Enums;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class ShipmentReturnService : IShipmentReturnService
     {

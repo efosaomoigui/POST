@@ -1,8 +1,8 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.Domain;
+﻿using POST.Core;
+using POST.Core.Domain;
 using System.Collections.Generic;
 
-namespace GIGLS.CORE.Domain
+namespace POST.CORE.Domain
 {
     public class MainNav : BaseDomain, IAuditable
     {

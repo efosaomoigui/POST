@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.IServices.Partnership;
+using POST.Core;
+using POST.Core.Domain.Partnership;
+using POST.Core.DTO.Partnership;
+using POST.Core.IServices.Partnership;
 using System;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Partnership
+namespace POST.Services.Implementation.Partnership
 {
     public class PartnerPayoutService : IPartnerPayoutService
     {

@@ -1,10 +1,10 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.IRepositories.Shipments;
+using POST.Infrastructure.Persistence.Repository;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
+namespace POST.Infrastructure.Persistence.Repositories.Shipments
 {
     public class MobileGroupCodeWaybillMappingRepository : Repository<MobileGroupCodeWaybillMapping, GIGLSContext>, IMobileGroupCodeWaybillMappingRepository
     {

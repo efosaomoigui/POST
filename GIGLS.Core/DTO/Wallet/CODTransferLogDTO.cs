@@ -1,10 +1,10 @@
-﻿using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.Enums;
+using POST.CORE.DTO;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Wallet
+namespace POST.Core.DTO.Wallet
 {
     public class CODTransferLogDTO : BaseDomainDTO
     {

@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.DTO.Wallet;
+﻿using POST.Core.DTO.Wallet;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Wallet
+namespace POST.Core.IServices.Wallet
 {
     public interface IWalletNumberService
     {

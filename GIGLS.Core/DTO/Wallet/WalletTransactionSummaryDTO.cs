@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Shipments;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.Shipments;
+using POST.CORE.DTO;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Wallet
+namespace POST.Core.DTO.Wallet
 {
     public class WalletTransactionSummaryDTO : BaseDomainDTO
     {

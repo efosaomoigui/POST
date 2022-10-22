@@ -1,19 +1,19 @@
-﻿using GIGLS.Core.IServices.Shipments;
+﻿using POST.Core.IServices.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
-using GIGLS.Core.Domain;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.DTO.Report;
+using POST.Core.DTO.Shipments;
+using POST.Core;
+using POST.Infrastructure;
+using POST.Core.Domain;
+using POST.Core.IServices.User;
+using POST.Core.DTO.Report;
 using System;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.Enums;
-using GIGLS.Core.DTO;
+using GIGL.POST.Core.Domain;
+using POST.Core.IMessageService;
+using POST.Core.Enums;
+using POST.Core.DTO;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class ShipmentCancelService : IShipmentCancelService
     {

@@ -1,15 +1,15 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.IServices.Account;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Core.DTO.Account;
+using POST.Core.IServices.Account;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.WebApi.Filters;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Core.View;
+using POST.WebApi.Filters;
+using POST.CORE.DTO.Shipments;
+using POST.Core.View;
 
-namespace GIGLS.WebApi.Controllers.Account
+namespace POST.WebApi.Controllers.Account
 {
     [RoutePrefix("api/invoice")]
     public class InvoiceReminderController : BaseWebApiController

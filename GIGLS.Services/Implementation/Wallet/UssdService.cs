@@ -1,11 +1,11 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.PaymentTransactions;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Wallet;
+﻿using POST.Core;
+using POST.Core.DTO.OnlinePayment;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.Core.IServices.PaymentTransactions;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Wallet;
 using Newtonsoft.Json;
 using System;
 using System.Configuration;
@@ -16,7 +16,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Wallet
+namespace POST.Services.Implementation.Wallet
 {
     public class UssdService : IUssdService
     {

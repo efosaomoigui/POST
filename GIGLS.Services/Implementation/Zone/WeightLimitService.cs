@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.IServices.Zone;
+﻿using POST.Core.IServices.Zone;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
-using GIGLS.Core.Domain;
+using POST.Core.DTO.Zone;
+using POST.Core;
+using POST.Infrastructure;
+using POST.Core.Domain;
 using AutoMapper;
 using System.Net;
 
-namespace GIGLS.Services.Implementation.Zone
+namespace POST.Services.Implementation.Zone
 {
     public class WeightLimitService : IWeightLimitService
     {

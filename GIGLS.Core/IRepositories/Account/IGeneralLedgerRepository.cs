@@ -1,12 +1,12 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO.Report;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain;
+using POST.Core.DTO.Account;
+using POST.Core.Enums;
+using POST.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Account
+namespace POST.Core.IRepositories.Account
 {
     public interface IGeneralLedgerRepository : IRepository<GeneralLedger>
     {

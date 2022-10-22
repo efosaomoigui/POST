@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.Common.Extensions
+namespace POST.Core.Common.Extensions
 {
     public static class EntityQueryExtensions
     {

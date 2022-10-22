@@ -1,18 +1,18 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain.DHL;
-using GIGLS.Core.DTO.DHL;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.DHL;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain.DHL;
+using POST.Core.DTO.DHL;
+using POST.Core.Enums;
+using POST.Core.IServices.DHL;
+using POST.Core.IServices.Shipments;
+using POST.CORE.DTO.Report;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class InternationalShipmentWaybillService : IInternationalShipmentWaybillService
     {

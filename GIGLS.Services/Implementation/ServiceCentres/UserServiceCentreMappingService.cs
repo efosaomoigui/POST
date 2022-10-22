@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.User;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core;
+using GIGL.POST.Core.Domain;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.User;
 using AutoMapper;
 using System.Collections.Generic;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.User;
+using POST.Infrastructure;
+using POST.Core.IServices.User;
 using System.Linq;
 
-namespace GIGLS.Services.Implementation.ServiceCentres
+namespace POST.Services.Implementation.ServiceCentres
 {
     public class UserServiceCentreMappingService : IUserServiceCentreMappingService
     {

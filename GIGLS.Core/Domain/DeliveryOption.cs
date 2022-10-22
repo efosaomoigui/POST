@@ -1,8 +1,8 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.CORE.Enums;
+﻿using POST.Core;
+using POST.Core.Domain;
+using POST.CORE.Enums;
 
-namespace GIGL.GIGLS.Core.Domain
+namespace GIGL.POST.Core.Domain
 {
     public class DeliveryOption : BaseDomain, IAuditable
     {

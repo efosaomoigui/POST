@@ -1,10 +1,10 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.InternationalShipmentDetails;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain;
+using POST.Core.DTO.InternationalShipmentDetails;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.InternationalRequest
+namespace POST.Core.IRepositories.InternationalRequest
 {
     public interface IInternationalRequestReceiverRepository : IRepository<InternationalRequestReceiver>
     {

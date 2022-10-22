@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices
+namespace POST.Core.IServices
 {
     public interface IActivationCampaignEmailService : IServiceDependencyMarker 
     {

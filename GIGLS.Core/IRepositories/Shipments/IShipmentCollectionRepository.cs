@@ -1,12 +1,12 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.DTO.Report;
-using GIGLS.CORE.Domain;
-using GIGLS.CORE.DTO.Shipments;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.DTO.Report;
+using POST.CORE.Domain;
+using POST.CORE.DTO.Shipments;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.CORE.IRepositories.Shipments
+namespace POST.CORE.IRepositories.Shipments
 {
     public interface IShipmentCollectionRepository : IRepository<ShipmentCollection>
     {

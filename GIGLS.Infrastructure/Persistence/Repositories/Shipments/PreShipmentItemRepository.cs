@@ -1,9 +1,9 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.IRepositories.Shipments;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
     public class PreShipmentItemRepository :  Repository<PreShipmentItem, GIGLSContext>, IPreShipmentItemRepository
     {

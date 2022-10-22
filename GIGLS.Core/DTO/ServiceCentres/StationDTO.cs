@@ -1,8 +1,8 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.CORE.DTO;
+﻿using GIGL.POST.Core.Domain;
+using POST.CORE.DTO;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.ServiceCentres
+namespace POST.Core.DTO.ServiceCentres
 {
     public class StationDTO : BaseDomainDTO
     {

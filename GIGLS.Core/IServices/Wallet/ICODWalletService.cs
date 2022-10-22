@@ -1,11 +1,11 @@
-﻿using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Wallet;
+﻿using POST.Core.Domain.Wallet;
+using POST.Core.DTO;
+using POST.Core.DTO.Wallet;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Wallet
+namespace POST.Core.IServices.Wallet
 {
     public interface ICODWalletService : IServiceDependencyMarker
     {

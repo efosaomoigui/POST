@@ -1,5 +1,5 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class FleetPartnerTransaction : BaseDomain
     {

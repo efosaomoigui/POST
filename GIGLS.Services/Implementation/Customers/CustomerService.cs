@@ -1,26 +1,26 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Core;
+using POST.Core.DTO.Customers;
+using POST.Core.IServices.Customers;
+using POST.Core;
 using AutoMapper;
-using GIGLS.Core.Enums;
+using POST.Core.Enums;
 using System.Collections.Generic;
-using GIGLS.CORE.Enums;
+using POST.CORE.Enums;
 using System.Configuration;
-using GIGLS.Core.DTO.Shipments;
+using POST.Core.DTO.Shipments;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Linq;
-using GIGLS.Core.Domain;
-using GIGLS.Infrastructure;
+using POST.Core.Domain;
+using POST.Infrastructure;
 using System.Net;
-using GIGLS.Core.DTO.User;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.DTO.Account;
+using POST.Core.DTO.User;
+using POST.CORE.DTO.Report;
+using POST.Core.DTO.Account;
 
-namespace GIGLS.Services.Implementation.Customers
+namespace POST.Services.Implementation.Customers
 {
     public class CustomerService : ICustomerService
     {
@@ -557,7 +557,7 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
-        private async Task<GIGL.GIGLS.Core.Domain.User> GetInternationalCustomer(string email)
+        private async Task<GIGL.POST.Core.Domain.User> GetInternationalCustomer(string email)
         {
             var user = await _uow.User.GetUserByEmail(email);
 

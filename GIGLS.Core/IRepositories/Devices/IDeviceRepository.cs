@@ -1,7 +1,7 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.Devices;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.Devices;
 
-namespace GIGLS.Core.IRepositories.Devices
+namespace POST.Core.IRepositories.Devices
 {
     public interface IDeviceRepository : IRepository<Device>
     {

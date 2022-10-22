@@ -2,15 +2,15 @@
 using Microsoft.Owin;
 using Microsoft.Owin.Security.OAuth;
 using Owin;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.WebApi.Providers;
+using POST.Infrastructure.Persistence;
+using POST.WebApi.Providers;
 using Microsoft.Owin.Security.DataHandler.Encoder;
 using System.Configuration;
-using GIGLS.WebApi.App_Start;
+using POST.WebApi.App_Start;
 using Microsoft.Owin.Security.Jwt;
 using Microsoft.Owin.Security;
 
-namespace GIGLS.WebApi
+namespace POST.WebApi
 {
     public partial class Startup
     {

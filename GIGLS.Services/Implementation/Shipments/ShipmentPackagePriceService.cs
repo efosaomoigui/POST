@@ -1,18 +1,18 @@
-﻿using GIGLS.Core.IServices.Shipments;
+﻿using POST.Core.IServices.Shipments;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core;
+using POST.Core.DTO.Shipments;
+using POST.Core;
 using AutoMapper;
-using GIGLS.Core.Domain;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.DTO.Stores;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.DTO.Report;
+using POST.Core.Domain;
+using POST.Infrastructure;
+using POST.Core.IServices.User;
+using POST.Core.DTO.Stores;
+using POST.CORE.DTO.Report;
+using POST.Core.DTO.Report;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class ShipmentPackagePriceService : IShipmentPackagePriceService
     {

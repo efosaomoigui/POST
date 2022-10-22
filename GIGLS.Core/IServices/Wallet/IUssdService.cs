@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.DTO.Wallet;
+﻿using POST.Core.DTO.OnlinePayment;
+using POST.Core.DTO.Wallet;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Wallet
+namespace POST.Core.IServices.Wallet
 {
     public interface IUssdService : IServiceDependencyMarker
     {

@@ -8,7 +8,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class AzureBlobServiceUtil
     {

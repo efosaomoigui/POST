@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 
-namespace GIGLS.CORE.Domain
+namespace POST.CORE.Domain
 {
 
     public class AppRole : IdentityRole

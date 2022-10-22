@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Configuration;
 
-namespace GIGLS.Core.Config
+namespace POST.Core.Config
 {
     public interface IMessageConfig 
     {

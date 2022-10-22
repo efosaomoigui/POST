@@ -1,26 +1,26 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.DHL;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.CustomerPortal;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.IServices.User;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.CORE.IServices.Report;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.DHL;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.Zone;
+using POST.Core.Enums;
+using POST.Core.IServices;
+using POST.Core.IServices.CustomerPortal;
+using POST.Core.IServices.Shipments;
+using POST.Core.IServices.User;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
+using POST.CORE.IServices.Report;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Shipments
+namespace POST.WebApi.Controllers.Shipments
 {
     [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/shipment")]

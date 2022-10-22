@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.Enums;
+using POST.CORE.DTO;
 using System;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Partnership
+namespace POST.Core.DTO.Partnership
 {
     public class PartnerDTO : BaseDomainDTO
     {

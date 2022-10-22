@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Domain.Expenses;
-using GIGLS.Core.IRepositories.Expenses;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain.Expenses;
+using POST.Core.IRepositories.Expenses;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Expenses
+namespace POST.Infrastructure.Persistence.Repositories.Expenses
 {
     public class ExpenseTypeRepository : Repository<ExpenseType, GIGLSContext>, IExpenseTypeRepository
     {

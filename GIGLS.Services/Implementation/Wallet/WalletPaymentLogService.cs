@@ -1,24 +1,24 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.View;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO.Wallet;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Wallet;
+using POST.Core.View;
+using POST.CORE.DTO.Shipments;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PayStack.Net;
 using System.Configuration;
-using GIGLS.CORE.DTO.Report;
+using POST.CORE.DTO.Report;
 using System.Net;
-using GIGLS.Core.Enums;
-using GIGLS.Core.DTO.OnlinePayment;
+using POST.Core.Enums;
+using POST.Core.DTO.OnlinePayment;
 
-namespace GIGLS.Services.Implementation.Wallet
+namespace POST.Services.Implementation.Wallet
 {
     public class WalletPaymentLogService : IWalletPaymentLogService
     {

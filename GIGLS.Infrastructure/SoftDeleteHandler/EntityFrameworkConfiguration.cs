@@ -1,6 +1,6 @@
 ﻿using System.Data.Entity;
 
-namespace GIGLS.INFRASTRUCTURE.SoftDeleteHandler
+namespace POST.INFRASTRUCTURE.SoftDeleteHandler
 {
     public class EntityFrameworkConfiguration : DbConfiguration
     {

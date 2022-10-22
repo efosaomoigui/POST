@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.IServices.Zone;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
-using GIGLS.Core.DTO.Zone;
+using POST.Core.IServices.Zone;
+using POST.Core;
+using POST.Infrastructure;
+using POST.Core.DTO.Zone;
 using AutoMapper;
-using GIGLS.Core.Domain;
-using GIGLS.Core.IServices;
-using GIGLS.Core.Enums;
+using POST.Core.Domain;
+using POST.Core.IServices;
+using POST.Core.Enums;
 
-namespace GIGLS.Services.Implementation.Zone
+namespace POST.Services.Implementation.Zone
 {
     public class CountryRouteZoneMapService : ICountryRouteZoneMapService
     {

@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.DTO.JobCards;
+﻿using POST.Core.DTO.JobCards;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.JobCards
+namespace POST.Core.IServices.JobCards
 {
     public interface IJobCardManagementService : IServiceDependencyMarker
     {

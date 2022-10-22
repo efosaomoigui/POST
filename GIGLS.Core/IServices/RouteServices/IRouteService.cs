@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.Common.Helpers;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Routes;
+﻿using POST.Core.Common.Helpers;
+using POST.Core.DTO;
+using POST.Core.DTO.Routes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.RouteServices
+namespace POST.Core.IServices.RouteServices
 {
     public interface IRouteService : IServiceDependencyMarker
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Partnership
+namespace POST.Core.IServices.Partnership
 {
     public interface IVehicleTypeService : IServiceDependencyMarker
     {

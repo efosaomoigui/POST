@@ -1,9 +1,9 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.Workshops;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.IRepositories.Workshops;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Workshops
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Workshops
 {
     public class WorkshopRepository : Repository<Workshop, GIGLSContext>, IWorkshopRepository
     {

@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.Report;
+using POST.Core.DTO.Shipments;
+using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO.Partnership
+namespace POST.Core.DTO.Partnership
 {
     public class PartnerTransactionsDTO : BaseDomainDTO
     {

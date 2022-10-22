@@ -1,20 +1,20 @@
-﻿using GIGLS.Core.IServices.Utility;
+﻿using POST.Core.IServices.Utility;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Utility;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
-using GIGLS.Core.Domain.Utility;
+using POST.Core.DTO.Utility;
+using POST.Core;
+using POST.Infrastructure;
+using POST.Core.Domain.Utility;
 using AutoMapper;
-using GIGLS.Core.Enums;
-using GIGLS.Core.DTO;
+using POST.Core.Enums;
+using POST.Core.DTO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Security.Cryptography;
 
-namespace GIGLS.Services.Implementation.Utility
+namespace POST.Services.Implementation.Utility
 {
     public class GlobalPropertyService : IGlobalPropertyService
     {

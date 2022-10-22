@@ -1,7 +1,7 @@
-﻿using GIGL.GIGLS.Core.Domain;
+﻿using GIGL.POST.Core.Domain;
 using System;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class DeliveryOptionPrice : BaseDomain, IAuditable
     {

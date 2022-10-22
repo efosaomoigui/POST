@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ApiProcessor;
-using GIGLS.Core.DTO.ServiceCentres;
+using POST.Core.DTO.ServiceCentres;
 using Newtonsoft.Json.Linq;
 
 namespace Jobs.AutomatedBankSettlement

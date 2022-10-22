@@ -1,4 +1,4 @@
-﻿namespace GIGLS.Core.DTO.PaymentTransactions
+﻿namespace POST.Core.DTO.PaymentTransactions
 {
     public class ReroutePricingDTO
     {

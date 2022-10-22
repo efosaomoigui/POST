@@ -1,6 +1,6 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO.BankSettlement
+namespace POST.Core.DTO.BankSettlement
 {
     public class BankDTO : BaseDomainDTO
     {

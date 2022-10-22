@@ -1,19 +1,19 @@
-﻿using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.BankSettlement;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.BankSettlement;
-using GIGLS.Services.Implementation;
-using GIGLS.Services.Scheduler;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO.Account;
+using POST.Core.DTO.BankSettlement;
+using POST.Core.DTO.Report;
+using POST.Core.Enums;
+using POST.Core.IServices;
+using POST.Core.IServices.BankSettlement;
+using POST.Services.Implementation;
+using POST.Services.Scheduler;
+using POST.WebApi.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.BankSettlement
+namespace POST.WebApi.Controllers.BankSettlement
 {
     [Authorize(Roles = "Account, Shipment")]
     [RoutePrefix("api/BankProcessingOrderWaybillsandCode")]

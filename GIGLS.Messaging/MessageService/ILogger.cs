@@ -1,4 +1,4 @@
-﻿namespace GIGLS.INFRASTRUCTURE.MessageService
+﻿namespace POST.INFRASTRUCTURE.MessageService
 {
     internal interface ILogger
     {

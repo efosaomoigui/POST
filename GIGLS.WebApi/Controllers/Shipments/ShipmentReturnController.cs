@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.CORE.IServices.Shipments;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.WebApi.Filters;
+using POST.CORE.IServices.Shipments;
+using POST.CORE.DTO.Shipments;
+using POST.WebApi.Filters;
 
-namespace GIGLS.WebApi.Controllers.Shipments
+namespace POST.WebApi.Controllers.Shipments
 {
     [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/shipmentreturn")]

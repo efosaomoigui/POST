@@ -1,12 +1,12 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.Domain.Route
+namespace POST.Core.Domain.Route
 {
     public class Route : BaseDomain, IAuditable
     {

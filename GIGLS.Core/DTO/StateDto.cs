@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.ServiceCentres;
+using POST.CORE.DTO;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO
+namespace POST.Core.DTO
 {
     public class StateDTO : BaseDomainDTO
     {

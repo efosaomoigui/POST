@@ -1,6 +1,6 @@
-﻿using GIGLS.CORE.DTO.Report;
+﻿using POST.CORE.DTO.Report;
 
-namespace GIGLS.Core.DTO.Report
+namespace POST.Core.DTO.Report
 {
     public class ExpenditureFilterCriteria : BaseFilterCriteria
     {

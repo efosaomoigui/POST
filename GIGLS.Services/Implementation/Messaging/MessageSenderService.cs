@@ -1,23 +1,23 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.DTO.JobCards;
-using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IMessage;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.MessagingLog;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.Fleets;
+using POST.Core.DTO.JobCards;
+using POST.Core.DTO.MessagingLog;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.User;
+using POST.Core.Enums;
+using POST.Core.IMessage;
+using POST.Core.IMessageService;
+using POST.Core.IServices;
+using POST.Core.IServices.MessagingLog;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Utility;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -26,7 +26,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace GIGLS.Services.Implementation.Messaging
+namespace POST.Services.Implementation.Messaging
 {
     public class MessageSenderService : IMessageSenderService
     {

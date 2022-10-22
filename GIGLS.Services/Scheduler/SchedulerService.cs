@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace GIGLS.Services.Scheduler
+namespace POST.Services.Scheduler
 {
     class SchedulerService
     {

@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class UserLoginEmail : BaseDomain, IAuditable
     {

@@ -1,15 +1,15 @@
-﻿using GIGLS.Core.IServices.ShipmentScan;
+﻿using POST.Core.IServices.ShipmentScan;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.ShipmentScan;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
+using POST.Core.DTO.ShipmentScan;
+using POST.Core;
+using POST.Infrastructure;
 using AutoMapper;
-using GIGLS.Core.Domain.ShipmentScan;
+using POST.Core.Domain.ShipmentScan;
 using System.Linq;
 
-namespace GIGLS.Services.Implementation.ShipmentScan
+namespace POST.Services.Implementation.ShipmentScan
 {
     public class ScanStatusService : IScanStatusService
     {

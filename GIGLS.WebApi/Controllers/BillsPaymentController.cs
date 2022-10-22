@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.IServices;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO;
+using POST.Core.IServices;
+using POST.CORE.DTO.Report;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers
+namespace POST.WebApi.Controllers
 {
     [Authorize]
     [RoutePrefix("api/billspayment")]

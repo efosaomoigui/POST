@@ -1,6 +1,6 @@
 ﻿using System.Configuration;
 
-namespace GIGLS.WebApi.Filters.Configuration
+namespace POST.WebApi.Filters.Configuration
 {
     [ConfigurationCollection(typeof(IPAddressElement))]
     public class IPAddressElementCollection : ConfigurationElementCollection

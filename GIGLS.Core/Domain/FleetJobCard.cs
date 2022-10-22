@@ -1,11 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.Enums;
+using POST.Core.Domain;
+using POST.Core.Domain.Partnership;
+using POST.Core.Enums;
 
-namespace GIGL.GIGLS.Core.Domain
+namespace GIGL.POST.Core.Domain
 {
     public class FleetJobCard : BaseDomain
     {

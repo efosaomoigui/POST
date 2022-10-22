@@ -1,12 +1,12 @@
-﻿using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.CORE.DTO.Shipments;
+﻿using POST.Core.Domain.Wallet;
+using POST.Core.DTO.OnlinePayment;
+using POST.Core.DTO.Wallet;
+using POST.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Wallet
+namespace POST.Core.IServices.Wallet
 {
     public interface IWaybillPaymentLogService : IServiceDependencyMarker
     {

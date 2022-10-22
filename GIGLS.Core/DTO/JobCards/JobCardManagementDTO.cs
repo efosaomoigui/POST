@@ -1,7 +1,7 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 using System;
 
-namespace GIGLS.Core.DTO.JobCards
+namespace POST.Core.DTO.JobCards
 {
     public class JobCardManagementDTO : BaseDomainDTO
     {

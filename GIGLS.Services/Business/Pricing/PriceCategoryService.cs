@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.Stores;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Stores;
-using GIGLS.Core.IServices.User;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.DTO.Stores;
+using POST.Core.IServices;
+using POST.Core.IServices.Stores;
+using POST.Core.IServices.User;
+using POST.Infrastructure;
 
-namespace GIGLS.Services.Business.Pricing
+namespace POST.Services.Business.Pricing
 {
     public class PriceCategoryService : IPriceCategoryService
     {

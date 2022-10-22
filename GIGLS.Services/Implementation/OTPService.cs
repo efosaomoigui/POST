@@ -1,26 +1,26 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.IServices;
+﻿using POST.Core;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.User;
+using POST.Core.IServices;
 using System.Threading.Tasks;
 using System;
-using GIGLS.Core.IMessage;
+using POST.Core.IMessage;
 using AutoMapper;
-using GIGLS.Core.IServices.User;
+using POST.Core.IServices.User;
 using System.Text.RegularExpressions;
-using GIGLS.Core.IServices.Utility;
+using POST.Core.IServices.Utility;
 using System.Collections.Generic;
 using System.Linq;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IMessageService;
-using GIGLS.Infrastructure;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.IServices.Wallet;
+using POST.Core.DTO.Partnership;
+using POST.Core.Enums;
+using POST.Core.IMessageService;
+using POST.Infrastructure;
+using POST.Core.DTO.Wallet;
+using POST.Core.IServices.Wallet;
 using System.Net;
 
-namespace GIGLS.Services.Implementation
+namespace POST.Services.Implementation
 {
     public class OTPService : IOTPService
     {

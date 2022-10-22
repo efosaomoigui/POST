@@ -1,25 +1,25 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.User;
-using GIGLS.CORE.Domain;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.User;
+using POST.CORE.Domain;
 using Microsoft.AspNet.Identity;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.User
+namespace POST.Core.IServices.User
 {
     public interface IUserService : IServiceDependencyMarker
     {
-        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers();
-        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers(string email);
-        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers();
-        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCorporateCustomerUsers();
-        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers();
-        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetSystemUsers();
-        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchCaptains();
-        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchRiders();
+        Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetUsers();
+        Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetCustomerUsers(string email);
+        Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetCustomerUsers();
+        Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetCorporateCustomerUsers();
+        Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetPartnerUsers();
+        Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetSystemUsers();
+        Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetDispatchCaptains();
+        Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetDispatchRiders();
         Task<UserDTO> GetUserById(string userId);
         Task<UserDTO> GetUserByEmail(string email);
         Task<UserDTO> GetUserById(int userId);
@@ -41,7 +41,7 @@ namespace GIGLS.Core.IServices.User
         Task<bool> IsInRoleAsync(string roleId, string name);
         Task<IdentityResult> RemoveFromRoleAsync(string userid, string name);
 
-        //Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsersInRole(string roleId);    AddClaimAsync
+        //Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetUsersInRole(string roleId);    AddClaimAsync
         Task<IdentityResult> AddClaimAsync(string userid, Claim claim);
         Task<IdentityResult> RemoveClaimAsync(string userid, Claim claim);
         Task<IList<Claim>> GetClaimsAsync(string userid);
@@ -63,7 +63,7 @@ namespace GIGLS.Core.IServices.User
 
         Task<UserDTO> GetUserByPhone(string PhoneNumber);
 
-        IQueryable<GIGL.GIGLS.Core.Domain.User> GetCorporateCustomerUsersAsQueryable();
+        IQueryable<GIGL.POST.Core.Domain.User> GetCorporateCustomerUsersAsQueryable();
 
         Task<int[]> GetPriviledgeCountryIds();
         Task<List<CountryDTO>> GetPriviledgeCountrys();
@@ -93,7 +93,7 @@ namespace GIGLS.Core.IServices.User
         Task<IdentityResult> SetDashboardAccess(string userid, bool val);
         Task<ServiceCentreDTO> GetInternationalOutBoundServiceCentre();
         Task<UserDTO> GetEmployeeUserByEmail(string email);
-        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsersByEmail(string email);
+        Task<IEnumerable<GIGL.POST.Core.Domain.User>> GetPartnerUsersByEmail(string email);
         Task<bool> CheckCurrentUserSystemRole(string currentUserId);
         Task<int> GetPriviledgeServiceCenter();
     }

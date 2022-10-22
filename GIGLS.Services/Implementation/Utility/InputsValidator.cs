@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
-using GIGLS.Core.DTO.Captains;
-using GIGLS.Infrastructure;
+using POST.Core.DTO.Captains;
+using POST.Infrastructure;
 
-namespace GIGLS.Services.Implementation.Utility
+namespace POST.Services.Implementation.Utility
 {
     public static class InputsValidator
     {

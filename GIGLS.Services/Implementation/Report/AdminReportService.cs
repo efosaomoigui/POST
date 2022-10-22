@@ -1,23 +1,23 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Admin;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Report;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.View;
-using GIGLS.Core.View.AdminReportView;
-using GIGLS.CORE.Enums;
+using POST.Core;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Admin;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.Enums;
+using POST.Core.IServices.Report;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.View;
+using POST.Core.View.AdminReportView;
+using POST.CORE.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Report
+namespace POST.Services.Implementation.Report
 {
     public class AdminReportService : IAdminReportService
     {

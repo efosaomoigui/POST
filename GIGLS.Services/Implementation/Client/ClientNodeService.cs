@@ -1,16 +1,16 @@
 ﻿//using AutoMapper;
-//using GIGLS.Core;
-//using GIGLS.Core.Domain;
-//using GIGLS.Core.DTO.Client;
-//using GIGLS.Core.IServices.Client;
-//using GIGLS.Infrastructure;
+//using POST.Core;
+//using POST.Core.Domain;
+//using POST.Core.DTO.Client;
+//using POST.Core.IServices.Client;
+//using POST.Infrastructure;
 //using Microsoft.Owin.Security.DataHandler.Encoder;
 //using System;
 //using System.Collections.Generic;
 //using System.Security.Cryptography;
 //using System.Threading.Tasks;
 
-//namespace GIGLS.Services.Implementation.Client
+//namespace POST.Services.Implementation.Client
 //{
 //    public class ClientNodeService : IClientNodeService
 //    {

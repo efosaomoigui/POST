@@ -1,14 +1,14 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Business;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IServices.Zone;
-using GIGLS.Infrastructure;
+﻿using POST.Core;
+using POST.Core.DTO;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.DTO.Shipments;
+using POST.Core.Enums;
+using POST.Core.IServices.Business;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Utility;
+using POST.Core.IServices.Zone;
+using POST.Infrastructure;
 using Newtonsoft.Json;
 using System;
 using System.Configuration;
@@ -19,7 +19,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Business.Pricing
+namespace POST.Services.Business.Pricing
 {
     public class GIGGoPricingService : IGIGGoPricingService
     {

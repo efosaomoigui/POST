@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Zone;
+﻿using POST.Core.DTO.Zone;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices
+namespace POST.Core.IServices
 {
     public interface IHaulageDistanceMappingService : IServiceDependencyMarker
     {

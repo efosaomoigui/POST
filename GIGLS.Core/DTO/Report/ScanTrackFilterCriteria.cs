@@ -1,9 +1,9 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.View;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.View;
 using System;
 using System.Linq;
 
-namespace GIGLS.CORE.DTO.Report
+namespace POST.CORE.DTO.Report
 {
     public class ScanTrackFilterCriteria
     {

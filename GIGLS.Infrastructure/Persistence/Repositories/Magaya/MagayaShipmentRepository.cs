@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using GIGL.POST.Core.Domain;
+using POST.Core.DTO.Shipments;
+using POST.Core.IRepositories.Shipments;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Linq;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.Enums;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.IRepositories.Magaya;
+using POST.CORE.DTO.Report;
+using POST.Core.Enums;
+using POST.CORE.Enums;
+using POST.Core.DTO.Zone;
+using POST.Core.DTO.ServiceCentres;
+using POST.CORE.DTO.Shipments;
+using POST.Core.DTO.Account;
+using POST.Core.IRepositories.Magaya;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Magaya
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Magaya
 {
     public class MagayaShipmentRepository : Repository<MagayaShipmentAgility, GIGLSContext>, IMagayaShipmentRepository
     {

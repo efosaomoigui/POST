@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.IRepositories.ServiceCentres;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using GIGL.POST.Core.Domain;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.IRepositories.ServiceCentres;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Linq;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Dashboard;
+using POST.Core.DTO;
+using POST.Core.DTO.Dashboard;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
 {
     public class ServiceCentreRepository : Repository<ServiceCentre, GIGLSContext>, IServiceCentreRepository
     {

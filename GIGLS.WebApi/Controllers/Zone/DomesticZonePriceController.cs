@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.IServices.Zone;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Core.DTO.Zone;
+using POST.Core.IServices.Zone;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.WebApi.Filters;
+using POST.WebApi.Filters;
 
-namespace GIGLS.WebApi.Controllers.Zone
+namespace POST.WebApi.Controllers.Zone
 {
     [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/domesticzoneprice")]

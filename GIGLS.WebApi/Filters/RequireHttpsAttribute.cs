@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Net;
 using System.Text;
 
-namespace GIGLS.WebApi.Filters
+namespace POST.WebApi.Filters
 {
     public class RequireHttpsAttribute: AuthorizationFilterAttribute
     {

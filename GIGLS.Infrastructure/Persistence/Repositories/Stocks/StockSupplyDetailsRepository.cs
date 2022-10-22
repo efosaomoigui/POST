@@ -1,9 +1,9 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.Stocks;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.IRepositories.Stocks;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Stocks
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Stocks
 {
     public class StockSupplyDetailsRepository : Repository<StockSupplyDetails, GIGLSContext>, IStockSupplyDetailsRepository
     {

@@ -1,16 +1,16 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.IRepositories;
-using GIGLS.Core.IRepositories.BankSettlement;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.User;
+using POST.Core.IRepositories;
+using POST.Core.IRepositories.BankSettlement;
+using POST.CORE.DTO.Shipments;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
+namespace POST.Infrastructure.Persistence.Repositories.BankSettlement
 {
     public class ShipmentExportRepository : Repository<ShipmentExport, GIGLSContext>, IShipmentExportRepository
     {

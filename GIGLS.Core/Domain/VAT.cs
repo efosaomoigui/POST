@@ -1,6 +1,6 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class VAT : BaseDomain, IAuditable
     {

@@ -1,21 +1,21 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.CORE.DTO.Report;
+﻿using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.Shipments;
+using POST.CORE.DTO.Report;
 using System.Collections.Generic;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.Utility;
-using GIGLS.Core.DTO.Zone;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.User;
+using POST.Core.DTO.Utility;
+using POST.Core.DTO.Zone;
 using System;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.Node;
-using GIGLS.CORE.DTO.Shipments;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.Node;
+using POST.CORE.DTO.Shipments;
 
-namespace GIGLS.Core.IServices.Shipments
+namespace POST.Core.IServices.Shipments
 {
     public interface IPreShipmentMobileService : IServiceDependencyMarker
     {

@@ -1,22 +1,22 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Core.IServices.Dashboard;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices.User;
+﻿using POST.Core;
+using POST.Core.DTO.Dashboard;
+using POST.Core.IServices.Dashboard;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.IServices.User;
 using System.Threading.Tasks;
 using System.Linq;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Customers;
+using POST.Core.Enums;
+using POST.Core.IServices.Customers;
 using System;
-using GIGLS.Infrastructure;
+using POST.Infrastructure;
 using System.Collections.Generic;
-using GIGLS.Core.View;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Account;
+using POST.Core.View;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.Wallet;
+using POST.Core.Domain;
+using POST.Core.DTO.Account;
 
-namespace GIGLS.Services.Implementation.Dashboard
+namespace POST.Services.Implementation.Dashboard
 {
     public class DashboardService : IDashboardService
     {

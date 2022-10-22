@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.IRepositories.Wallet;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain.Wallet;
+using POST.Core.IRepositories.Wallet;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Wallet
+namespace POST.Infrastructure.Persistence.Repositories.Wallet
 {
     public class WaybillPaymentLogRepository : Repository<WaybillPaymentLog, GIGLSContext>, IWaybillPaymentLogRepository
     {

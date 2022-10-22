@@ -1,7 +1,7 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 using System;
 
-namespace GIGLS.Core.DTO.Vendors
+namespace POST.Core.DTO.Vendors
 {
     public class VendorDTO : BaseDomainDTO
     {

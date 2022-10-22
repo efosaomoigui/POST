@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.Account;
-using GIGLS.Core.Enums;
+﻿using POST.Core.DTO.Account;
+using POST.Core.Enums;
 using System;
 using System.Collections.Generic;
 
-namespace GIGLS.CORE.DTO.Report
+namespace POST.CORE.DTO.Report
 {
     public class AccountFilterCriteria : BaseFilterCriteria
     {

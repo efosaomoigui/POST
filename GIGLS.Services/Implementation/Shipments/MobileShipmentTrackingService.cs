@@ -1,21 +1,21 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.DTO;
-using GIGLS.Core.Enums;
+﻿using POST.Core;
+using POST.Core.IServices.User;
+using POST.Core.IMessageService;
+using POST.Core.IServices.Shipments;
+using POST.Core.DTO;
+using POST.Core.Enums;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
-using GIGLS.Infrastructure;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.ShipmentScan;
-using GIGLS.Core.IServices.Business;
+using POST.Infrastructure;
+using POST.Core.Domain;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.ShipmentScan;
+using POST.Core.IServices.Business;
 using System.Net;
 using System.Collections.Generic;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class MobileShipmentTrackingService : IMobileShipmentTrackingService
     {

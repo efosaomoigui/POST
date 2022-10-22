@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.Common.Helpers
+namespace POST.Core.Common.Helpers
 {
     public interface IQueryCommand<out TResult>
     {

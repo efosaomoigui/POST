@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.Domain.Devices;
-using GIGLS.Core.DTO.Devices;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.IRepositories.Devices;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain.Devices;
+using POST.Core.DTO.Devices;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.User;
+using POST.Core.IRepositories.Devices;
+using POST.Infrastructure.Persistence.Repository;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Devices
+namespace POST.Infrastructure.Persistence.Repositories.Devices
 {
     public class DeviceManagementRepository : Repository<DeviceManagement, GIGLSContext>, IDeviceManagementRepository
     {

@@ -1,22 +1,22 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Domain.BankSettlement;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.BankSettlement;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO.Report;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.Domain.BankSettlement;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.BankSettlement;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.CORE.DTO.Report;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.BankSettlement
+namespace POST.Core.IServices.BankSettlement
 {
     public interface IBankShipmentSettlementService : IServiceDependencyMarker
     {
         Task<IEnumerable<InvoiceViewDTO>> GetCashShipmentSettlement();
-		Task<Tuple<string, List<GIGLS.Core.DTO.Account.InvoiceViewDTO>, decimal>> GetBankProcessingOrderForShipment(DepositType type);
+		Task<Tuple<string, List<POST.Core.DTO.Account.InvoiceViewDTO>, decimal>> GetBankProcessingOrderForShipment(DepositType type);
 
         Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, BankProcessingOrderCodesDTO>> SearchBankProcessingOrder(string refcode, DepositType type);
         Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, List<BankProcessingOrderCodesDTO>>> SearchBankProcessingOrder2(string refcode, DepositType type);

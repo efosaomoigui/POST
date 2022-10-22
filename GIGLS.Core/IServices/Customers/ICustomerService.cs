@@ -1,15 +1,15 @@
-﻿using GIGLS.Core.DTO.Customers;
+﻿using POST.Core.DTO.Customers;
 using System.Threading.Tasks;
-using GIGLS.Core.Enums;
+using POST.Core.Enums;
 using System.Collections.Generic;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Domain;
+using POST.Core.DTO.Shipments;
+using POST.Core.Domain;
 using System;
-using GIGLS.Core.DTO.User;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.DTO.Account;
+using POST.Core.DTO.User;
+using POST.CORE.DTO.Report;
+using POST.Core.DTO.Account;
 
-namespace GIGLS.Core.IServices.Customers
+namespace POST.Core.IServices.Customers
 {
     public interface ICustomerService : IServiceDependencyMarker
     {

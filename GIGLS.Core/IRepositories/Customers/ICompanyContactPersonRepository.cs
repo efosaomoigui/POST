@@ -1,10 +1,10 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.DTO.Customers;
+﻿using GIGL.POST.Core.Domain;
+using GIGL.POST.Core.Repositories;
+using POST.Core.DTO.Customers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Customers
+namespace POST.Core.IRepositories.Customers
 {
     public interface ICompanyContactPersonRepository : IRepository<CompanyContactPerson>
     {

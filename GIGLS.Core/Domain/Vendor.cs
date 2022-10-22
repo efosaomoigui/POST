@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.Enums;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
+﻿using POST.Core.Enums;
+using POST.Core;
+using POST.Core.Domain;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGL.GIGLS.Core.Domain
+namespace GIGL.POST.Core.Domain
 {
     public class Vendor : BaseDomain, IAuditable
     {

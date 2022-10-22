@@ -1,5 +1,5 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.IMessageService;
+﻿using POST.Core.DTO;
+using POST.Core.IMessageService;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -12,7 +12,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Messaging.MessageService
+namespace POST.Messaging.MessageService
 {
     public class WhatsappService : IWhatsappService
     {

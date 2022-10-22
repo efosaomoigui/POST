@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GIGLS.Core
+namespace POST.Core
 {
     public interface IAuditable
     {

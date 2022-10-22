@@ -1,9 +1,9 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
+﻿using POST.Core;
+using POST.Core.Domain;
+using POST.Core.Enums;
 using System;
 
-namespace GIGL.GIGLS.Core.Domain
+namespace GIGL.POST.Core.Domain
 {
     public class FleetPartInventoryHistory : BaseDomain, IAuditable
     {

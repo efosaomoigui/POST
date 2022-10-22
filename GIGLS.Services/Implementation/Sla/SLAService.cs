@@ -1,17 +1,17 @@
-﻿using GIGLS.Core.IServices.Sla;
+﻿using POST.Core.IServices.Sla;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.SLA;
-using GIGLS.Core.Enums;
-using GIGLS.Core;
+using POST.Core.DTO.SLA;
+using POST.Core.Enums;
+using POST.Core;
 using AutoMapper;
-using GIGLS.Core.Domain.SLA;
-using GIGLS.Infrastructure;
+using POST.Core.Domain.SLA;
+using POST.Infrastructure;
 using System;
-using GIGLS.Core.IServices.User;
+using POST.Core.IServices.User;
 using System.Net;
 
-namespace GIGLS.Services.Implementation.Sla
+namespace POST.Services.Implementation.Sla
 {
     public class SLAService : ISLAService
     {

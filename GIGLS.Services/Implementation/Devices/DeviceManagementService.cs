@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.IServices.Devices;
+﻿using POST.Core.IServices.Devices;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Devices;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
-using GIGLS.Core.Domain.Devices;
+using POST.Core.DTO.Devices;
+using POST.Core;
+using POST.Infrastructure;
+using POST.Core.Domain.Devices;
 
-namespace GIGLS.Services.Implementation.Devices
+namespace POST.Services.Implementation.Devices
 {
     public class DeviceManagementService : IDeviceManagementService
     {

@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.DTO.Stocks;
+﻿using POST.Core.DTO.Stocks;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Stocks
+namespace POST.Core.IServices.Stocks
 {
     public interface IStockRequestPartService : IServiceDependencyMarker
     {

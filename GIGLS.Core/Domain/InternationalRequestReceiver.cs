@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class InternationalRequestReceiver : BaseDomain, IAuditable
     {

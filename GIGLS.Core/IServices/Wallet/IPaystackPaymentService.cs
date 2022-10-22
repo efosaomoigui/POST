@@ -1,12 +1,12 @@
-﻿using GIGLS.Core.DTO.Wallet;
+﻿using POST.Core.DTO.Wallet;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.Domain.Wallet;
+using POST.Core.DTO.OnlinePayment;
+using POST.Core.Domain.Wallet;
 using System.Net.Http;
-using GIGLS.Core.DTO;
+using POST.Core.DTO;
 using Newtonsoft.Json.Linq;
 
-namespace GIGLS.Core.IServices.Wallet
+namespace POST.Core.IServices.Wallet
 {
     public interface IPaystackPaymentService : IServiceDependencyMarker 
     {

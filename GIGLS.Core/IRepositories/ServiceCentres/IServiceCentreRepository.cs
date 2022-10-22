@@ -1,12 +1,12 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Core.DTO.ServiceCentres;
+﻿using GIGL.POST.Core.Domain;
+using GIGL.POST.Core.Repositories;
+using POST.Core.DTO;
+using POST.Core.DTO.Dashboard;
+using POST.Core.DTO.ServiceCentres;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.ServiceCentres
+namespace POST.Core.IRepositories.ServiceCentres
 {
     public interface IServiceCentreRepository : IRepository<ServiceCentre>
     {

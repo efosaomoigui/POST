@@ -4,13 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Fleets;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Controllers.FleetJobCards;
+using POST.Core.DTO.Fleets;
+using POST.Core.IServices;
+using POST.Core.IServices.Fleets;
+using POST.Services.Implementation;
+using POST.WebApi.Controllers.FleetJobCards;
 
-namespace GIGLS.WebApi.Controllers.Fleets
+namespace POST.WebApi.Controllers.Fleets
 {
     [Authorize]
     [RoutePrefix("api/fleetdisputemessage")]

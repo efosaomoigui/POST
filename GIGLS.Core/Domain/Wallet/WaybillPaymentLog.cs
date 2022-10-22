@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GIGLS.Core.Domain.Wallet
+namespace POST.Core.Domain.Wallet
 {
     public class WaybillPaymentLog : BaseDomain
     {

@@ -1,4 +1,4 @@
-﻿namespace GIGL.GIGLS.Core.Domain
+﻿namespace GIGL.POST.Core.Domain
 {
     internal class GIGLSContext
     {

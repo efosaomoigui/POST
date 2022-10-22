@@ -1,6 +1,6 @@
-﻿using GIGL.GIGLS.Core.Domain;
+﻿using GIGL.POST.Core.Domain;
 
-namespace GIGLS.Core.Domain.Devices
+namespace POST.Core.Domain.Devices
 {
     public class DeviceManagement : BaseDomain
     {

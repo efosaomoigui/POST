@@ -1,12 +1,12 @@
-﻿using GIGLS.Core.Enums;
-using GIGLS.Core;
-using GIGLS.Core.Domain.Partnership;
+﻿using POST.Core.Enums;
+using POST.Core;
+using POST.Core.Domain.Partnership;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using GIGLS.Core.Domain;
+using POST.Core.Domain;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GIGL.GIGLS.Core.Domain
+namespace GIGL.POST.Core.Domain
 {
     public class Fleet : BaseDomain, IAuditable
     {

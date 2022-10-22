@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.IRepositories.Zone;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using POST.Core.Domain;
+using POST.Core.DTO.Zone;
+using POST.Core.IRepositories.Zone;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Linq;
-using GIGLS.Core.DTO;
+using POST.Core.DTO;
 using System;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Zone
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Zone
 {
     public class DeliveryOptionPriceRepository : Repository<DeliveryOptionPrice, GIGLSContext>, IDeliveryOptionPriceRepository
     {

@@ -1,7 +1,7 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain;
 
-namespace GIGLS.Core.IRepositories.PaymentTransactions
+namespace POST.Core.IRepositories.PaymentTransactions
 {
     public interface IPaymentTransactionRepository : IRepository<PaymentTransaction>
     {

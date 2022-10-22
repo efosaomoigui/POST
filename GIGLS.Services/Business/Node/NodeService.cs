@@ -1,6 +1,6 @@
-﻿using GIGLS.Core.DTO.Node;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Node;
+﻿using POST.Core.DTO.Node;
+using POST.Core.DTO.Shipments;
+using POST.Core.IServices.Node;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
@@ -12,7 +12,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Business.Node
+namespace POST.Services.Business.Node
 {
     public class NodeService : INodeService
     {

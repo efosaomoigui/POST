@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Node;
-using GIGLS.Core.DTO.Shipments;
+﻿using POST.Core.DTO.Node;
+using POST.Core.DTO.Shipments;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Node
+namespace POST.Core.IServices.Node
 {
     public interface INodeService : IServiceDependencyMarker
     {

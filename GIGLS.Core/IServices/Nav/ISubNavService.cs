@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.CORE.DTO.Nav;
+﻿using POST.Core.IServices;
+using POST.CORE.DTO.Nav;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.CORE.IServices.Nav
+namespace POST.CORE.IServices.Nav
 {
     public interface ISubNavService : IServiceDependencyMarker
     {

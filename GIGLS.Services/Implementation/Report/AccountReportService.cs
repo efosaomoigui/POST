@@ -1,21 +1,21 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.View;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.IServices.Report;
+﻿using POST.Core;
+using POST.Core.DTO;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.Dashboard;
+using POST.Core.DTO.Report;
+using POST.Core.Enums;
+using POST.Core.IServices;
+using POST.Core.IServices.Shipments;
+using POST.Core.IServices.User;
+using POST.Core.View;
+using POST.CORE.DTO.Report;
+using POST.CORE.IServices.Report;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Report
+namespace POST.Services.Implementation.Report
 {
     public class AccountReportService : IAccountReportService
     {

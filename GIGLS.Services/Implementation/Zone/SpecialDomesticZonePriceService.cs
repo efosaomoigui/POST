@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.IServices.Zone;
-using GIGLS.Core;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Infrastructure;
+using POST.Core.DTO.Zone;
+using POST.Core.IServices.Zone;
+using POST.Core;
+using GIGL.POST.Core.Domain;
+using POST.Infrastructure;
 using System.Linq;
-using GIGLS.Core.DTO;
+using POST.Core.DTO;
 using AutoMapper;
 using System.Net;
 
-namespace GIGLS.Services.Implementation.Zone
+namespace POST.Services.Implementation.Zone
 {
     public class SpecialDomesticZonePriceService : ISpecialDomesticZonePriceService
     {

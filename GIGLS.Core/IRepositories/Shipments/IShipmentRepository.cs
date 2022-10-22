@@ -1,18 +1,18 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
+﻿using GIGL.POST.Core.Domain;
+using GIGL.POST.Core.Repositories;
+using POST.Core.DTO;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.Shipments;
+using POST.Core.Enums;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Shipments
+namespace POST.Core.IRepositories.Shipments
 {
     public interface IShipmentRepository : IRepository<Shipment>
     {

@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.IServices.Customers;
+using POST.Core.DTO.Customers;
+using POST.Core.IServices.Customers;
 using System.Collections.Generic;
-using GIGLS.Core;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Infrastructure;
+using POST.Core;
+using GIGL.POST.Core.Domain;
+using POST.Infrastructure;
 using AutoMapper;
 using System.Linq;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IServices.User;
+using POST.Core.IServices.Wallet;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.Core.IServices.Utility;
+using POST.Core.IServices.User;
 
-namespace GIGLS.Services.Implementation.Customers
+namespace POST.Services.Implementation.Customers
 {
     public class IndividualCustomerService : IIndividualCustomerService
     {

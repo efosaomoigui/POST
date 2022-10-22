@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.IRepositories.Customers;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using GIGL.POST.Core.Domain;
+using POST.Core.DTO.Customers;
+using POST.Core.IRepositories.Customers;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Linq;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Customers
 {
     public class CompanyContactPersonRepository : Repository<CompanyContactPerson, GIGLSContext>, ICompanyContactPersonRepository
     {

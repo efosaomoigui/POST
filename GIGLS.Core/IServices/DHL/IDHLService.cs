@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.DHL;
-using GIGLS.Core.DTO.Shipments;
+﻿using POST.Core.DTO.DHL;
+using POST.Core.DTO.Shipments;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.DHL
+namespace POST.Core.IServices.DHL
 {
     public interface IDHLService : IServiceDependencyMarker
     {

@@ -1,19 +1,19 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.CORE.Enums;
-using GIGLS.Infrastructure;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.Zone;
+using POST.Core.Enums;
+using POST.Core.IRepositories.Shipments;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
+using POST.CORE.Enums;
+using POST.Infrastructure;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -22,7 +22,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
     public class ShipmentRepository : Repository<Shipment, GIGLSContext>, IShipmentRepository
     {

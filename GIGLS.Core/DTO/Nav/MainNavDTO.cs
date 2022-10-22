@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GIGLS.CORE.DTO.Nav
+namespace POST.CORE.DTO.Nav
 {
     public class MainNavDTO : BaseDomainDTO
     {

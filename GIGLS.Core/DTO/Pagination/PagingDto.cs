@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Captains;
+using POST.Core.DTO.Captains;
 
-namespace GIGLS.Core.DTO.Pagination
+namespace POST.Core.DTO.Pagination
 {
     public class ViewCaptainPagingDto
     {

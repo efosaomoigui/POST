@@ -1,29 +1,29 @@
-﻿using GIGLS.Core.IServices.Partnership;
+﻿using POST.Core.IServices.Partnership;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core;
-using GIGLS.Core.IServices.Wallet;
+using POST.Core.DTO.Partnership;
+using POST.Core;
+using POST.Core.IServices.Wallet;
 using System.Collections.Generic;
 using AutoMapper;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO.Report;
+using POST.Core.Domain.Partnership;
+using POST.Infrastructure;
+using POST.Core.IServices.Utility;
+using POST.Core.Enums;
+using POST.CORE.DTO.Report;
 using System;
 using System.Linq;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.IServices.Customers;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.Customers;
+using POST.Core.IServices.Customers;
 using System.Net;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Node;
-using GIGLS.Core.IServices.Node;
-using GIGLS.Core.IServices.User;
+using POST.Core.DTO;
+using POST.Core.DTO.Shipments;
+using POST.Core.Domain;
+using POST.Core.DTO.Node;
+using POST.Core.IServices.Node;
+using POST.Core.IServices.User;
 
-namespace GIGLS.Services.Implementation.Partnership
+namespace POST.Services.Implementation.Partnership
 {
     public class PartnerService : IPartnerService
     {

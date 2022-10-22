@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
+﻿using POST.Core.DTO.Account;
+using POST.Core.DTO.Shipments;
+using POST.Core.Enums;
 using System;
 
-namespace GIGLS.Core.DTO
+namespace POST.Core.DTO
 {
     public class ShipmentAndPreShipmentParamDTO 
     {

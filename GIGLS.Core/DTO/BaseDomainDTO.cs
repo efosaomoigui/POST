@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GIGLS.CORE.DTO
+namespace POST.CORE.DTO
 {
     public class BaseDomainDTO
     {

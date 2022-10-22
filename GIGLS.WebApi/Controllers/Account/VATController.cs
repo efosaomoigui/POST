@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.IServices.Account;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Core.DTO.Account;
+using POST.Core.IServices.Account;
+using POST.Services.Implementation;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.WebApi.Filters;
+using POST.WebApi.Filters;
 using System.Collections.Generic;
 
-namespace GIGLS.WebApi.Controllers.Account
+namespace POST.WebApi.Controllers.Account
 {
     [Authorize(Roles = "Account, ViewAdmin")]
     [RoutePrefix("api/vat")]

@@ -1,17 +1,17 @@
-﻿using GIGLS.Core.IServices.Shipments;
+﻿using POST.Core.IServices.Shipments;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
-using GIGLS.Core.Domain;
+using POST.Core;
+using POST.Infrastructure;
+using POST.Core.Domain;
 using AutoMapper;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.Enums;
+using POST.Core.DTO.Shipments;
+using POST.Core.IServices.Utility;
+using POST.Core.Enums;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class WaybillNumberService : IWaybillNumberService
     {

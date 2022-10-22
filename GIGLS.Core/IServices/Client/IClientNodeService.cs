@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.DTO.Client;
+﻿using POST.Core.IServices;
+using POST.Core.DTO.Client;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Client
+namespace POST.Core.IServices.Client
 {
     public interface IClientNodeService : IServiceDependencyMarker
     {

@@ -6,7 +6,7 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 
-namespace GIGLS.WebApi.Filters
+namespace POST.WebApi.Filters
 {
     public class GIGLSActivityAuthorizeAttribute : AuthorizeAttribute
     {

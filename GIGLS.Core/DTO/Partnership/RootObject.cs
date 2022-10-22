@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Partnership
+namespace POST.Core.DTO.Partnership
 {
     public class Distance
     {

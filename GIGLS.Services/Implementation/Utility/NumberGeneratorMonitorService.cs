@@ -1,14 +1,14 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Infrastructure;
+﻿using POST.Core;
+using POST.Core.Domain;
+using POST.Core.Enums;
+using POST.Core.IServices.Utility;
+using POST.Infrastructure;
 using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Utility
+namespace POST.Services.Implementation.Utility
 {
     public class NumberGeneratorMonitorService : INumberGeneratorMonitorService
     {

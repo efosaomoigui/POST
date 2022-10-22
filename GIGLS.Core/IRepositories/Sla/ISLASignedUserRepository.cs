@@ -1,7 +1,7 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.SLA;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.SLA;
 
-namespace GIGLS.Core.IRepositories.Sla
+namespace POST.Core.IRepositories.Sla
 {
     public interface ISLASignedUserRepository : IRepository<SLASignedUser>
     {

@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.DTO.Vendors;
+﻿using POST.Core.DTO.Vendors;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Vendors
+namespace POST.Core.IServices.Vendors
 {
     public interface IVendorService : IServiceDependencyMarker
     {

@@ -1,15 +1,15 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Dashboard;
-using GIGLS.Core.IServices.User;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Dashboard;
+using POST.Core.DTO.Report;
+using POST.Core.IServices;
+using POST.Core.IServices.Dashboard;
+using POST.Core.IServices.User;
+using POST.Services.Implementation;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Dashboard
+namespace POST.WebApi.Controllers.Dashboard
 {
     //[Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
     [RoutePrefix("api/dashboard")]

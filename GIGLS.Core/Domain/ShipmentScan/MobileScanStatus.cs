@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GIGLS.Core.Domain.ShipmentScan
+namespace POST.Core.Domain.ShipmentScan
 {
     public class MobileScanStatus : BaseDomain, IAuditable
     {

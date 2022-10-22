@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.Domain.BankSettlement;
-using GIGLS.Core.DTO.BankSettlement;
-using GIGLS.Core.IRepositories.BankSettlement;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain.BankSettlement;
+using POST.Core.DTO.BankSettlement;
+using POST.Core.IRepositories.BankSettlement;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
 {
     public class CODSettlementSheetRepository : Repository<CODSettlementSheet, GIGLSContext>, ICODSettlementSheetRepository
     {

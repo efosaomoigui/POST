@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.User;
+using POST.Core.DTO;
+using POST.Core.DTO.User;
 
-namespace GIGLS.Core.IServices
+namespace POST.Core.IServices
 {
     public interface IOTPService : IServiceDependencyMarker
     {

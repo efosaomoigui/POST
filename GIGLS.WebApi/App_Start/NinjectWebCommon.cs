@@ -1,6 +1,6 @@
-[assembly: WebActivatorEx.PreApplicationStartMethod(typeof(GIGLS.WebApi.App_Start.NinjectWebCommon), "Start")]
-[assembly: WebActivatorEx.ApplicationShutdownMethodAttribute(typeof(GIGLS.WebApi.App_Start.NinjectWebCommon), "Stop")]
-namespace GIGLS.WebApi.App_Start
+[assembly: WebActivatorEx.PreApplicationStartMethod(typeof(POST.WebApi.App_Start.NinjectWebCommon), "Start")]
+[assembly: WebActivatorEx.ApplicationShutdownMethodAttribute(typeof(POST.WebApi.App_Start.NinjectWebCommon), "Stop")]
+namespace POST.WebApi.App_Start
 {
     using System;
     using System.Web;
@@ -15,11 +15,11 @@ namespace GIGLS.WebApi.App_Start
     using Core;
     using Infrastructure.Persistence;
     using Ninject.Syntax;
-    using GIGL.GIGLS.Core.Repositories;
+    using GIGL.POST.Core.Repositories;
     using Core.IServices;
     using INFRASTRUCTURE.Persistence.Repositories.User;
-    using GIGLS.Core.IServices.Shipments;
-    using GIGLS.Services.Business.Magaya.Shipments;
+    using POST.Core.IServices.Shipments;
+    using POST.Services.Business.Magaya.Shipments;
 
     //using Hangfire;
     //using GlobalConfiguration = Hangfire.GlobalConfiguration;

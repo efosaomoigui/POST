@@ -1,25 +1,25 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.User;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.Core.IServices;
+using POST.Core.IServices.Customers;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Wallet;
+using POST.CORE.DTO.Report;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Wallet
+namespace POST.Services.Implementation.Wallet
 {
     public class WalletTransactionService : IWalletTransactionService
     {

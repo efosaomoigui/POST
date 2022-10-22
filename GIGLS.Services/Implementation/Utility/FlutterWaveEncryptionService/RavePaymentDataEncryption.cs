@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace GIGLS.Services.Implementation.Utility.FlutterWaveEncryptionService
+namespace POST.Services.Implementation.Utility.FlutterWaveEncryptionService
 {
     public class RavePaymentDataEncryption : IPaymentDataEncryption
     {

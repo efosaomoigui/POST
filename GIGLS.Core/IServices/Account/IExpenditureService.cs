@@ -1,10 +1,10 @@
-﻿using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Expenses;
-using GIGLS.Core.DTO.Report;
+﻿using POST.Core.DTO.Account;
+using POST.Core.DTO.Expenses;
+using POST.Core.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Account
+namespace POST.Core.IServices.Account
 {
     public interface IExpenditureService : IServiceDependencyMarker
     {

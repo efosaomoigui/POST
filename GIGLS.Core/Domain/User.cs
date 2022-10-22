@@ -1,5 +1,5 @@
-﻿using GIGLS.Core.Enums;
-using GIGLS.CORE.Domain;
+﻿using POST.Core.Enums;
+using POST.CORE.Domain;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace GIGL.GIGLS.Core.Domain
+namespace GIGL.POST.Core.Domain
 {
     public class ApplicationUserRole : IdentityUserRole<string> { }
     public class User : IdentityUser<string, IdentityUserLogin, IdentityUserRole, AppUserClaim>

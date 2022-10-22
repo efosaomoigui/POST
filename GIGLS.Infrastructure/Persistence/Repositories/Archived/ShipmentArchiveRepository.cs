@@ -1,15 +1,15 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Domain.Archived;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IRepositories.Archived;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.CORE.Enums;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.Domain.Archived;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.Zone;
+using POST.Core.Enums;
+using POST.Core.IRepositories.Archived;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
+using POST.CORE.Enums;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -17,7 +17,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
+namespace POST.Infrastructure.Persistence.Repositories.Archived
 {
     public class ShipmentArchiveRepository : Repository<Shipment_Archive, GIGLSContext>, IShipmentArchiveRepository
     {

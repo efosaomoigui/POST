@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.DTO.Alpha
+namespace POST.Core.DTO.Alpha
 {
     public class AlphaUserLoginDTO
     {

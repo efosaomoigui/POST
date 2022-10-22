@@ -1,6 +1,6 @@
-﻿using GIGLS.Core.Domain;
+﻿using POST.Core.Domain;
 
-namespace GIGL.GIGLS.Core.Domain
+namespace GIGL.POST.Core.Domain
 {
     public class JobCardManagementPart : BaseDomain
     {

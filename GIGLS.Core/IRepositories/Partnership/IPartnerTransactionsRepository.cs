@@ -1,15 +1,15 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Report;
-using GIGLS.CORE.DTO.Report;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.Partnership;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Report;
+using POST.CORE.DTO.Report;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories
+namespace POST.Core.IRepositories
 {
     public interface IPartnerTransactionsRepository : IRepository<PartnerTransactions>
     {

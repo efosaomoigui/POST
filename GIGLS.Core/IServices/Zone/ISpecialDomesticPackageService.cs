@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Zone;
+﻿using POST.Core.DTO.Zone;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Zone
+namespace POST.Core.IServices.Zone
 {
     public interface ISpecialDomesticPackageService : IServiceDependencyMarker
     {

@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.Shipments;
+using POST.Core.Enums;
+using POST.CORE.DTO;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Customers
+namespace POST.Core.DTO.Customers
 {
     public class IndividualCustomerDTO : BaseDomainDTO
     {

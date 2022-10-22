@@ -1,12 +1,12 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Report;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Shipments
+namespace POST.Core.IRepositories.Shipments
 {
     public interface IMobilePickUpRequestsRepository :IRepository<MobilePickUpRequests>
     {

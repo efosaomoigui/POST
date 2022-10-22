@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Expenses;
+﻿using POST.Core.DTO.Expenses;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Expenses
+namespace POST.Core.IServices.Expenses
 {
     public interface IExpenseTypeService : IServiceDependencyMarker
     {

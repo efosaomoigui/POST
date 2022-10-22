@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.DTO.ShipmentScan;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.ShipmentScan;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO.ShipmentScan;
+using POST.Core.IServices;
+using POST.Core.IServices.ShipmentScan;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.ShipmentScan
+namespace POST.WebApi.Controllers.ShipmentScan
 {
     [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/scanstatus")]

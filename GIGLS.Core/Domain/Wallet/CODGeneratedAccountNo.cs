@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain.Wallet
+namespace POST.Core.Domain.Wallet
 {
     public class CODGeneratedAccountNo : BaseDomain, IAuditable
     {

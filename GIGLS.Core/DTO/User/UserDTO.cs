@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Fleets;
+﻿using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.Fleets;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using GIGLS.Core.Enums;
+using POST.Core.Enums;
 using System;
-using GIGLS.Core.DTO.Partnership;
+using POST.Core.DTO.Partnership;
 
-namespace GIGLS.Core.DTO.User
+namespace POST.Core.DTO.User
 {
     public class UserDTO
     {

@@ -1,11 +1,11 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.User;
+using POST.Core.Enums;
+using POST.CORE.DTO;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Fleets
+namespace POST.Core.DTO.Fleets
 {
     public class DispatchDTO : BaseDomainDTO
     {

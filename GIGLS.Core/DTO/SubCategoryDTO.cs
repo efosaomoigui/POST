@@ -1,4 +1,4 @@
-﻿namespace GIGLS.Core.DTO
+﻿namespace POST.Core.DTO
 {
     public class SubCategoryDTO
     {

@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain.Archived
+namespace POST.Core.Domain.Archived
 {
     public class Invoice_Archive : BaseDomain_Archive
     {

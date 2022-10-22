@@ -1,27 +1,27 @@
 ﻿using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.DTO.ShipmentScan;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.IServices.Fleets;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.IServices.User;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Infrastructure;
+using GIGL.POST.Core.Domain;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.Zone;
+using POST.Core.DTO.ShipmentScan;
+using POST.Core.Enums;
+using POST.Core.IServices.Customers;
+using POST.Core.IServices.Fleets;
+using POST.Core.IServices.Shipments;
+using POST.Core.IServices.User;
+using POST.CORE.DTO.Report;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Core.DTO.Fleets;
+using POST.CORE.DTO.Shipments;
+using POST.Core.DTO.Fleets;
 
-namespace GIGLS.Services.Implementation.Shipments
+namespace POST.Services.Implementation.Shipments
 {
     public class ManifestWaybillMappingService : IManifestWaybillMappingService
     {

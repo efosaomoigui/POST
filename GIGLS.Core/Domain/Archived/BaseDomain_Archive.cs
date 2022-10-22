@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GIGLS.Core.Domain.Archived
+namespace POST.Core.Domain.Archived
 {
     public class BaseDomain_Archive
     {

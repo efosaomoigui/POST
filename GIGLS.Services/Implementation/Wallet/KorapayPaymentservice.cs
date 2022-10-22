@@ -1,22 +1,22 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Node;
-using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.IServices.Node;
-using GIGLS.Core.IServices.PaymentTransactions;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Infrastructure;
-using GIGLS.Services.Implementation.Utility.CellulantEncryptionService;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO;
+using POST.Core.DTO.Node;
+using POST.Core.DTO.OnlinePayment;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.Core.IMessageService;
+using POST.Core.IServices.Node;
+using POST.Core.IServices.PaymentTransactions;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Wallet;
+using POST.CORE.DTO.Report;
+using POST.Infrastructure;
+using POST.Services.Implementation.Utility.CellulantEncryptionService;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -33,7 +33,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Wallet
+namespace POST.Services.Implementation.Wallet
 {
     public class KorapayPaymentService : IKorapayPaymentService
     {

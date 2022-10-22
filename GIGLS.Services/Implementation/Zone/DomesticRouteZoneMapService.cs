@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.IServices.Zone;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
-using GIGLS.Core.DTO.Zone;
+using GIGL.POST.Core.Domain;
+using POST.Core.IServices.Zone;
+using POST.Core;
+using POST.Infrastructure;
+using POST.Core.DTO.Zone;
 using AutoMapper;
-using GIGLS.Core.IServices.ServiceCentres;
+using POST.Core.IServices.ServiceCentres;
 using System.Net;
 using System.Linq;
 
-namespace GIGLS.Services.Implementation.Zone
+namespace POST.Services.Implementation.Zone
 {
     public class DomesticRouteZoneMapService : IDomesticRouteZoneMapService
     {

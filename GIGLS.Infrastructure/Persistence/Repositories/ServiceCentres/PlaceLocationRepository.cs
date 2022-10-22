@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.IRepositories.ServiceCentres;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.IRepositories.ServiceCentres;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.ServiceCentres
+namespace POST.Infrastructure.Persistence.Repositories.ServiceCentres
 {
     public class PlaceLocationRepository : Repository<PlaceLocation, GIGLSContext>, IPlaceLocationRepository
     {

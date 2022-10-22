@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain.Expenses
+namespace POST.Core.Domain.Expenses
 {
     public class ExpenseType : BaseDomain, IAuditable
     {

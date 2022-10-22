@@ -1,11 +1,11 @@
-﻿using GIGL.GIGLS.Core.Domain;
+﻿using GIGL.POST.Core.Domain;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http.Routing;
 
-namespace GIGLS.WebApi.Models
+namespace POST.WebApi.Models
 {
     public class ModelFactory
     {

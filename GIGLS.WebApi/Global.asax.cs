@@ -3,7 +3,7 @@
 using System;
 using System.Web.Http;
 
-namespace GIGLS.WebApi
+namespace POST.WebApi
 {
     public class WebApiApplication : System.Web.HttpApplication
     {

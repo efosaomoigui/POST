@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class Message : BaseDomain, IAuditable
     {

@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.IServices.MessagingLog;
+﻿using POST.Core.IServices.MessagingLog;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.Core;
-using GIGLS.Core.Domain.MessagingLog;
+using POST.Core.DTO.MessagingLog;
+using POST.Core;
+using POST.Core.Domain.MessagingLog;
 using AutoMapper;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.User;
-using GIGLS.CORE.DTO.Shipments;
+using POST.Infrastructure;
+using POST.Core.IServices.User;
+using POST.CORE.DTO.Shipments;
 using System.Linq;
 using System;
 using System.Net;
@@ -15,7 +15,7 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Configuration;
 
-namespace GIGLS.Services.Implementation.Messaging
+namespace POST.Services.Implementation.Messaging
 {
     public class SmsSendLogService : ISmsSendLogService
     {

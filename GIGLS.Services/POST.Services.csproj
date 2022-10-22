@@ -583,17 +583,17 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GIGLS.Core\GIGLS.Core.csproj">
+    <ProjectReference Include="..\GIGLS.Core\POST.Core.csproj">
       <Project>{e09465db-8bc7-4f1c-81d8-4ea1daa77ad4}</Project>
-      <Name>GIGLS.Core</Name>
+      <Name>POST.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GIGLS.Infrastructure\GIGLS.Infrastructure.csproj">
+    <ProjectReference Include="..\GIGLS.Infrastructure\POST.Infrastructure.csproj">
       <Project>{ca1b58fd-e1d5-48d3-a27d-d4e756cbf3e5}</Project>
-      <Name>GIGLS.Infrastructure</Name>
+      <Name>POST.Infrastructure</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GIGLS.Messaging\GIGLS.Messaging.csproj">
+    <ProjectReference Include="..\GIGLS.Messaging\POST.Messaging.csproj">
       <Project>{f5d1aa8b-bb98-43e6-a758-cbfa7563f4a7}</Project>
-      <Name>GIGLS.Messaging</Name>
+      <Name>POST.Messaging</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThirdParty.WebServices\ThirdParty.WebServices.csproj">
       <Project>{03529607-e784-45a7-b684-158ea13fb5e0}</Project>

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.DTO.UPS
+namespace POST.Core.DTO.UPS
 {
     public class UPSPackage
     {

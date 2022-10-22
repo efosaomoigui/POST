@@ -2,14 +2,14 @@
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
-using GIGLS.Infrastructure.Persistence;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Services.Implementation.Messaging;
+using POST.Infrastructure.Persistence;
+using GIGL.POST.Core.Domain;
+using POST.Services.Implementation.Messaging;
 using System;
-using GIGLS.CORE.Domain;
-using GIGLS.Infrastructure.IdentityInfrastrure;
+using POST.CORE.Domain;
+using POST.Infrastructure.IdentityInfrastrure;
 
-namespace GIGLS.WebApi
+namespace POST.WebApi
 {
     // Configure the application user manager used in this application. UserManager is defined in ASP.NET Identity and is used by the application.
 

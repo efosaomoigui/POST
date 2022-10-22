@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.Domain.MessagingLog;
-using GIGLS.Core.IRepositories.MessagingLog;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain.MessagingLog;
+using POST.Core.IRepositories.MessagingLog;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.MessagingLog;
+using POST.Core.DTO.MessagingLog;
 using AutoMapper;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.MessagingLog
+namespace POST.Infrastructure.Persistence.Repositories.MessagingLog
 {
     public class EmailSendLogRepository : Repository<EmailSendLog, GIGLSContext>, IEmailSendLogRepository
     {

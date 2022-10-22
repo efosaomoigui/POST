@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.User;
-using GIGLS.CORE.DTO;
-using GIGLS.CORE.Enums;
+﻿using POST.Core.DTO.User;
+using POST.CORE.DTO;
+using POST.CORE.Enums;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Zone
+namespace POST.Core.DTO.Zone
 {
     public class DeliveryOptionDTO : BaseDomainDTO
     {

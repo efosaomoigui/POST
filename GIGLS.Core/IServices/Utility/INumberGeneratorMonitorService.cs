@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.Enums;
+﻿using POST.Core.IServices;
+using POST.Core.Enums;
 using System.Threading.Tasks;
 using System;
 
-namespace GIGLS.Core.IServices.Utility
+namespace POST.Core.IServices.Utility
 {
     public interface INumberGeneratorMonitorService : IServiceDependencyMarker
     {

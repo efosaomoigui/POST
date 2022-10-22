@@ -1,10 +1,10 @@
-﻿using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.Customers;
+using POST.Core.Enums;
+using POST.CORE.DTO;
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.View
+namespace POST.Core.View
 {
     public class CustomerView : BaseDomainDTO
     {

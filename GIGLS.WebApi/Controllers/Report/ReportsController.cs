@@ -1,19 +1,19 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.ShipmentScan;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IMessage;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.View;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.CORE.IServices.Report;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Dashboard;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.ShipmentScan;
+using POST.Core.Enums;
+using POST.Core.IMessage;
+using POST.Core.IServices;
+using POST.Core.IServices.Utility;
+using POST.Core.View;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
+using POST.CORE.IServices.Report;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -21,7 +21,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Report
+namespace POST.WebApi.Controllers.Report
 {
     [Authorize(Roles = "Report, ViewAdmin")]
     [RoutePrefix("api/report")]

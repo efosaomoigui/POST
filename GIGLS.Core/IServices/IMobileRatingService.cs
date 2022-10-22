@@ -1,4 +1,4 @@
-﻿namespace GIGLS.Core.IServices
+﻿namespace POST.Core.IServices
 {
     public interface IMobileRatingService : IServiceDependencyMarker
     {

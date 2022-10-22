@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Utility.CellulantEncryptionService
+namespace POST.Services.Implementation.Utility.CellulantEncryptionService
 {
     public interface ICellulantDataEncryption 
     {

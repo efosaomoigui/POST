@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.DTO.BankSettlement;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.BankSettlement;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO.BankSettlement;
+using POST.Core.IServices;
+using POST.Core.IServices.BankSettlement;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.BankSettlement
+namespace POST.WebApi.Controllers.BankSettlement
 {
     [Authorize(Roles = "Admin")]
     [RoutePrefix("api/bank")]

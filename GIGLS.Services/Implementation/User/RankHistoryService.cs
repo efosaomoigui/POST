@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core;
-using GIGLS.Core.DTO.Stores;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.IRepositories.User;
-using GIGLS.Core.IServices.Stores;
-using GIGLS.Core.IServices.User;
+using POST.Core;
+using POST.Core.DTO.Stores;
+using POST.Core.DTO.User;
+using POST.Core.IRepositories.User;
+using POST.Core.IServices.Stores;
+using POST.Core.IServices.User;
 
-namespace GIGLS.Services.Implementation.User
+namespace POST.Services.Implementation.User
 {
     public class RankHistoryService : IRankHistoryService
     {

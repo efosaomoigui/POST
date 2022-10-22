@@ -1,53 +1,53 @@
 ﻿using AutoMapper;
-using GIGLS.Core.DTO.Zone;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Client;
-using GIGLS.CORE.Domain;
-using GIGLS.CORE.DTO.Nav;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Core.DTO.Haulage;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.Core.Domain.MessagingLog;
-using GIGLS.Core.Domain.ShipmentScan;
-using GIGLS.Core.DTO.ShipmentScan;
-using GIGLS.Core.Domain.Utility;
-using GIGLS.Core.DTO.Utility;
-using GIGLS.Core.View;
-using GIGLS.Core.Domain.Devices;
-using GIGLS.Core.DTO.Devices;
-using GIGLS.Core.Domain.BankSettlement;
-using GIGLS.Core.DTO.BankSettlement;
-using GIGLS.Core.DTO.InternationalShipmentDetails;
-using GIGLS.Core.DTO.SLA;
-using GIGLS.Core.Domain.SLA;
-using GIGLS.Core.DTO.Expenses;
-using GIGLS.Core.Domain.Expenses;
+using POST.Core.DTO.Zone;
+using GIGL.POST.Core.Domain;
+using POST.Core.Domain;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.User;
+using POST.Core.DTO;
+using POST.Core.DTO.PaymentTransactions;
+using POST.Core.Domain.Partnership;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Fleets;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Client;
+using POST.CORE.Domain;
+using POST.CORE.DTO.Nav;
+using POST.CORE.DTO.Shipments;
+using POST.Core.DTO.Haulage;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO.Wallet;
+using POST.Core.DTO.MessagingLog;
+using POST.Core.Domain.MessagingLog;
+using POST.Core.Domain.ShipmentScan;
+using POST.Core.DTO.ShipmentScan;
+using POST.Core.Domain.Utility;
+using POST.Core.DTO.Utility;
+using POST.Core.View;
+using POST.Core.Domain.Devices;
+using POST.Core.DTO.Devices;
+using POST.Core.Domain.BankSettlement;
+using POST.Core.DTO.BankSettlement;
+using POST.Core.DTO.InternationalShipmentDetails;
+using POST.Core.DTO.SLA;
+using POST.Core.Domain.SLA;
+using POST.Core.DTO.Expenses;
+using POST.Core.Domain.Expenses;
 using ThirdParty.WebServices.Magaya.DTO;
 using ThirdParty.WebServices.Magaya.Business;
 using ThirdParty.WebServices;
 using ThirdParty.WebServices.Magaya.Business.New;
 using ThirdParty.WebServices.Business;
-using GIGLS.Core.Domain.DHL;
-using GIGLS.Core.DTO.DHL;
-using GIGLS.Core.Domain.Archived;
-using GIGLS.Core.DTO.Stores;
-using Country = GIGLS.Core.Domain.Country;
-using GIGLS.Core.DTO.Captains;
+using POST.Core.Domain.DHL;
+using POST.Core.DTO.DHL;
+using POST.Core.Domain.Archived;
+using POST.Core.DTO.Stores;
+using Country = POST.Core.Domain.Country;
+using POST.Core.DTO.Captains;
 
-namespace GIGLS.Core
+namespace POST.Core
 {
     public static class MapperConfigurationExtension
     {
@@ -265,11 +265,11 @@ namespace GIGLS.Core
                 config.CreateMap<ShipmentCancel, ShipmentCancelDTO>();
                 config.CreateMap<ShipmentCancelDTO, ShipmentCancel>();
 
-                config.CreateMap<GIGLS.Core.Domain.Country, CountryDTO>();
-                config.CreateMap<CountryDTO, GIGLS.Core.Domain.Country>(); 
+                config.CreateMap<POST.Core.Domain.Country, CountryDTO>();
+                config.CreateMap<CountryDTO, POST.Core.Domain.Country>(); 
 
-                config.CreateMap<GIGLS.Core.Domain.Country, NewCountryDTO>();
-                config.CreateMap<NewCountryDTO, GIGLS.Core.Domain.Country>();
+                config.CreateMap<POST.Core.Domain.Country, NewCountryDTO>();
+                config.CreateMap<NewCountryDTO, POST.Core.Domain.Country>();
 
                 config.CreateMap<ShipmentReroute, ShipmentRerouteDTO>();
                 config.CreateMap<ShipmentRerouteDTO, ShipmentReroute>();

@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.IRepositories.Partnership;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain.Partnership;
+using POST.Core.DTO.Fleets;
+using POST.Core.DTO.Partnership;
+using POST.Core.IRepositories.Partnership;
+using POST.Infrastructure.Persistence.Repository;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
+namespace POST.Infrastructure.Persistence.Repositories.Partnership
 {
     public class FleetPartnerRepository : Repository<FleetPartner, GIGLSContext>, IFleetPartnerRepository
     {

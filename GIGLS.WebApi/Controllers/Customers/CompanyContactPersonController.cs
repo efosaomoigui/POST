@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Core.DTO.Customers;
+using POST.Core.IServices.Customers;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.WebApi.Filters;
+using POST.WebApi.Filters;
 
-namespace GIGLS.WebApi.Controllers.Customers
+namespace POST.WebApi.Controllers.Customers
 {
     [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/companycontactperson")]

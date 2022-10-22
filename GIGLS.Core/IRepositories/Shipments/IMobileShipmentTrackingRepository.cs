@@ -1,11 +1,11 @@
 ﻿using System;
-using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain;
+using GIGL.POST.Core.Repositories;
+using POST.Core.Domain;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO;
+using POST.Core.DTO;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.IRepositories.Shipments
+namespace POST.Core.IRepositories.Shipments
 {
     public interface IMobileShipmentTrackingRepository : IRepository<Domain.MobileShipmentTracking>
     {

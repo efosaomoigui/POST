@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.User;
+using POST.Core.Enums;
+using POST.Core.IServices;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IMessageService
+namespace POST.Core.IMessageService
 {
     public interface IMessageSenderService : IServiceDependencyMarker
     {

@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.ServiceCentres;
+using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO.Shipments
+namespace POST.Core.DTO.Shipments
 {
     public class TransitWaybillNumberDTO : BaseDomainDTO
     {

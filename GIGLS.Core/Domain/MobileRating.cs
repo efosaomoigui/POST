@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class MobileRating : BaseDomain, IAuditable
     {

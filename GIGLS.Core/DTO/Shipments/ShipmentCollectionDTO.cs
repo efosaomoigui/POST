@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
+﻿using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.Enums;
 using System;
 
-namespace GIGLS.CORE.DTO.Shipments
+namespace POST.CORE.DTO.Shipments
 {
     public class ShipmentCollectionDTO : BaseDomainDTO
     {

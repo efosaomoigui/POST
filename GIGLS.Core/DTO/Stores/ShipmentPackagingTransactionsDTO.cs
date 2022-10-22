@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.ServiceCentres;
+using POST.Core.Enums;
+using POST.CORE.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.DTO.Stores
+namespace POST.Core.DTO.Stores
 {
     public class ShipmentPackagingTransactionsDTO : BaseDomainDTO
     {

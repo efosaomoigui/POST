@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.DTO.Zone;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.Zone;
+using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO.Shipments
+namespace POST.Core.DTO.Shipments
 {
     public class ShipmentDeliveryOptionMappingDTO : BaseDomainDTO
     {

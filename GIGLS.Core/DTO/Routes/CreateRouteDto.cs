@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.DTO.Routes
+namespace POST.Core.DTO.Routes
 {
     public class CreateRouteDto
     {

@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.BankSettlement;
+﻿using POST.Core.DTO.BankSettlement;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.BankSettlement
+namespace POST.Core.IServices.BankSettlement
 {
     public interface IBankService : IServiceDependencyMarker
     {

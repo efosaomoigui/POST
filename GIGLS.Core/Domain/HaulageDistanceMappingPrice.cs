@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class HaulageDistanceMappingPrice : BaseDomain, IAuditable
     {

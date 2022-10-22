@@ -1,6 +1,6 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 
-namespace GIGLS.Core.DTO.Shipments
+namespace POST.Core.DTO.Shipments
 {
     public class MessageExtensionDTO
     {

@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.IRepositories;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.IRepositories;
+using POST.Infrastructure.Persistence.Repository;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
 using System.Collections.Generic;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories
+namespace POST.Infrastructure.Persistence.Repositories
 {
     public class CountryRepository : Repository<Country, GIGLSContext>, ICountryRepository
     {

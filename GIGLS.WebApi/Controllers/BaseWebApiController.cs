@@ -4,20 +4,20 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.IServices;
+using POST.Core.IServices;
 using System.Net.Http;
-using GIGLS.Infrastructure;
-using GIGLS.Services.Implementation;
+using POST.Infrastructure;
+using POST.Services.Implementation;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.AspNet.Identity;
-using GIGLS.WebApi.Models;
+using POST.WebApi.Models;
 //using Audit.WebApi;
 using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
-using GIGLS.WebApi.Helper;
+using POST.WebApi.Helper;
 
-namespace GIGLS.WebApi.Controllers
+namespace POST.WebApi.Controllers
 {
     public abstract class BaseWebApiController : ApiController
     {

@@ -1,11 +1,11 @@
-﻿using GIGLS.Core.DTO.ShipmentScan;
+﻿using POST.Core.DTO.ShipmentScan;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.ShipmentScan
+namespace POST.Core.IServices.ShipmentScan
 {
     public interface IMobileScanStatusService : IServiceDependencyMarker
     {

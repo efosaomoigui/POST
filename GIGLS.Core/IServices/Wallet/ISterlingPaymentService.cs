@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO.OnlinePayment;
+﻿using POST.Core.Domain.Wallet;
+using POST.Core.DTO.OnlinePayment;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Wallet
+namespace POST.Core.IServices.Wallet
 {
     public interface ISterlingPaymentService : IServiceDependencyMarker
     {

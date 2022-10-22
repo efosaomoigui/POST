@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.Utility;
-using GIGLS.Core.Enums;
+﻿using POST.Core.DTO.Utility;
+using POST.Core.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Utility
+namespace POST.Core.IServices.Utility
 {
     public interface IGlobalPropertyService : IServiceDependencyMarker
     {

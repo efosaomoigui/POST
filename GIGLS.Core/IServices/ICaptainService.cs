@@ -1,15 +1,15 @@
-﻿using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.DTO.Captains;
-using GIGLS.Core.DTO.Fleets;
+﻿using POST.Core.Domain.Partnership;
+using POST.Core.DTO.Captains;
+using POST.Core.DTO.Fleets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Pagination;
-using GIGLS.CORE.DTO.Report;
+using POST.Core.DTO.Pagination;
+using POST.CORE.DTO.Report;
 
-namespace GIGLS.Core.IServices
+namespace POST.Core.IServices
 {
     public interface ICaptainService : IServiceDependencyMarker
     {

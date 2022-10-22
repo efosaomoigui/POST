@@ -1,17 +1,17 @@
 ﻿using EfeAuthen.Models;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.CustomerPortal;
-using GIGLS.Core.IServices.Partnership;
-using GIGLS.Infrastructure;
-using GIGLS.Services.Implementation;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.Fleets;
+using POST.Core.DTO.MessagingLog;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.User;
+using POST.Core.Enums;
+using POST.Core.IServices;
+using POST.Core.IServices.CustomerPortal;
+using POST.Core.IServices.Partnership;
+using POST.Infrastructure;
+using POST.Services.Implementation;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Partnership
+namespace POST.WebApi.Controllers.Partnership
 {
     [Authorize]
     [RoutePrefix("api/fleetpartner")]

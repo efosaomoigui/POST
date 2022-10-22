@@ -1,6 +1,6 @@
-﻿using GIGLS.CORE.Enums;
+﻿using POST.CORE.Enums;
 
-namespace GIGLS.Core.DTO.Wallet
+namespace POST.Core.DTO.Wallet
 {
     public class WalletSearchOption
     {

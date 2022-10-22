@@ -1,4 +1,4 @@
-﻿namespace GIGLS.Core.DTO.MessagingLog
+﻿namespace POST.Core.DTO.MessagingLog
 {
     public class PasswordMessageDTO
     {

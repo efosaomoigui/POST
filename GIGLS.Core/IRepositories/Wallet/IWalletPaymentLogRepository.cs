@@ -1,17 +1,17 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.View;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.Wallet;
+using POST.Core.View;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Wallet
+namespace POST.Core.IRepositories.Wallet
 {
     public interface IWalletPaymentLogRepository : IRepository<WalletPaymentLog>
     {

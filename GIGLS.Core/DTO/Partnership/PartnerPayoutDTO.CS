@@ -1,7 +1,7 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 using System;
 
-namespace GIGLS.Core.DTO.Partnership
+namespace POST.Core.DTO.Partnership
 {
     public class PartnerPayoutDTO : BaseDomainDTO
     {

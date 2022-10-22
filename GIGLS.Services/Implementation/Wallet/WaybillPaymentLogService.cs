@@ -1,16 +1,16 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.IServices.Zone;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Infrastructure;
-using GIGLS.Services.Implementation.Utility.FlutterWaveEncryptionService;
+using POST.Core;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO.OnlinePayment;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Utility;
+using POST.Core.IServices.Wallet;
+using POST.Core.IServices.Zone;
+using POST.CORE.DTO.Shipments;
+using POST.Infrastructure;
+using POST.Services.Implementation.Utility.FlutterWaveEncryptionService;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Wallet
+namespace POST.Services.Implementation.Wallet
 {
     public class WaybillPaymentLogService : IWaybillPaymentLogService
     {

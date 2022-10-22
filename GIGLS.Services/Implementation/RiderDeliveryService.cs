@@ -1,11 +1,11 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.IServices;
+﻿using POST.Core;
+using POST.Core.DTO;
+using POST.Core.DTO.Report;
+using POST.Core.IServices;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation
+namespace POST.Services.Implementation
 {
     public class RiderDeliveryService : IRiderDeliveryService
     {

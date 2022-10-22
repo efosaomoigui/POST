@@ -1,22 +1,22 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.Domain.BankSettlement;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.BankSettlement;
-using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.IServices.Account;
-using GIGLS.Core.IServices.BankSettlement;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.Domain.BankSettlement;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.BankSettlement;
+using POST.Core.DTO.MessagingLog;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.Core.IMessageService;
+using POST.Core.IServices.Account;
+using POST.Core.IServices.BankSettlement;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Utility;
+using POST.Core.IServices.Wallet;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -24,7 +24,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Wallet
+namespace POST.Services.Implementation.Wallet
 {
     public class BankShipmentSettlementService : IBankShipmentSettlementService
     {

@@ -1,14 +1,14 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Shipments;
+using POST.Core.Enums;
+using POST.CORE.DTO;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Shipments
+namespace POST.Core.DTO.Shipments
 {
     public class PreShipmentMobileDTO : BaseDomainDTO
     {

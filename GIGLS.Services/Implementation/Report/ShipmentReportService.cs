@@ -1,45 +1,45 @@
-﻿using GIGLS.Core;
-using GIGLS.CORE.IServices.Report;
+﻿using POST.Core;
+using POST.CORE.IServices.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.DTO.Account;
+using POST.Core.DTO.Shipments;
+using POST.CORE.DTO.Report;
+using POST.Core.IServices.User;
+using POST.Core.DTO.Account;
 using System.Web;
 using SpreadsheetLight;
-using GIGLS.Core.Enums;
-using GIGLS.Core.View;
+using POST.Core.Enums;
+using POST.Core.View;
 using System.Linq;
-using GIGLS.Core.DTO.ShipmentScan;
+using POST.Core.DTO.ShipmentScan;
 using System;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.DTO.Report;
+using POST.Core.DTO.Dashboard;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.DTO.Report;
 using AutoMapper;
 using System.Net;
-using GIGLS.Infrastructure;
+using POST.Infrastructure;
 using OfficeOpenXml;
 using System.Drawing;
 using System.Web.Hosting;
 using OfficeOpenXml.Style;
 using System.IO;
 using OfficeOpenXml.Drawing;
-using GIGLS.Core.Domain;
+using POST.Core.Domain;
 using Newtonsoft.Json.Linq;
-using GIGLS.Core.IServices.Utility;
+using POST.Core.IServices.Utility;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-using GIGLS.Services.Implementation.Shipments;
-using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.IServices.Wallet;
+using POST.Services.Implementation.Shipments;
+using POST.Core.DTO.OnlinePayment;
+using POST.Core.IServices.Wallet;
 using Image = iTextSharp.text.Image;
 using System.Configuration;
 using Font = iTextSharp.text.Font;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Core.DTO.Wallet;
+using POST.CORE.DTO.Shipments;
+using POST.Core.DTO.Wallet;
 
-namespace GIGLS.Services.Implementation.Report
+namespace POST.Services.Implementation.Report
 {
     public class ShipmentReportService : IShipmentReportService
     {

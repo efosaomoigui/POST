@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Account
+namespace POST.Core.DTO.Account
 {
     public class DailySalesDTO
     {

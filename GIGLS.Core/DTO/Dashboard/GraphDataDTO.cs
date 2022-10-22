@@ -1,4 +1,4 @@
-﻿namespace GIGLS.Core.DTO.Dashboard
+﻿namespace POST.Core.DTO.Dashboard
 {
     public class GraphDataDTO
     {

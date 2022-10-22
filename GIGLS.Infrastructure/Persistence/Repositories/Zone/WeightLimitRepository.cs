@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.Zone;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.IRepositories.Zone;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Zone
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Zone
 {
     public class WeightLimitRepository : Repository<WeightLimit, GIGLSContext>, IWeightLimitRepository
     {

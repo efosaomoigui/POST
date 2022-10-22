@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.Enums;
+using POST.CORE.DTO;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.View
+namespace POST.Core.View
 {
     public class WalletPaymentLogView : BaseDomainDTO
     {

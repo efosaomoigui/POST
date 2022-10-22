@@ -1,15 +1,15 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.DTO.Captains;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.Partnership;
+using POST.Core.DTO.Captains;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.CORE.DTO.Report;
+using GIGL.POST.Core.Domain;
+using POST.CORE.DTO.Report;
 
-namespace GIGLS.Core.IRepositories
+namespace POST.Core.IRepositories
 {
     public interface ICaptainRepository : IRepository<Partner>
     {

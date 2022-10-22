@@ -1,24 +1,24 @@
 ﻿using EfeAuthen.Models;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.ShipmentScan;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Business;
-using GIGLS.Core.IServices.CustomerPortal;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.IServices.ShipmentScan;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.CORE.IServices.Shipments;
-using GIGLS.Infrastructure;
-using GIGLS.Services.Implementation;
-using GIGLS.Services.Implementation.Utility;
-using GIGLS.WebApi.Filters;
+using POST.Core.DTO;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.ShipmentScan;
+using POST.Core.DTO.Zone;
+using POST.Core.Enums;
+using POST.Core.IServices;
+using POST.Core.IServices.Business;
+using POST.Core.IServices.CustomerPortal;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.IServices.Shipments;
+using POST.Core.IServices.ShipmentScan;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
+using POST.CORE.IServices.Shipments;
+using POST.Infrastructure;
+using POST.Services.Implementation;
+using POST.Services.Implementation.Utility;
+using POST.WebApi.Filters;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -28,7 +28,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Scanner
+namespace POST.WebApi.Controllers.Scanner
 {
     [Authorize(Roles = "Shipment, ViewAdmin, Agent")]
     [RoutePrefix("api/scanner")]

@@ -1,7 +1,7 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain.Wallet;
+﻿using GIGL.POST.Core.Repositories;
+using POST.Core.Domain.Wallet;
 
-namespace GIGLS.Core.IRepositories.Wallet
+namespace POST.Core.IRepositories.Wallet
 {
     public interface IWaybillPaymentLogRepository : IRepository<WaybillPaymentLog>
     {

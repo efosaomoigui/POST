@@ -1,18 +1,18 @@
-﻿using GIGLS.Core.IServices;
+﻿using POST.Core.IServices;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
+using POST.Core.DTO;
+using POST.Core;
+using POST.Infrastructure;
 using AutoMapper;
-using GIGLS.Core.Domain;
+using POST.Core.Domain;
 using System.Linq;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Zone;
+using POST.Core.DTO.User;
+using POST.Core.Enums;
+using POST.Core.IServices.Zone;
 
-namespace GIGLS.Services.Implementation
+namespace POST.Services.Implementation
 {
     public class CountryService : ICountryService
     {

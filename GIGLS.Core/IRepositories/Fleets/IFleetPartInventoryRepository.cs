@@ -1,7 +1,7 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGL.GIGLS.Core.Repositories;
+﻿using GIGL.POST.Core.Domain;
+using GIGL.POST.Core.Repositories;
 
-namespace GIGLS.Core.IRepositories.Fleets
+namespace POST.Core.IRepositories.Fleets
 {
     public interface IFleetPartInventoryRepository : IRepository<FleetPartInventory>
     {

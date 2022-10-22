@@ -1,15 +1,15 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.Domain;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.User;
+using POST.Core.Enums;
+using POST.CORE.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.DTO
+namespace POST.Core.DTO
 {
     public class MobilePickUpRequestsDTO: BaseDomainDTO
     {

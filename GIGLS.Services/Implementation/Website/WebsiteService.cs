@@ -1,28 +1,28 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IServices.Website;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.DTO;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.MessagingLog;
+using POST.Core.Enums;
+using POST.Core.IMessageService;
+using POST.Core.IServices.Customers;
+using POST.Core.IServices.Shipments;
+using POST.Core.IServices.User;
+using POST.Core.DTO.Wallet;
+using POST.Core.IServices.Wallet;
+using POST.Core.IServices.Utility;
+using POST.Core.IServices.Website;
+using POST.Infrastructure;
 using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 using System.Collections.Generic;
-using GIGLS.Core.DTO.Shipments;
+using POST.Core.DTO.Shipments;
 
-namespace GIGLS.Services.Implementation.Website
+namespace POST.Services.Implementation.Website
 {
     public class WebsiteService : IWebsiteService
     {

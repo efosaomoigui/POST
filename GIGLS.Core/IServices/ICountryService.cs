@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.User;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.User;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices
+namespace POST.Core.IServices
 {
     public interface ICountryService : IServiceDependencyMarker
     {

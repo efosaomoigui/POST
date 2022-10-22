@@ -1,11 +1,11 @@
-using GIGLS.Core.IRepositories;
+using POST.Core.IRepositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace GIGL.GIGLS.Core.Repositories  
+namespace GIGL.POST.Core.Repositories  
 {
     public interface IRepository<TEntity> where TEntity : class
     {

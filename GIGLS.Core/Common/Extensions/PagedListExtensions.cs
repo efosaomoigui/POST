@@ -1,4 +1,4 @@
-﻿using GIGLS.Core.Common.Helpers;
+﻿using POST.Core.Common.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.Common.Extensions
+namespace POST.Core.Common.Extensions
 {
     public static class PagedListExtensions
     {

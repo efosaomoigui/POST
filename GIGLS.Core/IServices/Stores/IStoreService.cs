@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Stores;
+﻿using POST.Core.DTO.Stores;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Stores
+namespace POST.Core.IServices.Stores
 {
     public interface IStoreService : IServiceDependencyMarker
     {

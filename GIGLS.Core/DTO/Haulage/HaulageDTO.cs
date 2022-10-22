@@ -1,6 +1,6 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO.Haulage
+namespace POST.Core.DTO.Haulage
 {
     public class HaulageDTO : BaseDomainDTO
     {

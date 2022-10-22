@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.JobCards;
-using GIGLS.Core.IServices.JobCards;
+using POST.Core.DTO.JobCards;
+using POST.Core.IServices.JobCards;
 
-namespace GIGLS.Services.Implementation.JobCards
+namespace POST.Services.Implementation.JobCards
 {
     public class JobCardManagementPartService : IJobCardManagementPartService
     {

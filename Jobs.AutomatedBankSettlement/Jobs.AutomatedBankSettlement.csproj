@@ -16,9 +16,9 @@
     <PackageReference Include="Microsoft.Azure.KeyVault.Core" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GIGLS.Core\GIGLS.Core.csproj" />
-    <ProjectReference Include="..\GIGLS.Infrastructure\GIGLS.Infrastructure.csproj" />
-    <ProjectReference Include="..\GIGLS.Services\GIGLS.Services.csproj" />
+    <ProjectReference Include="..\POST.Core\POST.Core.csproj" />
+    <ProjectReference Include="..\POST.Infrastructure\POST.Infrastructure.csproj" />
+    <ProjectReference Include="..\POST.Services\POST.Services.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Configuration" />

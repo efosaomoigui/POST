@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System;
 
-namespace GIGLS.Core.DTO.MessagingLog
+namespace POST.Core.DTO.MessagingLog
 {
     public class MessageFilterOption
     {

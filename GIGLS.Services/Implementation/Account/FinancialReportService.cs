@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.IServices.Account;
+using POST.Core;
+using POST.Core.Domain;
+using POST.Core.DTO.Account;
+using POST.Core.IServices.Account;
 using System.Threading.Tasks;
 
-namespace GIGLS.Services.Implementation.Account
+namespace POST.Services.Implementation.Account
 {
     public class FinancialReportService : IFinancialReportService
     {

@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Domain;
+﻿using POST.Core.Domain;
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGL.GIGLS.Core.Domain
+namespace GIGL.POST.Core.Domain
 {
     public class MobileGroupCodeWaybillMapping : BaseDomain
     {

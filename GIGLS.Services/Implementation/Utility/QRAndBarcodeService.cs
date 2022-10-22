@@ -1,4 +1,4 @@
-﻿using GIGLS.Core.IServices.Utility;
+﻿using POST.Core.IServices.Utility;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
@@ -11,10 +11,10 @@ using System.Drawing.Imaging;
 using QRCoder;
 using BarcodeLib;
 using System.Web.Hosting;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Services.Implementation.Shipments;
+using POST.Core.DTO.Shipments;
+using POST.Services.Implementation.Shipments;
 
-namespace GIGLS.Services.Implementation.Utility
+namespace POST.Services.Implementation.Utility
 {
     public class QRAndBarcodeService : IQRAndBarcodeService
     {

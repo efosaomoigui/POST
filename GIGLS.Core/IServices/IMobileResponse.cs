@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GIGLS.Core.IServices
+namespace POST.Core.IServices
 {
     public interface IMobileResponse<TResponse>
     {

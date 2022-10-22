@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GIGLS.Core.DTO.Shipments
+namespace POST.Core.DTO.Shipments
 {
     public class ShipmentDetailDanfoDTO
     {

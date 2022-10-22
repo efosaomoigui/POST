@@ -1,10 +1,10 @@
-﻿using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.Enums;
+﻿using POST.Core.DTO.User;
+using POST.Core.DTO.Zone;
+using POST.Core.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Zone
+namespace POST.Core.IServices.Zone
 {
     public interface ICountryRouteZoneMapService : IServiceDependencyMarker
     {

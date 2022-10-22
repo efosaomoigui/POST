@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.Domain.Partnership
+namespace POST.Core.Domain.Partnership
 {
     public class FleetPartner : BaseDomain, IAuditable
     {

@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.PaymentTransactions
+namespace POST.Core.DTO.PaymentTransactions
 {
     public class PriceCategoryDTO
     {

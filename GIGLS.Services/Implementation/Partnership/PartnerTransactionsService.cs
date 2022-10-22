@@ -1,18 +1,18 @@
 ﻿using AutoMapper;
-using GIGLS.Core;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Partnership;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Infrastructure;
+using POST.Core;
+using POST.Core.Domain.Partnership;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.Core.IServices.Partnership;
+using POST.Core.IServices.Shipments;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Wallet;
+using POST.Infrastructure;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -23,16 +23,16 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Shipments;
+using POST.Core.DTO.Report;
+using POST.Infrastructure;
+using POST.Core.IServices.Wallet;
+using POST.Core.DTO.Wallet;
+using POST.Core.Domain.Wallet;
+using POST.Core.DTO.Shipments;
+using POST.Core.IServices.Shipments;
 using System.Linq;
 
-namespace GIGLS.Services.Implementation.Partnership
+namespace POST.Services.Implementation.Partnership
 {
     public class PartnerTransactionsService : IPartnerTransactionsService
     {

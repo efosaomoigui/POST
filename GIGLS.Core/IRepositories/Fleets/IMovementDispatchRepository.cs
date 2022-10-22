@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Fleets;
+using GIGL.POST.Core.Repositories;
+using POST.Core.Domain;
+using POST.Core.DTO.Fleets;
 
-namespace GIGLS.Core.IRepositories.Fleets
+namespace POST.Core.IRepositories.Fleets
 {
     public interface IMovementDispatchRepository : IRepository<MovementDispatch>   
     {

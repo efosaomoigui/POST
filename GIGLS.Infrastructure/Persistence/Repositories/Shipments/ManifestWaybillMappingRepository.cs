@@ -1,16 +1,16 @@
-﻿using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.Core.Domain;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Fleets;
+﻿using POST.Core.IRepositories.Shipments;
+using POST.Core.Domain;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.Fleets;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.CORE.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.CORE.DTO.Report;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
     public class ManifestWaybillMappingRepository : Repository<ManifestWaybillMapping, GIGLSContext>, IManifestWaybillMappingRepository
     {

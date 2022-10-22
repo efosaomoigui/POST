@@ -1,17 +1,17 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Domain.BankSettlement;
-using GIGLS.Core.DTO.BankSettlement;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IRepositories.BankSettlement;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.Domain.BankSettlement;
+using POST.Core.DTO.BankSettlement;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.Enums;
+using POST.Core.IRepositories.BankSettlement;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
 {
     public class BankProcessingOrderCodesRepository : Repository<BankProcessingOrderCodes, GIGLSContext>, IBankProcessingOrderCodesRepository
     {

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Core;
+using POST.Core.DTO.Customers;
+using POST.Core.IServices.Customers;
+using POST.Core;
 using System.Collections.Generic;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Infrastructure;
+using GIGL.POST.Core.Domain;
+using POST.Infrastructure;
 
-namespace GIGLS.Services.Implementation.Customers
+namespace POST.Services.Implementation.Customers
 {
     public class CompanyContactPersonService : ICompanyContactPersonService
     {

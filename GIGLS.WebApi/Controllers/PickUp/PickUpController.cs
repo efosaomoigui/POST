@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.PickUp
+namespace POST.WebApi.Controllers.PickUp
 {
     public class PickUpController : ApiController
     {

@@ -1,8 +1,8 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.Enums;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Shipments
+namespace POST.Core.DTO.Shipments
 {
     public class ScanDTO
     {

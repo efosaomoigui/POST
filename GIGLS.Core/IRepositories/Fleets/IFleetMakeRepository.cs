@@ -1,10 +1,10 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGL.GIGLS.Core.Repositories;
-using GIGLS.Core.DTO.Fleets;
+﻿using GIGL.POST.Core.Domain;
+using GIGL.POST.Core.Repositories;
+using POST.Core.DTO.Fleets;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Fleets
+namespace POST.Core.IRepositories.Fleets
 {
     public interface IFleetMakeRepository : IRepository<FleetMake>
     {

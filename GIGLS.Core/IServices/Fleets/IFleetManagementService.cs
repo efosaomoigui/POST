@@ -1,10 +1,10 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.DTO.Fleets;
+﻿using POST.Core.IServices;
+using POST.Core.DTO.Fleets;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Fleets
+namespace POST.Core.IServices.Fleets
 {
     public interface IFleetManagementService : IServiceDependencyMarker
     {

@@ -1,22 +1,22 @@
 ﻿using AutoMapper;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IRepositories.Account;
-using GIGLS.Core.View;
-using GIGLS.Core.View.AdminReportView;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using POST.Core.Domain;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.Enums;
+using POST.Core.IRepositories.Account;
+using POST.Core.View;
+using POST.Core.View.AdminReportView;
+using POST.CORE.DTO.Report;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Account
 {
     public class InvoiceRepository : Repository<Invoice, GIGLSContext>, IInvoiceRepository
     {

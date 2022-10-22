@@ -1,12 +1,12 @@
-﻿//using GIGLS.Core.IServices;
-//using GIGLS.CORE.DTO.Account;
-//using GIGLS.CORE.IServices.Account;
-//using GIGLS.Services.Implementation;
+﻿//using POST.Core.IServices;
+//using POST.CORE.DTO.Account;
+//using POST.CORE.IServices.Account;
+//using POST.Services.Implementation;
 //using System.Collections.Generic;
 //using System.Threading.Tasks;
 //using System.Web.Http;
 
-//namespace GIGLS.WebApi.Controllers.Account
+//namespace POST.WebApi.Controllers.Account
 //{
 //    //[Authorize]
 //    [RoutePrefix("api/invoiceShipment")]

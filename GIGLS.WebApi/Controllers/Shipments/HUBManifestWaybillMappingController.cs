@@ -1,15 +1,15 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.WebApi.Filters;
-using GIGLS.Core.IServices.Business;
-using GIGLS.CORE.DTO.Report;
+using POST.Core.IServices.Shipments;
+using POST.Core.DTO.Shipments;
+using POST.WebApi.Filters;
+using POST.Core.IServices.Business;
+using POST.CORE.DTO.Report;
 
-namespace GIGLS.WebApi.Controllers.Shipments
+namespace POST.WebApi.Controllers.Shipments
 {
     [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/hubmanifestwaybillmapping")]

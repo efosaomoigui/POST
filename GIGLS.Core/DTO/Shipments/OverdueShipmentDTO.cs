@@ -1,6 +1,6 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 
-namespace GIGLS.CORE.DTO.Shipments
+namespace POST.CORE.DTO.Shipments
 {
     public class OverdueShipmentDTO : BaseDomainDTO
     {

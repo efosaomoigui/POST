@@ -1,11 +1,11 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.DTO.Client
+namespace POST.Core.DTO.Client
 {
     public class ClientNodeDTO : BaseDomainDTO
     {

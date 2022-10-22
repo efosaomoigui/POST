@@ -1,19 +1,19 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.ShipmentScan;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Fleets;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.ShipmentScan;
+using POST.Core.DTO.User;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.CustomerPortal
+namespace POST.Core.IServices.CustomerPortal
 {
     public interface IPartnerPortalService : IServiceDependencyMarker
     {

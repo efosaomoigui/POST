@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Fleets;
-using GIGLS.Services.Implementation;
-using GIGLS.Services.Implementation.Shipments;
+using POST.Core.DTO.Fleets;
+using POST.Core.IServices;
+using POST.Core.IServices.Fleets;
+using POST.Services.Implementation;
+using POST.Services.Implementation.Shipments;
 
-namespace GIGLS.WebApi.Controllers.FleetJobCards
+namespace POST.WebApi.Controllers.FleetJobCards
 {
     [Authorize]
     [RoutePrefix("api/fleetjobcard")]

@@ -1,13 +1,13 @@
-﻿using GIGLS.Core.DTO.Admin;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Report;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO.Admin;
+using POST.Core.DTO.Report;
+using POST.Core.IServices;
+using POST.Core.IServices.Report;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Report
+namespace POST.WebApi.Controllers.Report
 {
     [Authorize(Roles = "Report")]
     [RoutePrefix("api/specialreport")]

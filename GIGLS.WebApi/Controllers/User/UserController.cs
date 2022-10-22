@@ -1,31 +1,31 @@
-﻿using GIGLS.Core.IServices;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.IServices.User;
-using GIGLS.Services.Implementation;
+﻿using POST.Core.IServices;
+using POST.Core.DTO.User;
+using POST.Core.IServices.User;
+using POST.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Infrastructure;
+using POST.Infrastructure;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
 using EfeAuthen.Models;
 using System;
 using System.Configuration;
-using GIGLS.CORE.Domain;
+using POST.CORE.Domain;
 using System.Security.Claims;
-using GIGLS.WebApi.Filters;
-using GIGLS.CORE.DTO.User;
-using GIGLS.Core.IServices.Utility;
+using POST.WebApi.Filters;
+using POST.CORE.DTO.User;
+using POST.Core.IServices.Utility;
 using System.Linq;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.Enums;
-using GIGLS.Core.DTO;
-using GIGLS.Core.IServices.CustomerPortal;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.DTO.MessagingLog;
+using POST.Core.IMessageService;
+using POST.Core.Enums;
+using POST.Core.DTO;
+using POST.Core.IServices.CustomerPortal;
 
-namespace GIGLS.WebApi.Controllers.User
+namespace POST.WebApi.Controllers.User
 {
     [Authorize(Roles = "Admin, ViewAdmin")]
     //[RoutePrefix("api/user")]
@@ -52,12 +52,12 @@ namespace GIGLS.WebApi.Controllers.User
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user")]
-        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetUsers()
+        public async Task<IServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>> GetUsers()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var users = await _userService.GetUsers();
-                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                return new ServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>
                 {
                     Object = users
                 };
@@ -68,12 +68,12 @@ namespace GIGLS.WebApi.Controllers.User
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/customer/{email}")]
-        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetCustomerUsers(string email)
+        public async Task<IServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>> GetCustomerUsers(string email)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var users = await _userService.GetCustomerUsers(email);
-                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                return new ServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>
                 {
                     Object = users
                 };
@@ -84,12 +84,12 @@ namespace GIGLS.WebApi.Controllers.User
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/customer")]
-        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetCustomerUsers()
+        public async Task<IServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>> GetCustomerUsers()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var users = await _userService.GetCorporateCustomerUsers();
-                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                return new ServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>
                 {
                     Object = users
                 };
@@ -100,12 +100,12 @@ namespace GIGLS.WebApi.Controllers.User
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/partner")]
-        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetPartnerUsers()
+        public async Task<IServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>> GetPartnerUsers()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var users = await _userService.GetPartnerUsers();
-                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                return new ServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>
                 {
                     Object = users
                 };
@@ -116,12 +116,12 @@ namespace GIGLS.WebApi.Controllers.User
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/getsystemusers")]
-        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetSystemUsers()
+        public async Task<IServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>> GetSystemUsers()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var users = await _userService.GetSystemUsers();
-                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                return new ServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>
                 {
                     Object = users
                 };
@@ -132,12 +132,12 @@ namespace GIGLS.WebApi.Controllers.User
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/dispatchcaptains")]
-        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetDispatchCaptain()
+        public async Task<IServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>> GetDispatchCaptain()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var users = await _userService.GetDispatchCaptains();
-                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                return new ServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>
                 {
                     Object = users
                 };
@@ -148,12 +148,12 @@ namespace GIGLS.WebApi.Controllers.User
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/dispatchriders")]
-        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetDispatchRiders()
+        public async Task<IServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>> GetDispatchRiders()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var users = await _userService.GetDispatchRiders();
-                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                return new ServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>
                 {
                     Object = users
                 };
@@ -905,12 +905,12 @@ namespace GIGLS.WebApi.Controllers.User
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/partnerbyemail/{email}")]
-        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetPartnerUsersByEmail(string email)
+        public async Task<IServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>> GetPartnerUsersByEmail(string email)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var users = await _userService.GetPartnerUsersByEmail(email);
-                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                return new ServiceResponse<IEnumerable<GIGL.POST.Core.Domain.User>>
                 {
                     Object = users
                 };

@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.Enums;
+﻿using POST.Core.Enums;
 using System;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO
+namespace POST.Core.DTO
 {
     public class CouponManagementDTO
     {

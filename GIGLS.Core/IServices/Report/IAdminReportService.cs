@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.Admin;
-using GIGLS.Core.DTO.Report;
-using GIGLS.CORE.DTO.Report;
+﻿using POST.Core.DTO.Admin;
+using POST.Core.DTO.Report;
+using POST.CORE.DTO.Report;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Report
+namespace POST.Core.IServices.Report
 {
     public interface IAdminReportService : IServiceDependencyMarker
     {

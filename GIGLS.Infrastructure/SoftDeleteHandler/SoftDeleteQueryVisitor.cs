@@ -3,7 +3,7 @@ using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Linq;
 
-namespace GIGLS.INFRASTRUCTURE.SoftDeleteHandler
+namespace POST.INFRASTRUCTURE.SoftDeleteHandler
 {
     public class SoftDeleteQueryVisitor : DefaultExpressionVisitor
     {

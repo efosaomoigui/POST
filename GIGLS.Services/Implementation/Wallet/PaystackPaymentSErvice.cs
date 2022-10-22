@@ -1,36 +1,36 @@
-﻿using GIGLS.Core;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Wallet;
+﻿using POST.Core;
+using POST.Core.DTO.Wallet;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Wallet;
 using System.Threading.Tasks;
 using PayStack.Net;
-using GIGLS.Core.DTO.OnlinePayment;
+using POST.Core.DTO.OnlinePayment;
 using System.Configuration;
-using GIGLS.Core.Enums;
+using POST.Core.Enums;
 using System.Net;
 using System;
 using System.IO;
 using Newtonsoft.Json;
 using AutoMapper;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.IServices.PaymentTransactions;
-using GIGLS.Core.DTO.PaymentTransactions;
+using POST.Core.Domain.Wallet;
+using POST.Core.IServices.PaymentTransactions;
+using POST.Core.DTO.PaymentTransactions;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Collections.Generic;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.DTO;
+using POST.Core.IMessageService;
+using POST.Core.DTO;
 using System.Linq;
-using GIGLS.Core.IServices.Node;
-using GIGLS.Core.DTO.Node;
-using GIGLS.Core.DTO.Shipments;
+using POST.Core.IServices.Node;
+using POST.Core.DTO.Node;
+using POST.Core.DTO.Shipments;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System.Data;
-using GIGLS.Core.Domain;
+using POST.Core.Domain;
 
-namespace GIGLS.Services.Implementation.Wallet
+namespace POST.Services.Implementation.Wallet
 {
     public class PaystackPaymentService : IPaystackPaymentService
     {

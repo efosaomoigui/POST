@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+using GIGL.POST.Core.Domain;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Linq;
-using GIGLS.Core.IRepositories.Zone;
-using GIGLS.Core.DTO.Zone;
+using POST.Core.IRepositories.Zone;
+using POST.Core.DTO.Zone;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories
+namespace POST.INFRASTRUCTURE.Persistence.Repositories
 {
     public class DeliveryOptionRepository : Repository<DeliveryOption, GIGLSContext>, IDeliveryOptionRepository
     {

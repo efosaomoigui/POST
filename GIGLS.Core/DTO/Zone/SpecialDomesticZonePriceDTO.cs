@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.User;
-using GIGLS.CORE.DTO;
+﻿using POST.Core.DTO.User;
+using POST.CORE.DTO;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Zone
+namespace POST.Core.DTO.Zone
 {
     public class SpecialDomesticZonePriceDTO : BaseDomainDTO
     {

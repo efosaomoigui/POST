@@ -1,12 +1,12 @@
-﻿using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.CORE.DTO.Report;
+﻿using POST.Core.DTO;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.User;
+using POST.Core.DTO.Wallet;
+using POST.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Wallet
+namespace POST.Core.IServices.Wallet
 {
     public interface IWalletTransactionService : IServiceDependencyMarker
     {

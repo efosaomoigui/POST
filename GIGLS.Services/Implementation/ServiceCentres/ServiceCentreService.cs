@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core;
-using GIGL.GIGLS.Core.Domain;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core;
+using GIGL.POST.Core.Domain;
 using AutoMapper;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.User;
+using POST.Core.IServices.ServiceCentres;
+using POST.Infrastructure;
+using POST.Core.IServices.Utility;
+using POST.Core.Enums;
+using POST.Core.IServices.User;
 using System.Net;
 
-namespace GIGLS.Services.IServices.ServiceCentres
+namespace POST.Services.IServices.ServiceCentres
 {
     public class ServiceCentreService : IServiceCentreService
     {

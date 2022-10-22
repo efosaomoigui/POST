@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.DTO.DHL;
-using GIGLS.CORE.DTO.Report;
+﻿using POST.Core.DTO.DHL;
+using POST.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Shipments
+namespace POST.Core.IServices.Shipments
 {
     public interface IInternationalShipmentWaybillService : IServiceDependencyMarker
     {

@@ -1,9 +1,9 @@
-﻿using GIGLS.CORE.Domain;
-using GIGLS.CORE.IRepositories.Shipments;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.CORE.Domain;
+using POST.CORE.IRepositories.Shipments;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
     public class ShipmentReturnRepository : Repository<ShipmentReturn, GIGLSContext>, IShipmentReturnRepository
     {

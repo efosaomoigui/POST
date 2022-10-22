@@ -1,8 +1,8 @@
-﻿using GIGL.GIGLS.Core.Repositories;
-using GIGLS.CORE.Domain;
+﻿using GIGL.POST.Core.Repositories;
+using POST.CORE.Domain;
 using System.Linq;
 
-namespace GIGLS.CORE.IRepositories.Shipments
+namespace POST.CORE.IRepositories.Shipments
 {
     public interface IOverdueShipmentRepository : IRepository<OverdueShipment>
     {

@@ -2,7 +2,7 @@
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure.Interception;
 
-namespace GIGLS.INFRASTRUCTURE.SoftDeleteHandler
+namespace POST.INFRASTRUCTURE.SoftDeleteHandler
 {
     public class SoftDeleteInterceptor : IDbCommandTreeInterceptor
     {

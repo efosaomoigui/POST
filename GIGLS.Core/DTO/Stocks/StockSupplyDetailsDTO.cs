@@ -1,8 +1,8 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 using System;
 using System.Collections.Generic;
 
-namespace GIGLS.Core.DTO.Stocks
+namespace POST.Core.DTO.Stocks
 {
     public class StockSupplyDetailsDTO : BaseDomainDTO
     {

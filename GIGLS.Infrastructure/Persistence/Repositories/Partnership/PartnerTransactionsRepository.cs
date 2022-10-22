@@ -1,10 +1,10 @@
-﻿using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IRepositories;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain.Partnership;
+using POST.Core.DTO.Partnership;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.Shipments;
+using POST.Core.IRepositories;
+using POST.CORE.DTO.Report;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -12,7 +12,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
+namespace POST.Infrastructure.Persistence.Repositories.Partnership
 {
     public class PartnerTransactionsRepository : Repository<PartnerTransactions, GIGLSContext>, IPartnerTransactionsRepository
     {

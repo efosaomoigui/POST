@@ -1,18 +1,18 @@
-﻿using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.IRepositories.Partnership;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain.Partnership;
+using POST.Core.IRepositories.Partnership;
+using POST.Infrastructure.Persistence;
+using POST.Infrastructure.Persistence.Repository;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Partnership;
+using POST.Core.DTO.Partnership;
 using System.Data.Entity;
-using GIGLS.Core.DTO;
+using POST.Core.DTO;
 using System;
-using GIGLS.Core.Enums;
-using GIGLS.Core.DTO.Report;
+using POST.Core.Enums;
+using POST.Core.DTO.Report;
 
-namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
+namespace POST.INFRASTRUCTURE.Persistence.Repositories.Partnership
 {
     public class PartnerRepository : Repository<Partner, GIGLSContext>, IPartnerRepository
     {

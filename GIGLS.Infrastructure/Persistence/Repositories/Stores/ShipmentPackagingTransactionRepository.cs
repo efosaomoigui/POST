@@ -1,16 +1,16 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Stores;
-using GIGLS.Core.IRepositories.Stores;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using POST.Core.Domain;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.Stores;
+using POST.Core.IRepositories.Stores;
+using POST.CORE.DTO.Report;
+using POST.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Stores
+namespace POST.Infrastructure.Persistence.Repositories.Stores
 {
     public class ShipmentPackagingTransactionsRepository : Repository<ShipmentPackagingTransactions, GIGLSContext>, IShipmentPackagingTransactionsRepository
     {

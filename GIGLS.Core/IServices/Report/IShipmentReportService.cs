@@ -1,17 +1,17 @@
-﻿using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Core.DTO.OnlinePayment;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.ShipmentScan;
-using GIGLS.Core.IServices;
-using GIGLS.Core.View;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
+﻿using POST.Core.DTO.Account;
+using POST.Core.DTO.Dashboard;
+using POST.Core.DTO.OnlinePayment;
+using POST.Core.DTO.Report;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.ShipmentScan;
+using POST.Core.IServices;
+using POST.Core.View;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.CORE.IServices.Report
+namespace POST.CORE.IServices.Report
 {
     public interface IShipmentReportService : IServiceDependencyMarker
     {

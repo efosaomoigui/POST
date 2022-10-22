@@ -5,7 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Http.Description;
 
-namespace GIGLS.WebApi.App_Start
+namespace POST.WebApi.App_Start
 {
     public class AuthTokenOperation : IDocumentFilter
     {

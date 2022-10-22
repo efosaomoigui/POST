@@ -1,6 +1,6 @@
-﻿using GIGLS.CORE.DTO;
+﻿using POST.CORE.DTO;
 
-namespace GIGLS.Core.DTO.Utility
+namespace POST.Core.DTO.Utility
 {
     public class GlobalPropertyDTO : BaseDomainDTO
     {

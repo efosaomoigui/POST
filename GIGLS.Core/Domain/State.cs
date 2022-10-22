@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.Domain
+namespace POST.Core.Domain
 {
     public class State : BaseDomain, IAuditable
     {

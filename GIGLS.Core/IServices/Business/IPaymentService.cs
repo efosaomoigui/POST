@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.DTO.PaymentTransactions;
+﻿using POST.Core.DTO.PaymentTransactions;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Business
+namespace POST.Core.IServices.Business
 {
     public interface IPaymentService : IServiceDependencyMarker
     {

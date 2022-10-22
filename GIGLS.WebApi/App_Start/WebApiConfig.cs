@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json.Converters;
 using System.Web.Http;
 
-namespace GIGLS.WebApi
+namespace POST.WebApi
 {
     public static class WebApiConfig
     {

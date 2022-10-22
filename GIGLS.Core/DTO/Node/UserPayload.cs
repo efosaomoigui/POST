@@ -1,7 +1,7 @@
-﻿using GIGLS.Core.DTO.OnlinePayment;
+﻿using POST.Core.DTO.OnlinePayment;
 using Newtonsoft.Json;
 
-namespace GIGLS.Core.DTO.Node
+namespace POST.Core.DTO.Node
 {
     public class UserPayload
     {

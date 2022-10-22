@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using POST.Core.DTO.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Shipments
+namespace POST.Core.IServices.Shipments
 {
     public interface IManifestVisitMonitoringService : IServiceDependencyMarker
     {

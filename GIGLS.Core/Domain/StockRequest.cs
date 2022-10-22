@@ -1,9 +1,9 @@
-﻿using GIGLS.Core.Enums;
-using GIGLS.Core;
+﻿using POST.Core.Enums;
+using POST.Core;
 using System;
-using GIGLS.Core.Domain;
+using POST.Core.Domain;
 
-namespace GIGL.GIGLS.Core.Domain
+namespace GIGL.POST.Core.Domain
 {
     public class StockRequest : BaseDomain, IAuditable
     {

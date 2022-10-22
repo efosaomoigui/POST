@@ -1,24 +1,24 @@
 ﻿using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Infrastructure;
+using GIGL.POST.Core.Domain;
+using POST.Core;
+using POST.Core.DTO;
+using POST.Core.DTO.Account;
+using POST.Core.DTO.Customers;
+using POST.Core.DTO.ServiceCentres;
+using POST.Core.DTO.Shipments;
+using POST.Core.DTO.User;
+using POST.Core.DTO.Wallet;
+using POST.Core.Enums;
+using POST.Core.IMessageService;
+using POST.Core.IServices.Customers;
+using POST.Core.IServices.ServiceCentres;
+using POST.Core.IServices.Shipments;
+using POST.Core.IServices.User;
+using POST.Core.IServices.Utility;
+using POST.Core.IServices.Wallet;
+using POST.CORE.DTO.Report;
+using POST.CORE.DTO.Shipments;
+using POST.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -34,7 +34,7 @@ using ThirdParty.WebServices.Magaya.Business.New;
 using ThirdParty.WebServices.Magaya.DTO;
 using ThirdParty.WebServices.Magaya.Services;
 
-namespace GIGLS.Services.Business.Magaya.Shipments
+namespace POST.Services.Business.Magaya.Shipments
 {
     public class MagayaService : IMagayaService
     {

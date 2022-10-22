@@ -1,18 +1,18 @@
-﻿using GIGLS.Core.IServices;
+﻿using POST.Core.IServices;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+using POST.Core.DTO;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System.Web.Http;
-using GIGLS.Core.DTO.Captains;
+using POST.Core.DTO.Captains;
 using System;
 using System.Collections.Generic;
 using System.Web;
 using System.Text;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Services.Implementation.Shipments;
+using POST.CORE.DTO.Report;
+using POST.Services.Implementation.Shipments;
 
-namespace GIGLS.WebApi.Controllers
+namespace POST.WebApi.Controllers
 {
     [Authorize]
     [RoutePrefix("api/captain")]

@@ -1,8 +1,8 @@
-﻿using GIGLS.Core.DTO.InternationalShipmentDetails;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.InternationalRequest;
-using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
+﻿using POST.Core.DTO.InternationalShipmentDetails;
+using POST.Core.IServices;
+using POST.Core.IServices.InternationalRequest;
+using POST.Services.Implementation;
+using POST.WebApi.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.InternationalRequest
+namespace POST.WebApi.Controllers.InternationalRequest
 {
     [Authorize(Roles = "ViewAdmin")]
     [RoutePrefix("api/internationalrequest")]

@@ -1,8 +1,8 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.Haulage;
-using GIGLS.Infrastructure.Persistence.Repository;
+﻿using GIGL.POST.Core.Domain;
+using POST.Core.IRepositories.Haulage;
+using POST.Infrastructure.Persistence.Repository;
 
-namespace GIGLS.Infrastructure.Persistence.Repositories.Haulage
+namespace POST.Infrastructure.Persistence.Repositories.Haulage
 {
     public class HaulageDistanceMappingRepository : Repository<HaulageDistanceMapping, GIGLSContext>, IHaulageDistanceMappingRepository
     {

@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using GIGLS.Core.DTO.Captains;
-using GIGLS.Core.DTO.Pagination;
-using GIGLS.Infrastructure;
+using POST.Core.DTO.Captains;
+using POST.Core.DTO.Pagination;
+using POST.Infrastructure;
 using Newtonsoft.Json;
 
-namespace GIGLS.Services.Implementation
+namespace POST.Services.Implementation
 {
     public class Paginate
     {

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Vendors;
-using GIGLS.Core.IServices.Vendors;
+using POST.Core.DTO.Vendors;
+using POST.Core.IServices.Vendors;
 
-namespace GIGLS.Services.Implementation.Vendors
+namespace POST.Services.Implementation.Vendors
 {
     public class VendorService : IVendorService
     {
