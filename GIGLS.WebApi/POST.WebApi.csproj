@@ -576,19 +576,19 @@
     <Folder Include="Views\Test\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GIGLS.Core\POST.Core.csproj">
+    <ProjectReference Include="..\POST.Core\POST.Core.csproj">
       <Project>{e09465db-8bc7-4f1c-81d8-4ea1daa77ad4}</Project>
       <Name>POST.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GIGLS.Infrastructure\POST.Infrastructure.csproj">
+    <ProjectReference Include="..\POST.Infrastructure\POST.Infrastructure.csproj">
       <Project>{ca1b58fd-e1d5-48d3-a27d-d4e756cbf3e5}</Project>
       <Name>POST.Infrastructure</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GIGLS.Messaging\POST.Messaging.csproj">
+    <ProjectReference Include="..\POST.Messaging\POST.Messaging.csproj">
       <Project>{f5d1aa8b-bb98-43e6-a758-cbfa7563f4a7}</Project>
       <Name>POST.Messaging</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GIGLS.Services\POST.Services.csproj">
+    <ProjectReference Include="..\POST.Services\POST.Services.csproj">
       <Project>{3e97ded8-8a27-4b97-b8a9-fc3511550d91}</Project>
       <Name>POST.Services</Name>
     </ProjectReference>

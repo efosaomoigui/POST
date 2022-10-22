@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<TransactionTypes>
+  <Type>
+    <Code>BI</Code>
+    <Description>Bill</Description>
+  </Type>
+  <Type>
+    <Code>BK</Code>
+    <Description>Booking</Description>
+  </Type>
+  <Type>
+    <Code>CR</Code>
+    <Description>Cargo Release</Description>
+  </Type>
+  <Type>
+    <Code>CA</Code>
+    <Description>Carrier</Description>
+  </Type>
+  <Type>
+    <Code>CK</Code>
+    <Description>Check</Description>
+  </Type>
+  <Type>
+    <Code>CL</Code>
+    <Description>Client</Description>
+  </Type>
+  <Type>
+    <Code>CT</Code>
+    <Description>Category</Description>
+  </Type>
+  <Type>
+    <Code>DP</Code>
+    <Description>Deposit</Description>
+  </Type>
+  <Type>
+    <Code>EM</Code>
+    <Description>Employee</Description>
+  </Type>
+  <Type>
+    <Code>FA</Code>
+    <Description>Forwarding Agent</Description>
+  </Type>
+  <Type>
+    <Code>IN</Code>
+    <Description>Invoice</Description>
+  </Type>
+  <Type>
+    <Code>IV</Code>
+    <Description>Item Definitions</Description>
+  </Type>
+  <Type>
+    <Code>JB</Code>
+    <Description>Job</Description>
+  </Type>
+  <Type>
+    <Code>JE</Code>
+    <Description>Journal Entry</Description>
+  </Type>
+  <Type>
+    <Code>PM</Code>
+    <Description>Payment</Description>
+  </Type>
+  <Type>
+    <Code>PK</Code>
+    <Description>Pickup Order</Description>
+  </Type>
+  <Type>
+    <Code>PT</Code>
+    <Description>Port</Description>
+  </Type>
+  <Type>
+    <Code>PO</Code>
+    <Description>Purchase Order</Description>
+  </Type>
+  <Type>
+    <Code>QT</Code>
+    <Description>Quotation</Description>
+  </Type>
+  <Type>
+    <Code>RT</Code>
+    <Description>Rate</Description>
+  </Type>
+  <Type>
+    <Code>SO</Code>
+    <Description>Sales Order</Description>
+  </Type>
+  <Type>
+    <Code>SP</Code>
+    <Description>Sales Person</Description>
+  </Type>
+  <Type>
+    <Code>SH</Code>
+    <Description>Shipment</Description>
+  </Type>
+  <Type>
+    <Code>TR</Code>
+    <Description>Trip</Description>
+  </Type>
+  <Type>
+    <Code>VE</Code>
+    <Description>Vendor</Description>
+  </Type>
+  <Type>
+    <Code>WI</Code>
+    <Description>Warehouse Item</Description>
+  </Type>
+  <Type>
+    <Code>WP</Code>
+    <Description>Warehouse Provider</Description>
+  </Type>
+  <Type>
+    <Code>WH</Code>
+    <Description>Warehouse Receipt</Description>
+  </Type>
+</TransactionTypes>

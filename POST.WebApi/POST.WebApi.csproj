@@ -1,0 +1,650 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.Net.Compilers.1.2.2\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.1.2.2\build\Microsoft.Net.Compilers.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{34F0A9AD-90CD-4E09-9034-10A5F730F85A}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>POST.WebApi</RootNamespace>
+    <AssemblyName>POST.WebApi</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <UseIISExpress>false</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <Use64BitIISExpress />
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>POST.WebApi.xml</DocumentationFile>
+    <NoWarn>1062;1591</NoWarn>
+    <PublishDatabases>false</PublishDatabases>
+    <LegacyPublishPropertiesPageEnabled>true</LegacyPublishPropertiesPageEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Audit.EntityFramework, Version=9.0.1.0, Culture=neutral, PublicKeyToken=571d6b80b242c87e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Audit.EntityFramework.9.0.1\lib\net45\Audit.EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Audit.NET, Version=9.0.1.0, Culture=neutral, PublicKeyToken=571d6b80b242c87e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Audit.NET.9.0.1\lib\net45\Audit.NET.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Audit.WebApi, Version=7.0.9.0, Culture=neutral, PublicKeyToken=571d6b80b242c87e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Audit.WebApi.7.0.9\lib\net45\Audit.WebApi.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="AutoMapper, Version=6.2.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.6.2.0\lib\net45\AutoMapper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Castle.Core.4.2.0\lib\net45\Castle.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Hangfire.Core, Version=1.7.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Hangfire.Core.1.7.7\lib\net45\Hangfire.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Hangfire.Ninject, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Hangfire.Ninject.1.2.0\lib\net45\Hangfire.Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="Hangfire.SqlServer, Version=1.7.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Hangfire.SqlServer.1.7.7\lib\net45\Hangfire.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AI.Agent.Intercept, Version=2.0.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.Agent.Intercept.2.0.6\lib\net45\Microsoft.AI.Agent.Intercept.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AI.DependencyCollector, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.DependencyCollector.2.2.0\lib\net45\Microsoft.AI.DependencyCollector.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AI.PerfCounterCollector, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.PerfCounterCollector.2.2.0\lib\net45\Microsoft.AI.PerfCounterCollector.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AI.ServerTelemetryChannel, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel.2.2.0\lib\net45\Microsoft.AI.ServerTelemetryChannel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AI.Web, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.Web.2.2.0\lib\net45\Microsoft.AI.Web.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AI.WindowsServer, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.WindowsServer.2.2.0\lib\net45\Microsoft.AI.WindowsServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ApplicationInsights, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.2.2.0\lib\net45\Microsoft.ApplicationInsights.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.3\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.EntityFramework, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.EntityFramework.2.2.1\lib\net45\Microsoft.AspNet.Identity.EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Owin, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Owin.2.2.3\lib\net45\Microsoft.AspNet.Identity.Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=3.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.3.6.0\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Owin, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.3.1.0\lib\net45\Microsoft.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Cors, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Cors.3.0.0\lib\net45\Microsoft.Owin.Cors.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.3.1.0\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.3.1.0\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.Cookies, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.Cookies.3.0.1\lib\net45\Microsoft.Owin.Security.Cookies.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.Jwt, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.Jwt.3.1.0\lib\net45\Microsoft.Owin.Security.Jwt.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.OAuth, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.OAuth.3.1.0\lib\net45\Microsoft.Owin.Security.OAuth.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.3.2.0.0\lib\net45-full\Ninject.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Ninject.Extensions.Conventions, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.Extensions.Conventions.3.2.0.0\lib\net45-full\Ninject.Extensions.Conventions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Ninject.Web.Common, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.Web.Common.3.2.0.0\lib\net45-full\Ninject.Web.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Ninject.Web.WebApi, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.Web.WebApi.3.2.4.0\lib\net45-full\Ninject.Web.WebApi.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
+      <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="PayStack.Net, Version=0.6.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PayStack.Net.0.6.6\lib\net45\PayStack.Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.2.10.0\lib\net45\Serilog.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.Formatting.Compact, Version=1.1.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.Formatting.Compact.1.1.0\lib\net452\Serilog.Formatting.Compact.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.Sinks.File, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.Sinks.File.4.1.0\lib\net45\Serilog.Sinks.File.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.Sinks.PeriodicBatching, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.Sinks.PeriodicBatching.2.3.0\lib\net45\Serilog.Sinks.PeriodicBatching.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.Sinks.RollingFile, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.Sinks.RollingFile.3.3.0\lib\net45\Serilog.Sinks.RollingFile.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.Sinks.Seq, Version=5.0.1.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.Sinks.Seq.5.0.1\lib\net45\Serilog.Sinks.Seq.dll</HintPath>
+    </Reference>
+    <Reference Include="SerilogWeb.Classic, Version=5.0.0.0, Culture=neutral, PublicKeyToken=9462ddd55fbc0e7f, processorArchitecture=MSIL">
+      <HintPath>..\packages\SerilogWeb.Classic.5.0.48\lib\net45\SerilogWeb.Classic.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SerilogWeb.Classic.WebApi, Version=4.0.0.0, Culture=neutral, PublicKeyToken=9462ddd55fbc0e7f, processorArchitecture=MSIL">
+      <HintPath>..\packages\SerilogWeb.Classic.WebApi.4.0.5\lib\net45\SerilogWeb.Classic.WebApi.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Swashbuckle.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cd1bb07a5ac7c7bc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Swashbuckle.Core.5.6.0\lib\net40\Swashbuckle.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.IdentityModel.Services" />
+    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IdentityModel.Tokens.Jwt.4.0.1\lib\net45\System.IdentityModel.Tokens.Jwt.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web.Cors, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Cors.5.0.0\lib\net45\System.Web.Cors.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.Owin, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Owin.5.2.3\lib\net45\System.Web.Http.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.7\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.7\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Thinktecture.IdentityModel.Core, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Thinktecture.IdentityModel.Core.1.3.0\lib\net45\Thinktecture.IdentityModel.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WebActivatorEx, Version=2.0.0.0, Culture=neutral, PublicKeyToken=7b26dc2a43f6a0d4, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebActivatorEx.2.0\lib\net40\WebActivatorEx.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="XtremeIT.Library.Pins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5f275dd942b1b995, processorArchitecture=MSIL">
+      <HintPath>..\packages\PayStack.Net.0.6.6\lib\net45\XtremeIT.Library.Pins.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Net.Http.Formatting">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="POST.WebApi.xml" />
+    <Content Include="Global.asax" />
+    <Content Include="Images\amazon.png" />
+    <Content Include="Images\argos.png" />
+    <Content Include="Images\asos.png" />
+    <Content Include="Images\bestbuy.png" />
+    <Content Include="Images\boots.png" />
+    <Content Include="Images\ebay.png" />
+    <Content Include="Images\GIGLogisticsLogo.png" />
+    <Content Include="Images\h&amp;m.png" />
+    <Content Include="Images\homebase.png" />
+    <Content Include="Images\marksspencers.png" />
+    <Content Include="Images\matalan.png" />
+    <Content Include="Images\next.png" />
+    <Content Include="Images\oldnavy.png" />
+    <Content Include="Images\tesco.png" />
+    <Content Include="Images\ukflag.png" />
+    <Content Include="Images\usflag.png" />
+    <Content Include="Images\walmart.jpg" />
+    <Content Include="Images\walmart.png" />
+    <Content Include="Images\zara.png" />
+    <Content Include="MagayaDirectory\commoditytypes.xml" />
+    <Content Include="MagayaDirectory\Locations.xml" />
+    <Content Include="MagayaDirectory\transactiontypes.xml" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App_Start\AuthorizationOperationFilter.cs" />
+    <Compile Include="App_Start\AuthTokenOperation.cs" />
+    <Compile Include="App_Start\GiglsCustomJwtFormat.cs" />
+    <Compile Include="App_Start\IdentityConfig.cs" />
+    <Compile Include="App_Start\NinjectWebCommon.cs" />
+    <Compile Include="App_Start\Startup.Auth.cs" />
+    <Compile Include="App_Start\SwaggerConfig.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\Account\ExpenditureController.cs" />
+    <Compile Include="Controllers\Account\ExpenseTypeController.cs" />
+    <Compile Include="Controllers\Account\GeneralLedgerController.cs" />
+    <Compile Include="Controllers\Account\IncomeController.cs" />
+    <Compile Include="Controllers\Account\InsuranceController.cs" />
+    <Compile Include="Controllers\Account\InvoiceController.cs" />
+    <Compile Include="Controllers\Account\InvoiceReminderController.cs" />
+    <Compile Include="Controllers\Account\InvoiceShipmentController.cs" />
+    <Compile Include="Controllers\Account\VATController.cs" />
+    <Compile Include="Controllers\BankSettlement\BankController.cs" />
+    <Compile Include="Controllers\BankSettlement\BankProcessingOrderController.cs" />
+    <Compile Include="Controllers\BankSettlement\BankProcessingOrderForAllController.cs" />
+    <Compile Include="Controllers\BankSettlement\BankShipmentSettlementController.cs" />
+    <Compile Include="Controllers\BankSettlement\CODProcessingOrderController.cs" />
+    <Compile Include="Controllers\BankSettlement\CODSettlementSheetController.cs" />
+    <Compile Include="Controllers\BaseWebApiController.cs" />
+    <Compile Include="Controllers\BillsPaymentController.cs" />
+    <Compile Include="Controllers\Business\PaymentController.cs" />
+    <Compile Include="Controllers\Business\PriceCategoryController.cs" />
+    <Compile Include="Controllers\Business\PricingController.cs" />
+    <Compile Include="Controllers\Business\ScanController.cs" />
+    <Compile Include="Controllers\Business\ShipmentTrackController.cs" />
+    <Compile Include="Controllers\CaptainBonusByZoneMapingController.cs" />
+    <Compile Include="Controllers\CaptainController.cs" />
+    <Compile Include="Controllers\Client\ClientNodeController.cs" />
+    <Compile Include="Controllers\CountryController.cs" />
+    <Compile Include="Controllers\CustomerInvoice\CustomerInvoiceController.cs" />
+    <Compile Include="Controllers\CustomerPortal\CustomerPortalController.cs" />
+    <Compile Include="Controllers\CustomerPortal\FirebaseAccessController.cs" />
+    <Compile Include="Controllers\CustomerPortal\PublicTrackingController.cs" />
+    <Compile Include="Controllers\Customers\CompanyContactPersonController.cs" />
+    <Compile Include="Controllers\Customers\CompanyController.cs" />
+    <Compile Include="Controllers\Customers\CustomerController.cs" />
+    <Compile Include="Controllers\Customers\IndividualCustomerController.cs" />
+    <Compile Include="Controllers\Dashboard\DashboardController.cs" />
+    <Compile Include="Controllers\DeliveryLocationController.cs" />
+    <Compile Include="Controllers\Devices\DeviceController.cs" />
+    <Compile Include="Controllers\Devices\DeviceManagementController.cs" />
+    <Compile Include="Controllers\Fleets\DispatchActivityController.cs" />
+    <Compile Include="Controllers\Fleets\DispatchController.cs" />
+    <Compile Include="Controllers\Fleets\FleetController.cs" />
+    <Compile Include="Controllers\Fleets\FleetDisputeMessageController.cs" />
+    <Compile Include="Controllers\Fleets\FleetJobCardController.cs" />
+    <Compile Include="Controllers\Fleets\FleetMakeController.cs" />
+    <Compile Include="Controllers\Fleets\FleetManagementController.cs" />
+    <Compile Include="Controllers\Fleets\FleetModelController.cs" />
+    <Compile Include="Controllers\Fleets\FleetPartController.cs" />
+    <Compile Include="Controllers\Fleets\FleetTripController.cs" />
+    <Compile Include="Controllers\GIGGo\GIGGoPartnerController.cs" />
+    <Compile Include="Controllers\Haulage\HaulageController.cs" />
+    <Compile Include="Controllers\Haulage\HaulageDistanceMappingController.cs" />
+    <Compile Include="Controllers\Haulage\HaulageDistanceMappingPriceController.cs" />
+    <Compile Include="Controllers\Haulage\PackingListController.cs" />
+    <Compile Include="Controllers\InternationalRequest\InternationalRequestController.cs" />
+    <Compile Include="Controllers\Messaging\EmailSendLogController.cs" />
+    <Compile Include="Controllers\Messaging\MessageController.cs" />
+    <Compile Include="Controllers\Messaging\NotificationController.cs" />
+    <Compile Include="Controllers\Messaging\SmsSendLogController.cs" />
+    <Compile Include="Controllers\Nav\MainNavController.cs" />
+    <Compile Include="Controllers\Nav\SubNavController.cs" />
+    <Compile Include="Controllers\Nav\SubSubNavController.cs" />
+    <Compile Include="Controllers\Partnership\FleetPartnerController.cs" />
+    <Compile Include="Controllers\Partnership\PartnerApplicationController.cs" />
+    <Compile Include="Controllers\Partnership\PartnerController.cs" />
+    <Compile Include="Controllers\PaymentMethodController.cs" />
+    <Compile Include="Controllers\PaymentTransactions\PaymentPartialTransactionController.cs" />
+    <Compile Include="Controllers\PaymentTransactions\PaymentTransactionController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\AzapayController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\CellulantController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\KorapayController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\SterlingController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\FlutterwaveController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\PaystackController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\USSDController.cs" />
+    <Compile Include="Controllers\PickUp\PickUpController.cs" />
+    <Compile Include="Controllers\Report\AdminReportController.cs" />
+    <Compile Include="Controllers\Report\ReportsController.cs" />
+    <Compile Include="Controllers\RiderDeliveryController.cs" />
+    <Compile Include="Controllers\Routes\RouteController.cs" />
+    <Compile Include="Controllers\Scanner\GIGLExpressController.cs" />
+    <Compile Include="Controllers\Scanner\MobileScannerController.cs" />
+    <Compile Include="Controllers\ServiceCentres\LGAController.cs" />
+    <Compile Include="Controllers\ServiceCentres\PlaceLocationController.cs" />
+    <Compile Include="Controllers\ServiceCentres\RegionController.cs" />
+    <Compile Include="Controllers\ServiceCentres\RegionServiceCentreMappingController.cs" />
+    <Compile Include="Controllers\ServiceCentres\ServiceCentreController.cs" />
+    <Compile Include="Controllers\ServiceCentres\StationController.cs" />
+    <Compile Include="Controllers\ServiceCentres\UserServiceCentreMappingController.cs" />
+    <Compile Include="Controllers\ShipmentScan\ScanStatusController.cs" />
+    <Compile Include="Controllers\Shipments\ForWebJobsController.cs" />
+    <Compile Include="Controllers\Shipments\GroupWaybillNumberController.cs" />
+    <Compile Include="Controllers\Shipments\GroupWaybillNumberMappingController.cs" />
+    <Compile Include="Controllers\Shipments\HUBManifestWaybillMappingController.cs" />
+    <Compile Include="Controllers\Shipments\InternationalShipmentWaybillController.cs" />
+    <Compile Include="Controllers\Shipments\LogVisitReasonController.cs" />
+    <Compile Include="Controllers\Shipments\MagayaController.cs" />
+    <Compile Include="Controllers\Shipments\ManifestController.cs" />
+    <Compile Include="Controllers\Shipments\ManifestGroupWaybillNumberMappingController.cs" />
+    <Compile Include="Controllers\Shipments\ManifestVisitMonitoringController.cs" />
+    <Compile Include="Controllers\Shipments\ManifestWaybillMappingController.cs" />
+    <Compile Include="Controllers\Shipments\MissingShipmentController.cs" />
+    <Compile Include="Controllers\Shipments\PreShipmentController.cs" />
+    <Compile Include="Controllers\Shipments\PreShipmentManifestMappingController.cs" />
+    <Compile Include="Controllers\Shipments\ShipmentCancelController.cs" />
+    <Compile Include="Controllers\Shipments\ShipmentCollectionController.cs" />
+    <Compile Include="Controllers\Shipments\ShipmentController.cs" />
+    <Compile Include="Controllers\Shipments\ShipmentDeliveryOptionMappingController.cs" />
+    <Compile Include="Controllers\Shipments\ShipmentPackagePriceController.cs" />
+    <Compile Include="Controllers\Shipments\ShipmentRerouteController.cs" />
+    <Compile Include="Controllers\Shipments\ShipmentReturnController.cs" />
+    <Compile Include="Controllers\Shipments\SuperManifestController.cs" />
+    <Compile Include="Controllers\Shipments\WaybillNumberController.cs" />
+    <Compile Include="Controllers\Sla\SLAController.cs" />
+    <Compile Include="Controllers\StateController.cs" />
+    <Compile Include="Controllers\Store\StoreController.cs" />
+    <Compile Include="Controllers\ThirdPartyAPI\ThirdPartyAPIController.cs" />
+    <Compile Include="Controllers\User\LoginController.cs" />
+    <Compile Include="Controllers\User\UserController.cs" />
+    <Compile Include="Controllers\Utility\GlobalPropertyController.cs" />
+    <Compile Include="Controllers\Wallet\CashOnDeliveryAccountController.cs" />
+    <Compile Include="Controllers\Wallet\CashOnDeliveryBalanceController.cs" />
+    <Compile Include="Controllers\Wallet\WalletController.cs" />
+    <Compile Include="Controllers\Wallet\WalletPaymentLogController.cs" />
+    <Compile Include="Controllers\Wallet\WalletPaymentLogForAllController.cs" />
+    <Compile Include="Controllers\Wallet\WalletTransactionController.cs" />
+    <Compile Include="Controllers\Wallet\WaybillPaymentLogController.cs" />
+    <Compile Include="Controllers\Zone\CountryRouteZoneMapController.cs" />
+    <Compile Include="Controllers\Zone\DeliveryOptionController.cs" />
+    <Compile Include="Controllers\Zone\DeliveryOptionPriceController.cs" />
+    <Compile Include="Controllers\Zone\DomesticRouteZoneMapController.cs" />
+    <Compile Include="Controllers\Zone\DomesticZonePriceController.cs" />
+    <Compile Include="Controllers\Zone\SpecialDomesticPackageController.cs" />
+    <Compile Include="Controllers\Zone\SpecialDomesticZonePriceController.cs" />
+    <Compile Include="Controllers\Zone\WeightLimitController.cs" />
+    <Compile Include="Controllers\Zone\WeightLimitPriceController.cs" />
+    <Compile Include="Controllers\Zone\ZoneController.cs" />
+    <Compile Include="Helper\DbExtensions.cs" />
+    <Compile Include="Filters\Configuration\HttpRequestMessageExtensions.cs" />
+    <Compile Include="Filters\Configuration\IPAddressElement.cs" />
+    <Compile Include="Filters\Configuration\IPAddressElementCollection.cs" />
+    <Compile Include="Filters\Configuration\IPFilteringSection.cs" />
+    <Compile Include="Filters\GIGLSActivityAuthorizeAttribute.cs" />
+    <Compile Include="Filters\GIGLSRoleAuthorizeAttribute.cs" />
+    <Compile Include="Filters\IPFilterAttribute.cs" />
+    <Compile Include="Filters\RequireHttpsAttribute.cs" />
+    <Compile Include="Filters\ThirdPartyActivityAuthorizeAttribute.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Models\AccountBindingModels.cs" />
+    <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\ClaimBindingModel.cs" />
+    <Compile Include="Models\CreateUserBindingModel.cs" />
+    <Compile Include="Models\ExtendedClaimsProvider.cs" />
+    <Compile Include="Models\ModelFactory.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Providers\CustomAuthenticationMiddleware.cs" />
+    <Compile Include="Providers\GiglsCustomOAuthProvider.cs" />
+    <Compile Include="Providers\GiglsSimpleCustomOAuthProvider.cs" />
+    <Compile Include="Startup.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="packages.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="ApplicationInsights.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="app.manifest">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="ReportTemplate\dailysales.xlsx" />
+    <Content Include="Properties\webjobs-list.json" />
+    <None Include="Properties\PublishProfiles\agilityautomanifestAPI - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilityautomanifestAPI - ReadOnly - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilityautomanifestAPI - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - FTP1.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - FTP2.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - FTP3.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - ReadOnly - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - ReadOnly - FTP1.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - ReadOnly - FTP2.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - ReadOnly - FTP3.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - Web Deploy1.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - Web Deploy2.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - Web Deploy3.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - FTP1.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - FTP2.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - FTP3.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - FTP4.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - FTP5.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - ReadOnly - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - ReadOnly - FTP1.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - ReadOnly - FTP2.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - ReadOnly - FTP3.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - ReadOnly - FTP4.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - ReadOnly - FTP5.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - Web Deploy1.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - Web Deploy2.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - Web Deploy3.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - Web Deploy4.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - Web Deploy5.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - FTP1.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - FTP2.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - ReadOnly - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - ReadOnly - FTP1.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - ReadOnly - FTP2.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - Web Deploy1.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - Web Deploy2.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemsapibackup-staging - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemsapibackup-staging - ReadOnly - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemsapibackup-staging - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\giggomobileappapi-staging - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\giggomobileappapi-staging - FTP1.pubxml" />
+    <None Include="Properties\PublishProfiles\giggomobileappapi-staging - FTP2.pubxml" />
+    <None Include="Properties\PublishProfiles\giggomobileappapi-staging - ReadOnly - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\giggomobileappapi-staging - ReadOnly - FTP1.pubxml" />
+    <None Include="Properties\PublishProfiles\giggomobileappapi-staging - ReadOnly - FTP2.pubxml" />
+    <None Include="Properties\PublishProfiles\giggomobileappapi-staging - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\giggomobileappapi-staging - Web Deploy1.pubxml" />
+    <None Include="Properties\PublishProfiles\giggomobileappapi-staging - Web Deploy2.pubxml" />
+    <None Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+    <None Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+    <Folder Include="ReportTemplate\download\" />
+    <Folder Include="Views\Captain\" />
+    <Folder Include="Views\FleetJobCard\" />
+    <Folder Include="Views\InvoiceReminder\" />
+    <Folder Include="Views\Korapay\" />
+    <Folder Include="Views\Location\" />
+    <Folder Include="Views\PaymentMethod\" />
+    <Folder Include="Views\Reminder\" />
+    <Folder Include="Views\Test\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\POST.Core\POST.Core.csproj">
+      <Project>{e09465db-8bc7-4f1c-81d8-4ea1daa77ad4}</Project>
+      <Name>POST.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\POST.Infrastructure\POST.Infrastructure.csproj">
+      <Project>{ca1b58fd-e1d5-48d3-a27d-d4e756cbf3e5}</Project>
+      <Name>POST.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\POST.Messaging\POST.Messaging.csproj">
+      <Project>{f5d1aa8b-bb98-43e6-a758-cbfa7563f4a7}</Project>
+      <Name>POST.Messaging</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\POST.Services\POST.Services.csproj">
+      <Project>{3e97ded8-8a27-4b97-b8a9-fc3511550d91}</Project>
+      <Name>POST.Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThirdParty.WebServices\ThirdParty.WebServices.csproj">
+      <Project>{03529607-e784-45a7-b684-158ea13fb5e0}</Project>
+      <Name>ThirdParty.WebServices</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>18591</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost/deltapost</IISUrl>
+          <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>
+          <IISAppRootUrl>http://localhost/giglsresourceapi</IISAppRootUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.1.2.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.1.2.2\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Web.WebJobs.Publish.2.0.0\build\Microsoft.Web.WebJobs.Publish.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Web.WebJobs.Publish.2.0.0\build\Microsoft.Web.WebJobs.Publish.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.3.6.0\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.3.6.0\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets'))" />
+  </Target>
+  <Import Project="..\packages\Microsoft.Web.WebJobs.Publish.2.0.0\build\Microsoft.Web.WebJobs.Publish.targets" Condition="Exists('..\packages\Microsoft.Web.WebJobs.Publish.2.0.0\build\Microsoft.Web.WebJobs.Publish.targets')" />
+  <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.3.6.0\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.3.6.0\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

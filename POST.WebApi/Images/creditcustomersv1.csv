@@ -1,0 +1,21 @@
+CUSTOMERCODE,AMOUNT,CREDITTYPE,DESCRIPTION
+IND744497,1959,Credit,Mistouted 1288163631
+IND713364,2768,Credit,Misrouted 1016056754 1349124312
+IND595617,600,Credit,Scanned for retrun but rerouted 1295050786 1295050853
+IND780165,2100,credit,Misroute 1002030027
+ECO004815,1815,Credit,Misroute 1289094287
+ECO00738,472,Credit,Overcharged waybill 1005021045
+IND273122,2000,Credit,Scanned for return but was picked up 1001046322 1013215646
+ECO004729,1735,Credit,Misroute 1290077764
+ECO002775,1255,Credit,Misrouted shipment 1401000007
+ECO012222,2250,Credit,Overcharged 1349125735
+ECO005897,12815.8,Credit,Misrouted 1330018107
+ECO005311,2700,Credit,Misrouted 1017096878
+ECO004757,3048,Credit,Misrouted 1303088562
+ECO002700,2475,Credit,Misrouted 1023026140
+ECO017305,600,Credit,Returned innstead of rerouted 1014008015
+P006151,3700,Credit,Failed GOTV Subscription
+IND893532,3600,Credit,Double reroute 1404000015 1404000014
+IND700463,1815,Credit,Refund for misroute waybill 1346040881
+IND030020,3999,Credit,Double class subscription from wallet
+ECO001249,7998,Credit,Multiple debit for Class Subscription

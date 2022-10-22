@@ -7,8 +7,8 @@
     <ProjectGuid>{CA1B58FD-E1D5-48D3-A27D-D4E756CBF3E5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GIGLS.Infrastructure</RootNamespace>
-    <AssemblyName>GIGLS.Infrastructure</AssemblyName>
+    <RootNamespace>POST.Infrastructure</RootNamespace>
+    <AssemblyName>POST.Infrastructure</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -313,7 +313,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GIGLS.Core\POST.Core.csproj">
+    <ProjectReference Include="..\POST.Core\POST.Core.csproj">
       <Project>{e09465db-8bc7-4f1c-81d8-4ea1daa77ad4}</Project>
       <Name>POST.Core</Name>
     </ProjectReference>
