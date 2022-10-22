@@ -7,13 +7,13 @@ namespace POST.Infrastructure.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.2.0-61023")]
-    public sealed partial class Efetype : IMigrationMetadata
+    public sealed partial class efe_dev : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(Efetype));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(efe_dev));
         
         string IMigrationMetadata.Id
         {
-            get { return "202210220532560_Efe type"; }
+            get { return "202210220845127_efe_dev"; }
         }
         
         string IMigrationMetadata.Source

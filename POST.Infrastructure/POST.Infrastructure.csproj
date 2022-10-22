@@ -118,9 +118,9 @@
   <ItemGroup>
     <Compile Include="GenericException.cs" />
     <Compile Include="IdentityInfrastrure\GiglsUserStore.cs" />
-    <Compile Include="Migrations\202210220532560_Efe type.cs" />
-    <Compile Include="Migrations\202210220532560_Efe type.Designer.cs">
-      <DependentUpon>202210220532560_Efe type.cs</DependentUpon>
+    <Compile Include="Migrations\202210220845127_efe_dev.cs" />
+    <Compile Include="Migrations\202210220845127_efe_dev.Designer.cs">
+      <DependentUpon>202210220845127_efe_dev.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Persistence\GIGLSContext.cs" />
@@ -326,8 +326,8 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202210220532560_Efe type.resx">
-      <DependentUpon>202210220532560_Efe type.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202210220845127_efe_dev.resx">
+      <DependentUpon>202210220845127_efe_dev.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
