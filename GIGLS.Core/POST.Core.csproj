@@ -1,0 +1,1118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E09465DB-8BC7-4F1C-81D8-4EA1DAA77AD4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>POST.Core</RootNamespace>
+    <AssemblyName>POST.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Audit.EntityFramework, Version=9.0.1.0, Culture=neutral, PublicKeyToken=571d6b80b242c87e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Audit.EntityFramework.9.0.1\lib\net45\Audit.EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Audit.NET, Version=9.0.1.0, Culture=neutral, PublicKeyToken=571d6b80b242c87e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Audit.NET.9.0.1\lib\net45\Audit.NET.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Audit.WebApi, Version=7.0.9.0, Culture=neutral, PublicKeyToken=571d6b80b242c87e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Audit.WebApi.7.0.9\lib\net45\Audit.WebApi.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="AutoMapper, Version=6.2.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.6.2.0\lib\net45\AutoMapper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.3\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.EntityFramework, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.EntityFramework.2.2.1\lib\net45\Microsoft.AspNet.Identity.EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Owin, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Owin.2.2.3\lib\net45\Microsoft.AspNet.Identity.Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.3.1.0\lib\net45\Microsoft.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.3.1.0\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.3.1.0\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.Cookies, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.Cookies.3.0.1\lib\net45\Microsoft.Owin.Security.Cookies.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.OAuth, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.OAuth.3.1.0\lib\net45\Microsoft.Owin.Security.OAuth.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
+      <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="PayStack.Net, Version=0.6.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PayStack.Net.0.6.6\lib\net45\PayStack.Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.IdentityModel.Services" />
+    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IdentityModel.Tokens.Jwt.1.0.0\lib\net45\System.IdentityModel.Tokens.Jwt.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Http.Owin, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Owin.5.2.3\lib\net45\System.Web.Http.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="XtremeIT.Library.Pins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5f275dd942b1b995, processorArchitecture=MSIL">
+      <HintPath>..\packages\PayStack.Net.0.6.6\lib\net45\XtremeIT.Library.Pins.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Common\Extensions\EntityQueryExtensions.cs" />
+    <Compile Include="Common\Extensions\PagedListExtensions.cs" />
+    <Compile Include="Common\Extensions\PredicateExtensions.cs" />
+    <Compile Include="Common\Helpers\IPagedQueryBuilder.cs" />
+    <Compile Include="Common\Helpers\IQueryCommand.cs" />
+    <Compile Include="Common\Helpers\PagedList.cs" />
+    <Compile Include="Domain\ActivationCampaignEmail.cs" />
+    <Compile Include="Domain\AppRole.cs" />
+    <Compile Include="Domain\Archived\GeneralLedger_Archive.cs" />
+    <Compile Include="Domain\Archived\Invoice_Archive.cs" />
+    <Compile Include="Domain\Archived\BaseDomain_Archive.cs" />
+    <Compile Include="Domain\Archived\ShipmentItem_Archive.cs" />
+    <Compile Include="Domain\Archived\Shipment_Archive.cs" />
+    <Compile Include="Domain\Archived\TransitWaybillNumber_Archive.cs" />
+    <Compile Include="Domain\Audit\AuditTrailEvent.cs" />
+    <Compile Include="Domain\BillsPaymentManagement.cs" />
+    <Compile Include="Domain\FleetPartnerTransaction.cs" />
+    <Compile Include="Domain\GIGGOCODTransfer.cs" />
+    <Compile Include="Domain\InboundCategory.cs" />
+    <Compile Include="Domain\InboundShipmentCategory.cs" />
+    <Compile Include="Domain\ShipmentCategory.cs" />
+    <Compile Include="Domain\FleetDisputeMessage.cs" />
+    <Compile Include="Domain\FleetJobCard.cs" />
+    <Compile Include="Domain\UnidentifiedItemsForInternationalShipping.cs" />
+    <Compile Include="Domain\InternationalCargoManifestDetail.cs" />
+    <Compile Include="Domain\InternationalCargoManifest.cs" />
+    <Compile Include="Domain\ShipmentExport.cs" />
+    <Compile Include="Domain\GIGXUserDetail.cs" />
+    <Compile Include="Domain\Bank.cs" />
+    <Compile Include="Domain\BankSettlement\BankProcessingOrderForShipmentAndCOD.cs" />
+    <Compile Include="Domain\BankSettlement\CODSettlementSheet.cs" />
+    <Compile Include="Domain\BaseDomain.cs" />
+    <Compile Include="Domain\CaptainBonusByZoneMaping.cs" />
+    <Compile Include="Domain\Category.cs" />
+    <Compile Include="Domain\ClientNode.cs" />
+    <Compile Include="Domain\Company.cs" />
+    <Compile Include="Domain\CompanyContactPerson.cs" />
+    <Compile Include="Domain\Country.cs" />
+    <Compile Include="Domain\CountryRouteZoneMap.cs" />
+    <Compile Include="Domain\CouponCodeManagement.cs" />
+    <Compile Include="Domain\PaymentMethod.cs" />
+    <Compile Include="Domain\PlaceLocation.cs" />
+    <Compile Include="Domain\TransferDetails.cs" />
+    <Compile Include="Domain\Wallet\CODTransferLog.cs" />
+    <Compile Include="Domain\Wallet\CODGeneratedAccountNo.cs" />
+    <Compile Include="Domain\Wallet\CODTransferRegister.cs" />
+    <Compile Include="Domain\Wallet\CODWallet.cs" />
+    <Compile Include="Domain\WaybillCharge.cs" />
+    <Compile Include="Domain\DeliveryLocation.cs" />
+    <Compile Include="Domain\DeliveryNumber.cs" />
+    <Compile Include="Domain\DeliveryNumberDTO.cs" />
+    <Compile Include="Domain\DeliveryOption.cs" />
+    <Compile Include="Domain\DeliveryOptionPrice.cs" />
+    <Compile Include="Domain\Demurrage.cs" />
+    <Compile Include="Domain\Devices\Device.cs" />
+    <Compile Include="Domain\Devices\DeviceManagement.cs" />
+    <Compile Include="Domain\DHL\InternationalShipmentWaybill.cs" />
+    <Compile Include="Domain\Dispatch.cs" />
+    <Compile Include="Domain\DispatchActivity.cs" />
+    <Compile Include="Domain\DomesticRouteZoneMap.cs" />
+    <Compile Include="Domain\DomesticZonePrice.cs" />
+    <Compile Include="Domain\EcommerceAgreement.cs" />
+    <Compile Include="Domain\Expenses\Expenditure.cs" />
+    <Compile Include="Domain\Expenses\ExpenseType.cs" />
+    <Compile Include="Domain\FinancialReport.cs" />
+    <Compile Include="Domain\Fleet.cs" />
+    <Compile Include="Domain\FleetMake.cs" />
+    <Compile Include="Domain\FleetModel.cs" />
+    <Compile Include="Domain\FleetMovement.cs" />
+    <Compile Include="Domain\FleetPart.cs" />
+    <Compile Include="Domain\FleetPartInventory.cs" />
+    <Compile Include="Domain\FleetPartInventoryHistory.cs" />
+    <Compile Include="Domain\FleetTrip.cs" />
+    <Compile Include="Domain\GeneralLedger.cs" />
+    <Compile Include="Domain\GiglgoStation.cs" />
+    <Compile Include="Domain\GIGLSContext.cs" />
+    <Compile Include="Domain\CustomerInvoice.cs" />
+    <Compile Include="Domain\MobileGroupCodeWaybillMapping.cs" />
+    <Compile Include="Domain\GroupWaybillNumber.cs" />
+    <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
+    <Compile Include="Domain\Haulage.cs" />
+    <Compile Include="Domain\HaulageDistanceMapping.cs" />
+    <Compile Include="Domain\HUBManifestWaybillMapping.cs" />
+    <Compile Include="Domain\InternationalRequestReceiver.cs" />
+    <Compile Include="Domain\InternationalRequestReceiverItem.cs" />
+    <Compile Include="Domain\LGA.cs" />
+    <Compile Include="Domain\Location.cs" />
+    <Compile Include="Domain\LogVisitReason.cs" />
+    <Compile Include="Domain\ManifestVisitMonitoring.cs" />
+    <Compile Include="Domain\MobilePickUpRequests.cs" />
+    <Compile Include="Domain\MobileRating.cs" />
+    <Compile Include="Domain\MobileShipmentTracking.cs" />
+    <Compile Include="Domain\Notification.cs" />
+    <Compile Include="Domain\OTP.cs" />
+    <Compile Include="Domain\OverdueShipment.cs" />
+    <Compile Include="Domain\Partnership\FleetPartner.cs" />
+    <Compile Include="Domain\Partnership\PartnerPayout.cs" />
+    <Compile Include="Domain\Partnership\PartnerTransactions.cs" />
+    <Compile Include="Domain\PickupManifest.cs" />
+    <Compile Include="Domain\PickupManifestWaybillMapping.cs" />
+    <Compile Include="Domain\PreShipmentItemMobile.cs" />
+    <Compile Include="Domain\PreShipmentManifestMapping.cs" />
+    <Compile Include="Domain\ManifestWaybillMapping.cs" />
+    <Compile Include="Domain\MessagingLog\EmailSendLog.cs" />
+    <Compile Include="Domain\MessagingLog\SmsSendLog.cs" />
+    <Compile Include="Domain\MissingShipment.cs" />
+    <Compile Include="Domain\PreShipment.cs" />
+    <Compile Include="Domain\PreShipmentMobile.cs" />
+    <Compile Include="Domain\PriceCategory.cs" />
+    <Compile Include="Domain\RankHistory.cs" />
+    <Compile Include="Domain\ReferrerCode.cs" />
+    <Compile Include="Domain\Region.cs" />
+    <Compile Include="Domain\RegionServiceCentreMapping.cs" />
+    <Compile Include="Domain\RiderDelivery.cs" />
+    <Compile Include="Domain\MagayaShipmentAgility.cs" />
+    <Compile Include="Domain\Route\Route.cs" />
+    <Compile Include="Domain\ServiceCenterPackage.cs" />
+    <Compile Include="Domain\ShipmentTimeMonitor.cs" />
+    <Compile Include="Domain\ShipmentContactHistory.cs" />
+    <Compile Include="Domain\ShipmentContact.cs" />
+    <Compile Include="Domain\ShipmentDeliveryOptionMapping.cs" />
+    <Compile Include="Domain\PreShipmentItem.cs" />
+    <Compile Include="Domain\ShipmentHash.cs" />
+    <Compile Include="Domain\MagayaShipmentItem.cs" />
+    <Compile Include="Domain\ShipmentPackagePrice.cs" />
+    <Compile Include="Domain\PackingList .cs" />
+    <Compile Include="Domain\IndividualCustomer.cs" />
+    <Compile Include="Domain\Insurance.cs" />
+    <Compile Include="Domain\Invoice.cs" />
+    <Compile Include="Domain\InvoiceShipment.cs" />
+    <Compile Include="Domain\JobCard.cs" />
+    <Compile Include="Domain\JobCardManagement.cs" />
+    <Compile Include="Domain\JobCardManagementPart.cs" />
+    <Compile Include="Domain\LogEntry.cs" />
+    <Compile Include="Domain\MainNav.cs" />
+    <Compile Include="Domain\Manifest.cs" />
+    <Compile Include="Domain\ManifestGroupWaybillNumberMapping.cs" />
+    <Compile Include="Domain\Message.cs" />
+    <Compile Include="Domain\NumberGeneratorMonitor.cs" />
+    <Compile Include="Domain\Partnership\Partner.cs" />
+    <Compile Include="Domain\Partnership\PartnerApplication.cs" />
+    <Compile Include="Domain\PaymentPartialTransaction.cs" />
+    <Compile Include="Domain\PaymentTransaction.cs" />
+    <Compile Include="Domain\ReceiveShipment.cs" />
+    <Compile Include="Domain\ServiceCentre.cs" />
+    <Compile Include="Domain\Shipment.cs" />
+    <Compile Include="Domain\ShipmentCancel.cs" />
+    <Compile Include="Domain\ShipmentCollection.cs" />
+    <Compile Include="Domain\ShipmentItem.cs" />
+    <Compile Include="Domain\ShipmentPackagingTransactions.cs" />
+    <Compile Include="Domain\ShipmentReroute.cs" />
+    <Compile Include="Domain\ShipmentReturn.cs" />
+    <Compile Include="Domain\ShipmentScan\MobileScanStatus.cs" />
+    <Compile Include="Domain\ShipmentScan\ScanStatus.cs" />
+    <Compile Include="Domain\ShipmentTracking.cs" />
+    <Compile Include="Domain\SLA\SLA.cs" />
+    <Compile Include="Domain\SLA\SLASignedUser.cs" />
+    <Compile Include="Domain\SpecialDomesticPackage.cs" />
+    <Compile Include="Domain\SpecialDomesticZonePrice.cs" />
+    <Compile Include="Domain\State.cs" />
+    <Compile Include="Domain\Station.cs" />
+    <Compile Include="Domain\StockRequest.cs" />
+    <Compile Include="Domain\StockRequestPart.cs" />
+    <Compile Include="Domain\StockSupplyDetails.cs" />
+    <Compile Include="Domain\Store.cs" />
+    <Compile Include="Domain\SubCategory.cs" />
+    <Compile Include="Domain\SubNav.cs" />
+    <Compile Include="Domain\SubSubNav.cs" />
+    <Compile Include="Domain\TransitWaybillNumber.cs" />
+    <Compile Include="Domain\User.cs" />
+    <Compile Include="Domain\UserLoginEmail.cs" />
+    <Compile Include="Domain\UserServiceCentreMapping.cs" />
+    <Compile Include="Domain\Utility\GlobalProperty.cs" />
+    <Compile Include="Domain\Utility\QRAndBarcode.cs" />
+    <Compile Include="Domain\VAT.cs" />
+    <Compile Include="Domain\Partnership\VehicleType.cs" />
+    <Compile Include="Domain\Vendor.cs" />
+    <Compile Include="Domain\Wallet\AccountSummary.cs" />
+    <Compile Include="Domain\Wallet\AccountTransaction.cs" />
+    <Compile Include="Domain\Wallet\CashOnDeliveryAccount.cs" />
+    <Compile Include="Domain\Wallet\CashOnDeliveryBalance.cs" />
+    <Compile Include="Domain\Wallet\Wallet.cs" />
+    <Compile Include="Domain\Wallet\WalletNumber.cs" />
+    <Compile Include="Domain\Wallet\WalletPaymentLog.cs" />
+    <Compile Include="Domain\Wallet\WalletTransaction.cs" />
+    <Compile Include="Domain\Wallet\WaybillPaymentLog.cs" />
+    <Compile Include="Domain\WaybillNumber.cs" />
+    <Compile Include="Domain\WeightLimit.cs" />
+    <Compile Include="Domain\WeightLimitPrice.cs" />
+    <Compile Include="Domain\Workshop.cs" />
+    <Compile Include="Domain\Zone.cs" />
+    <Compile Include="Domain\HaulageDistanceMappingPrice.cs" />
+    <Compile Include="DTO\Account\DailySalesByServiceCentreDTO.cs" />
+    <Compile Include="DTO\Account\DailySalesDTO.cs" />
+    <Compile Include="DTO\Account\FinancialReportDTO.cs" />
+    <Compile Include="DTO\Account\GeneralLedgerDTO.cs" />
+    <Compile Include="DTO\Account\InsuranceDTO.cs" />
+    <Compile Include="DTO\Account\InvoiceDTO.cs" />
+    <Compile Include="DTO\Account\InvoiceReportDTO.cs" />
+    <Compile Include="DTO\Account\InvoiceShipmentDTO.cs" />
+    <Compile Include="DTO\Account\NewInvoiceViewDTO.cs" />
+    <Compile Include="DTO\Account\InvoiceViewDTO.cs" />
+    <Compile Include="DTO\Account\SalesByServiceCentersDTO.cs" />
+    <Compile Include="DTO\Account\ServiceCenreDTO.cs" />
+    <Compile Include="DTO\Account\BulkWaybillPaymentDTO.cs" />
+    <Compile Include="DTO\Account\VATDTO.cs" />
+    <Compile Include="DTO\ActivationCampaignEmailDTO.cs" />
+    <Compile Include="DTO\Admin\AdminReportDTO.cs" />
+    <Compile Include="DTO\Alpha\AlphaUserLoginDTO.cs" />
+    <Compile Include="DTO\AppMessageDTO.cs" />
+    <Compile Include="DTO\ApproveShipmentDTO.cs" />
+    <Compile Include="DTO\AzapayTransferDetailsDTO.cs" />
+    <Compile Include="DTO\BankSettlement\BankDTO.cs" />
+    <Compile Include="DTO\BankSettlement\BankProcessingOrderForShipmentAndCODDTO.cs" />
+    <Compile Include="DTO\BankSettlement\CODSettlementSheetDTO.cs" />
+    <Compile Include="DTO\BaseDomainDTO.cs" />
+    <Compile Include="DTO\BaseSearchDto.cs" />
+    <Compile Include="DTO\BillsPaymentManagementDTO.cs" />
+    <Compile Include="DTO\CancelShipmentDTO.cs" />
+    <Compile Include="DTO\CaptainBonusByZoneMapingDTO.cs" />
+    <Compile Include="DTO\Captains\CaptainDTO.cs" />
+    <Compile Include="DTO\CategoryDTO.cs" />
+    <Compile Include="DTO\ChangePasswordDTO.cs" />
+    <Compile Include="DTO\Client\ClientNodeDTO.cs" />
+    <Compile Include="DTO\CODCustomerAccountStatementDto.cs" />
+    <Compile Include="DTO\CountryDTO.cs" />
+    <Compile Include="DTO\CouponManagementDTO.cs" />
+    <Compile Include="DTO\Customers\CompanyContactPersonDTO.cs" />
+    <Compile Include="DTO\Customers\CompanyDTO.cs" />
+    <Compile Include="DTO\Customers\CompanySearchDTO.cs" />
+    <Compile Include="DTO\Customers\CustomerDTO.cs" />
+    <Compile Include="DTO\Customers\CustomerSearchOption.cs" />
+    <Compile Include="DTO\Customers\EcommerceAgreementDTO.cs" />
+    <Compile Include="DTO\Customers\IndividualCustomerDTO.cs" />
+    <Compile Include="DTO\Dashboard\DashboardDTO.cs" />
+    <Compile Include="DTO\Dashboard\EarningsBreakdownDTO.cs" />
+    <Compile Include="DTO\Dashboard\GraphDataDTO.cs" />
+    <Compile Include="DTO\Dashboard\ShipmentOrderDTO.cs" />
+    <Compile Include="DTO\DeleteAccountDTO.cs" />
+    <Compile Include="DTO\DeliveryLocationDTO.cs" />
+    <Compile Include="DTO\Devices\DeviceDTO.cs" />
+    <Compile Include="DTO\Devices\DeviceManagementDTO.cs" />
+    <Compile Include="DTO\DHL\AddressPayload.cs" />
+    <Compile Include="DTO\DHL\Dimensions.cs" />
+    <Compile Include="DTO\DHL\Enum\Content.cs" />
+    <Compile Include="DTO\DHL\Enum\DropOffType.cs" />
+    <Compile Include="DTO\DHL\Enum\UnitOfMeasurement.cs" />
+    <Compile Include="DTO\DHL\InternationalShipmentTracking.cs" />
+    <Compile Include="DTO\DHL\InternationalShipmentWaybillDTO.cs" />
+    <Compile Include="DTO\DHL\RatePayload.cs" />
+    <Compile Include="DTO\DHL\RateRequestPayload.cs" />
+    <Compile Include="DTO\DHL\RateRequestResponse.cs" />
+    <Compile Include="DTO\DHL\RateResPayload.cs" />
+    <Compile Include="DTO\DHL\ShipmentResPayload.cs" />
+    <Compile Include="DTO\DHL\ShipmentRequestedPayload.cs" />
+    <Compile Include="DTO\DHL\ShipmentRequestResponse.cs" />
+    <Compile Include="DTO\DHL\ShippingPayload.cs" />
+    <Compile Include="DTO\DHL\TotalNetResult.cs" />
+    <Compile Include="DTO\Expenses\ExpenditureDTO.cs" />
+    <Compile Include="DTO\Expenses\ExpenseTypeDTO.cs" />
+    <Compile Include="DTO\Fleets\AssetDetails.cs" />
+    <Compile Include="DTO\Fleets\AssetDTO.cs" />
+    <Compile Include="DTO\Fleets\AssetTripDTO.cs" />
+    <Compile Include="DTO\Fleets\DispatchActivityDTO.cs" />
+    <Compile Include="DTO\Fleets\DispatchDTO.cs" />
+    <Compile Include="DTO\Fleets\FleetDisputeMessageDto.cs" />
+    <Compile Include="DTO\Fleets\FleetDTO.cs" />
+    <Compile Include="DTO\Fleets\FleetFilterCriteria.cs" />
+    <Compile Include="DTO\Fleets\FleetJobCardDto.cs" />
+    <Compile Include="DTO\Fleets\FleetLocationDTO.cs" />
+    <Compile Include="DTO\Fleets\FleetMakeDTO.cs" />
+    <Compile Include="DTO\Fleets\FleetModelDTO.cs" />
+    <Compile Include="DTO\Fleets\FleetPartDTO.cs" />
+    <Compile Include="DTO\Fleets\FleetPartInventoryDTO.cs" />
+    <Compile Include="DTO\Fleets\FleetPartInventoryHistoryDTO.cs" />
+    <Compile Include="DTO\Fleets\FleetPartnerTransactionDTO.cs" />
+    <Compile Include="DTO\Fleets\FleetPartnerWalletDTO.cs" />
+    <Compile Include="DTO\Fleets\FleetTripDTO.cs" />
+    <Compile Include="DTO\Fleets\ManifestStatusDTO.cs" />
+    <Compile Include="DTO\Fleets\VehicleAnalyticsDto.cs" />
+    <Compile Include="DTO\GatewatActivityDTO.cs" />
+    <Compile Include="DTO\GatewayActivityFilterCriteria.cs" />
+    <Compile Include="DTO\GetCODCustomerAccountStatementDto.cs" />
+    <Compile Include="DTO\GIGGOCODTransferDTO.cs" />
+    <Compile Include="DTO\GIGGOCODTransferResponseDTO.cs" />
+    <Compile Include="DTO\GIGGO\TransactionPreShipmentDTO.cs" />
+    <Compile Include="DTO\GiglgoStationDTO.cs" />
+    <Compile Include="DTO\InboundCategoryDTO.cs" />
+    <Compile Include="DTO\InboundShipmentCategoryDTO.cs" />
+    <Compile Include="DTO\InvoiceNoteDTO.cs" />
+    <Compile Include="DTO\LogEntryDTO.cs" />
+    <Compile Include="DTO\MessagingLog\ResponseData.cs" />
+    <Compile Include="DTO\Pagination\PagingDto.cs" />
+    <Compile Include="DTO\ShipmentExportDTO.cs" />
+    <Compile Include="DTO\GIGXUserDetailsDTO.cs" />
+    <Compile Include="DTO\Haulage\HaulageDTO.cs" />
+    <Compile Include="DTO\Haulage\HaulageDistanceMappingPriceDTO.cs" />
+    <Compile Include="DTO\Haulage\PackingListDTO.cs" />
+    <Compile Include="DTO\ImageDTO.cs" />
+    <Compile Include="DTO\InternationalShipmentDetails\InternationalRequestReceiverDTO.cs" />
+    <Compile Include="DTO\InternationalShipmentDetails\InternationalRequestReceiverItemDTO.cs" />
+    <Compile Include="DTO\JobCards\JobCardDTO.cs" />
+    <Compile Include="DTO\JobCards\JobCardManagementDTO.cs" />
+    <Compile Include="DTO\JobCards\JobCardManagementPartDTO.cs" />
+    <Compile Include="DTO\LocationDTO.cs" />
+    <Compile Include="DTO\Magaya\MagayaShipmentAgilityDTO.cs" />
+    <Compile Include="DTO\Magaya\MagayaShipmentItemDTO.cs" />
+    <Compile Include="DTO\MessageDTO.cs" />
+    <Compile Include="DTO\MessagingLog\BankDepositMessageDTO.cs" />
+    <Compile Include="DTO\MessagingLog\EmailSendLogDTO.cs" />
+    <Compile Include="DTO\MessagingLog\MessageFilterOption.cs" />
+    <Compile Include="DTO\MessagingLog\PasswordMessageDTO.cs" />
+    <Compile Include="DTO\MessagingLog\SmsSendLogDTO.cs" />
+    <Compile Include="DTO\MobileLoginDTO.cs" />
+    <Compile Include="DTO\MobileMessageDTO.cs" />
+    <Compile Include="DTO\MobilePickUpRequestsDTO.cs" />
+    <Compile Include="DTO\MobileRatingDTO.cs" />
+    <Compile Include="DTO\MobileShipmentNumberDTO.cs" />
+    <Compile Include="DTO\MobileShipmentTrackingDTO.cs" />
+    <Compile Include="DTO\Nav\MainNavDTO.cs" />
+    <Compile Include="DTO\Nav\SubNavDTO.cs" />
+    <Compile Include="DTO\Nav\SubSubNavDTO.cs" />
+    <Compile Include="DTO\Node\AcceptShipmentPayload.cs" />
+    <Compile Include="DTO\Node\NodeResponse.cs" />
+    <Compile Include="DTO\Node\UserPayload.cs" />
+    <Compile Include="DTO\NotificationDTO.cs" />
+    <Compile Include="DTO\OnlinePayment\CellulantPayloadDTO.cs" />
+    <Compile Include="DTO\OnlinePayment\PaystackWebhookDTO.cs" />
+    <Compile Include="DTO\OnlinePayment\TheTellerNetDTO.cs" />
+    <Compile Include="DTO\OTPDTO.cs" />
+    <Compile Include="DTO\PartnerMonthlyTransactionsDTO.cs" />
+    <Compile Include="DTO\Partnership\FleetPartnerDTO.cs" />
+    <Compile Include="DTO\Partnership\PartnerPayoutDTO.cs" />
+    <Compile Include="DTO\Partnership\RootObject.cs" />
+    <Compile Include="DTO\Partnership\PartnerApplicationDto.cs" />
+    <Compile Include="DTO\Partnership\PartnerDto.cs" />
+    <Compile Include="DTO\Partnership\PartnerPayDTO.cs" />
+    <Compile Include="DTO\Partnership\PartnerTransactionsDTO.cs" />
+    <Compile Include="DTO\Partnership\SummaryTransactionsDTO.cs" />
+    <Compile Include="DTO\Partnership\VehicleTypeDTO.cs" />
+    <Compile Include="DTO\PaymentMethodDTO.cs" />
+    <Compile Include="DTO\PaymentTransactions\HaulagePricingDTO.cs" />
+    <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionDTO.cs" />
+    <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionProcessDTO.cs" />
+    <Compile Include="DTO\PaymentTransactions\PaymentTransactionDTO.cs" />
+    <Compile Include="DTO\PaymentTransactions\PriceCategoryDTO.cs" />
+    <Compile Include="DTO\PaymentTransactions\ThirdPartyPricingDTO.cs" />
+    <Compile Include="DTO\PaymentTransactions\PricingDTO.cs" />
+    <Compile Include="DTO\PaymentTransactions\ReroutePricingDTO.cs" />
+    <Compile Include="DTO\Report\MobileShipmentFilterCriteria.cs" />
+    <Compile Include="DTO\Report\ShipmentContactFilterCriteria.cs" />
+    <Compile Include="DTO\ServiceCentres\PlaceLocationDTO.cs" />
+    <Compile Include="DTO\ShipmentAndPreShipmentParamDTO.cs" />
+    <Compile Include="DTO\PreShipmentSummaryDTO.cs" />
+    <Compile Include="DTO\ReferrerCodeDTO.cs" />
+    <Compile Include="DTO\Report\AccountFilterCriteria.cs" />
+    <Compile Include="DTO\Report\BankDepositFilterCriteria.cs" />
+    <Compile Include="DTO\Report\DateFilterCriteria.cs" />
+    <Compile Include="DTO\Report\BaseFilterCriteria.cs" />
+    <Compile Include="DTO\Report\DashboardFilterCriteria.cs" />
+    <Compile Include="DTO\Report\ExpenditureFilterCriteria.cs" />
+    <Compile Include="DTO\Report\ScanTrackFilterCriteria.cs" />
+    <Compile Include="DTO\Report\ShipmentCollectionFilterCriteria.cs" />
+    <Compile Include="DTO\Report\ShipmentFilterCriteria.cs" />
+    <Compile Include="DTO\Report\ShipmentProgressSummaryFilterCriteria.cs" />
+    <Compile Include="DTO\RiderDeliveryDTO.cs" />
+    <Compile Include="DTO\RiderDeliveryViewDTO.cs" />
+    <Compile Include="DTO\Routes\CreateRouteDto.cs" />
+    <Compile Include="DTO\Routes\RouteDto.cs" />
+    <Compile Include="DTO\ServiceCentres\LGADTO.cs" />
+    <Compile Include="DTO\ServiceCentres\RegionDTO.cs" />
+    <Compile Include="DTO\ServiceCentres\RegionServiceCentreMappingDTO.cs" />
+    <Compile Include="DTO\ServiceCentres\ServiceCentreDTO.cs" />
+    <Compile Include="DTO\ServiceCentres\StationDTO.cs" />
+    <Compile Include="DTO\ShipmentScan\MobileScanStatusDTO.cs" />
+    <Compile Include="DTO\ShipmentScan\ScanStatusDTO.cs" />
+    <Compile Include="DTO\ShipmentScan\ScanStatusReportDTO.cs" />
+    <Compile Include="DTO\Shipments\CreatePreShipmentMobileDTO.cs" />
+    <Compile Include="DTO\Shipments\CreateShipmentNodeDTO.cs" />
+    <Compile Include="DTO\Shipments\DemurrageDTO.cs" />
+    <Compile Include="DTO\Shipments\EcommerceShipmentSummaryFilterCriteria.cs" />
+    <Compile Include="DTO\Shipments\EcommerceShipmentSummaryReportDTO.cs" />
+    <Compile Include="DTO\Shipments\FilterOptionsDto.cs" />
+    <Compile Include="DTO\Shipments\GIGGoDashboardDTO.cs" />
+    <Compile Include="DTO\Shipments\UnidentifiedItemsForInternationalShippingDTO.cs" />
+    <Compile Include="DTO\Shipments\MobileGroupCodeWaybillMappingDTO.cs" />
+    <Compile Include="DTO\Shipments\GroupWaybillNumberDTO.cs" />
+    <Compile Include="DTO\Shipments\GroupWaybillNumberMappingDTO.cs" />
+    <Compile Include="DTO\Shipments\HUBManifestWaybillMappingDTO.cs" />
+    <Compile Include="DTO\Shipments\LogVisitReasonDTO.cs" />
+    <Compile Include="DTO\Shipments\ManifestDTO.cs" />
+    <Compile Include="DTO\Shipments\ManifestGroupWaybillNumberMappingDTO.cs" />
+    <Compile Include="DTO\Shipments\ManifestVisitMonitoringDTO.cs" />
+    <Compile Include="DTO\Shipments\MessageExtensionDTO.cs" />
+    <Compile Include="DTO\Shipments\MobilePriceDTO.cs" />
+    <Compile Include="DTO\Shipments\MobileShipmentTrackingHistoryDTO.cs" />
+    <Compile Include="DTO\Shipments\NodeLocationDTO.cs" />
+    <Compile Include="DTO\Shipments\OutstandingPaymentsDTO.cs" />
+    <Compile Include="DTO\Shipments\OverdueShipmentDTO.cs" />
+    <Compile Include="DTO\Shipments\PickupManifestDTO.cs" />
+    <Compile Include="DTO\Shipments\PickupManifestWaybillMappingDTO.cs" />
+    <Compile Include="DTO\Shipments\PreShipmentItemMobileDTO.cs" />
+    <Compile Include="DTO\Shipments\PreshipmentManifestDTO.cs" />
+    <Compile Include="DTO\Shipments\PreShipmentMobileDTO.cs" />
+    <Compile Include="DTO\Shipments\InternationalFreightDTO.cs" />
+    <Compile Include="DTO\Shipments\SearchOption.cs" />
+    <Compile Include="DTO\Shipments\ShipmentActivityDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentContactHistoryDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentContactDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentDetailDanfoDTO.cs" />
+    <Compile Include="DTO\Shipments\InternationalCargoManifestDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentHashDTO.cs" />
+    <Compile Include="DTO\Shipments\ThirdPartyPreShipmentItemDTO.cs" />
+    <Compile Include="DTO\Shipments\ThirdPartyPreShipmentDTO.cs" />
+    <Compile Include="DTO\Shipments\PreShipmentManifestMappingDTO.cs" />
+    <Compile Include="DTO\Shipments\ManifestWaybillMappingDTO.cs" />
+    <Compile Include="DTO\Shipments\MissingShipmentDTO.cs" />
+    <Compile Include="DTO\Shipments\ScanDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentDeliveryOptionMappingDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentCancelDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentCollectionDTO.cs" />
+    <Compile Include="DTO\Shipments\PreShipmentDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentDTO.cs" />
+    <Compile Include="DTO\Shipments\PreShipmentItemDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentItemDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentPackagePriceDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentRerouteDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentReturnDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentTrackingDTO.cs" />
+    <Compile Include="DTO\Shipments\ThirdPartyShipmentDTO.cs" />
+    <Compile Include="DTO\Shipments\ThirdPartyShipmentItemsDTO.cs" />
+    <Compile Include="DTO\Shipments\TransitWaybillNumberDTO.cs" />
+    <Compile Include="DTO\Shipments\WaybillNumberDTO.cs" />
+    <Compile Include="DTO\SignResponseDTO.cs" />
+    <Compile Include="DTO\SLA\SLADTO.cs" />
+    <Compile Include="DTO\SLA\SLASignedUserDTO.cs" />
+    <Compile Include="DTO\StateDto.cs" />
+    <Compile Include="DTO\Stocks\StockRequestDTO.cs" />
+    <Compile Include="DTO\Stocks\StockRequestPartDTO.cs" />
+    <Compile Include="DTO\Stocks\StockSupplyDetailsDTO.cs" />
+    <Compile Include="DTO\Stores\ServiceCenterPackageDTO.cs" />
+    <Compile Include="DTO\Stores\ShipmentPackagingTransactionsDTO.cs" />
+    <Compile Include="DTO\Stores\StoreDTO.cs" />
+    <Compile Include="DTO\SubCategoryDTO.cs" />
+    <Compile Include="DTO\TicketMannResponseDTO.cs" />
+    <Compile Include="DTO\TransferDetailsDTO.cs" />
+    <Compile Include="DTO\UPS\LabelDescription.cs" />
+    <Compile Include="DTO\UPS\LabelImageFormat.cs" />
+    <Compile Include="DTO\UPS\LabelSpecification.cs" />
+    <Compile Include="DTO\UPS\UPSAddress.cs" />
+    <Compile Include="DTO\UPS\UPSPackage.cs" />
+    <Compile Include="DTO\UPS\UPSPackaging.cs" />
+    <Compile Include="DTO\UPS\UPSPhone.cs" />
+    <Compile Include="DTO\UPS\UPSSecurity.cs" />
+    <Compile Include="DTO\UPS\UPSShipmentRequest.cs" />
+    <Compile Include="DTO\UPS\UPSShipmentResponsePayload.cs" />
+    <Compile Include="DTO\UserLoginEmailDTO.cs" />
+    <Compile Include="DTO\User\AddClaimDto.cs" />
+    <Compile Include="DTO\User\ClaimDto.cs" />
+    <Compile Include="DTO\User\IntertnationalUserProfilerDTO.cs" />
+    <Compile Include="DTO\User\RankHistoryDTO.cs" />
+    <Compile Include="DTO\User\RoleDTO.cs" />
+    <Compile Include="DTO\User\UserDTO.cs" />
+    <Compile Include="DTO\User\GIGXUserDetailDTO.cs" />
+    <Compile Include="DTO\User\UserValidationDTO.cs" />
+    <Compile Include="DTO\Utility\GlobalPropertyDTO.cs" />
+    <Compile Include="DTO\Utility\MultipleShipmentResult.cs" />
+    <Compile Include="DTO\Utility\MultipleShipmentResultComparer.cs" />
+    <Compile Include="DTO\ValidateBillTransactionDTO.cs" />
+    <Compile Include="DTO\Vendors\VendorDTO.cs" />
+    <Compile Include="DTO\Wallet\CashOnDeliveryAccountDTO.cs" />
+    <Compile Include="DTO\Wallet\CashOnDeliveryAccountSummaryDTO.cs" />
+    <Compile Include="DTO\Wallet\CashOnDeliveryBalanceDTO.cs" />
+    <Compile Include="DTO\Wallet\CODWalletDTO.cs" />
+    <Compile Include="DTO\Wallet\CODTransferLogDTO.cs" />
+    <Compile Include="DTO\Wallet\WalletDto.cs" />
+    <Compile Include="DTO\Wallet\WalletNumberDto.cs" />
+    <Compile Include="DTO\Wallet\TransactionResult.cs" />
+    <Compile Include="DTO\Wallet\WalletPaymentLogDTO.cs" />
+    <Compile Include="DTO\Wallet\WalletSearchOption.cs" />
+    <Compile Include="DTO\Wallet\WalletTransactionDto.cs" />
+    <Compile Include="DTO\Wallet\WalletTransactionSummaryDTO.cs" />
+    <Compile Include="DTO\Wallet\WaybillPaymentLogDTO.cs" />
+    <Compile Include="DTO\WebsiteMessageDTO.cs" />
+    <Compile Include="DTO\Workshops\WorkshopDTO.cs" />
+    <Compile Include="DTO\Zone\DeliveryOptionDTO.cs" />
+    <Compile Include="DTO\Zone\DeliveryOptionPriceDTO.cs" />
+    <Compile Include="DTO\Zone\CountryRouteZoneMapDTO.cs" />
+    <Compile Include="DTO\Zone\DomesticRouteZoneMapDTO.cs" />
+    <Compile Include="DTO\Zone\DomesticZonePriceDTO.cs" />
+    <Compile Include="DTO\Zone\HaulageDistanceMappingDTO.cs" />
+    <Compile Include="DTO\Zone\SpecialDomesticPackageDTO.cs" />
+    <Compile Include="DTO\Zone\SpecialDomesticZonePriceDTO.cs" />
+    <Compile Include="DTO\Zone\WeightLimitDTO.cs" />
+    <Compile Include="DTO\Zone\WeightLimitPriceDTO.cs" />
+    <Compile Include="DTO\Zone\WeightPercentDTO.cs" />
+    <Compile Include="DTO\Zone\ZoneDTO.cs" />
+    <Compile Include="DTO\Zone\ZonePercentDTO.cs" />
+    <Compile Include="Enums\ActivityStatus.cs" />
+    <Compile Include="Enums\AlphaOrderStatus.cs" />
+    <Compile Include="Enums\CardType.cs" />
+    <Compile Include="Enums\CompanyMap.cs" />
+    <Compile Include="Enums\FleetJobCardStatus.cs" />
+    <Compile Include="Enums\FleetTripStatus.cs" />
+    <Compile Include="Enums\ItemState.cs" />
+    <Compile Include="Enums\CouponDiscountType.cs" />
+    <Compile Include="Enums\DepositType.cs" />
+    <Compile Include="Enums\AccountType.cs" />
+    <Compile Include="Enums\CODStatus.cs" />
+    <Compile Include="Enums\CompanyStatus.cs" />
+    <Compile Include="Enums\CompanyType.cs" />
+    <Compile Include="Enums\CustomerCategory.cs" />
+    <Compile Include="Enums\CustomerType.cs" />
+    <Compile Include="Enums\DebitCreditFlag.cs" />
+    <Compile Include="Enums\DispatchCategory.cs" />
+    <Compile Include="Enums\EcommerceAgreementStatus.cs" />
+    <Compile Include="Enums\EmailSmsType.cs" />
+    <Compile Include="Enums\FilterCustomerType.cs" />
+    <Compile Include="Enums\FleetType.cs" />
+    <Compile Include="Enums\CountryType.cs" />
+    <Compile Include="Enums\BillType.cs" />
+    <Compile Include="Enums\Gender.cs" />
+    <Compile Include="Enums\GlobalPropertyType.cs" />
+    <Compile Include="Enums\ImageFileType.cs" />
+    <Compile Include="Enums\IncrementType.cs" />
+    <Compile Include="Enums\InternationalShipmentStatus.cs" />
+    <Compile Include="Enums\InternationalShipmentType.cs" />
+    <Compile Include="Enums\InventoryType.cs" />
+    <Compile Include="Enums\JobCardMaintenanceStatus.cs" />
+    <Compile Include="Enums\JobCardStatus.cs" />
+    <Compile Include="Enums\JobCardType.cs" />
+    <Compile Include="Enums\MaintenanceType.cs" />
+    <Compile Include="Enums\ManifestStatus.cs" />
+    <Compile Include="Enums\ManifestType.cs" />
+    <Compile Include="Enums\MessageAction.cs" />
+    <Compile Include="Enums\MessageType.cs" />
+    <Compile Include="Enums\MessagingLogStatus.cs" />
+    <Compile Include="Enums\MobilePickUpRequestStatus.cs" />
+    <Compile Include="Enums\ModificationType.cs" />
+    <Compile Include="Enums\MovementManifestActivationTypes.cs" />
+    <Compile Include="Enums\NumberGeneratorType.cs" />
+    <Compile Include="Enums\OverdueShipmentStatus.cs" />
+    <Compile Include="Enums\PageOrder.cs" />
+    <Compile Include="Enums\PackageTransactionType.cs" />
+    <Compile Include="Enums\PartnerApplicationStatus.cs" />
+    <Compile Include="Enums\PartnerType.cs" />
+    <Compile Include="Enums\PaymentServiceType.cs" />
+    <Compile Include="Enums\PaymentStatus.cs" />
+    <Compile Include="Enums\PaymentTypes.cs" />
+    <Compile Include="Enums\PickupOptions.cs" />
+    <Compile Include="Enums\PreShipmentProcessingStatus.cs" />
+    <Compile Include="Enums\PreShipmentStatus.cs" />
+    <Compile Include="Enums\PricingType.cs" />
+    <Compile Include="Enums\ProcessingPartnerType.cs" />
+    <Compile Include="Enums\Rank.cs" />
+    <Compile Include="Enums\RateType.cs" />
+    <Compile Include="Enums\RegularEcommerceType.cs" />
+    <Compile Include="Enums\RouteType.cs" />
+    <Compile Include="Enums\ReportSource.cs" />
+    <Compile Include="Enums\ShipmentProgressSummaryType.cs" />
+    <Compile Include="Enums\ShipmentRerouteInitiator.cs" />
+    <Compile Include="Enums\ShipmentScanStatus.cs" />
+    <Compile Include="Enums\ShipmentType.cs" />
+    <Compile Include="Enums\SLAType.cs" />
+    <Compile Include="Enums\SMSSenderPlatform.cs" />
+    <Compile Include="Enums\SpecialDomesticPackageType.cs" />
+    <Compile Include="Enums\StockRequestDestinationType.cs" />
+    <Compile Include="Enums\StockRequestSourceType.cs" />
+    <Compile Include="Enums\StockRequestStatus.cs" />
+    <Compile Include="Enums\SuperManifestStatus.cs" />
+    <Compile Include="Enums\TrackingType.cs" />
+    <Compile Include="Enums\VehicleFixedStatus.cs" />
+    <Compile Include="Enums\WalletTransactionType.cs" />
+    <Compile Include="Enums\UserChannelType.cs" />
+    <Compile Include="Enums\UserStatus.cs" />
+    <Compile Include="Enums\UserType.cs" />
+    <Compile Include="Enums\VATType.cs" />
+    <Compile Include="Enums\Vehicletype.cs" />
+    <Compile Include="Enums\VendorType.cs" />
+    <Compile Include="Enums\WalletType.cs" />
+    <Compile Include="IAuditable.cs" />
+    <Compile Include="IMessageService\Config\EmailConfig.cs" />
+    <Compile Include="IMessageService\Config\IMessageConfig.cs" />
+    <Compile Include="IMessageService\Config\SMSConfig.cs" />
+    <Compile Include="IMessageService\IEmailService.cs" />
+    <Compile Include="IMessageService\IMessageService.cs" />
+    <Compile Include="IMessageService\ISMSService.cs" />
+    <Compile Include="IMessageService\IWhatsappService.cs" />
+    <Compile Include="IRepositories\Account\ICustomerInvoiceRepository.cs" />
+    <Compile Include="IRepositories\Account\IFinancialReportRepository.cs" />
+    <Compile Include="IRepositories\Account\IGeneralLedgerRepository.cs" />
+    <Compile Include="IRepositories\Account\IInsuranceRepository.cs" />
+    <Compile Include="IRepositories\Account\IInvoiceRepository.cs" />
+    <Compile Include="IRepositories\Account\IInvoiceShipmentRepository.cs" />
+    <Compile Include="IRepositories\Account\IWaybillChargeRepository.cs" />
+    <Compile Include="IRepositories\Account\IVATRepository.cs" />
+    <Compile Include="IRepositories\Archived\IInvoiceArchiveRepository.cs" />
+    <Compile Include="IRepositories\Archived\IShipmentArchiveRepository.cs" />
+    <Compile Include="IRepositories\BankSettlement\IBankProcessingOrderForShipmentAndCOD.cs" />
+    <Compile Include="IRepositories\BankSettlement\IBankRepository.cs" />
+    <Compile Include="IRepositories\BankSettlement\ICODSettlementSheetRepository.cs" />
+    <Compile Include="IRepositories\Client\IClientNodeRepository.cs" />
+    <Compile Include="IRepositories\Customers\ICompanyContactPersonRepository.cs" />
+    <Compile Include="IRepositories\Customers\ICompanyRepository.cs" />
+    <Compile Include="IRepositories\Customers\IEcommerceAgreementRepository.cs" />
+    <Compile Include="IRepositories\Customers\IIndividualCustomerRepository.cs" />
+    <Compile Include="IRepositories\Devices\IDeviceManagementRepository.cs" />
+    <Compile Include="IRepositories\Devices\IDeviceRepository.cs" />
+    <Compile Include="IRepositories\Expenses\IExpenditureRepository.cs" />
+    <Compile Include="IRepositories\Expenses\IExpenseTypeRepository.cs" />
+    <Compile Include="IRepositories\Fleets\IDispatchActivityRepository.cs" />
+    <Compile Include="IRepositories\Fleets\IDispatchRepository.cs" />
+    <Compile Include="IRepositories\Fleets\IFleetDisputeMessageRepository.cs" />
+    <Compile Include="IRepositories\Fleets\IFleetJobCardRepository.cs" />
+    <Compile Include="IRepositories\Fleets\IFleetMakeRepository.cs" />
+    <Compile Include="IRepositories\Fleets\IFleetModelRepository.cs" />
+    <Compile Include="IRepositories\Fleets\IFleetPartInventoryHistoryRepository.cs" />
+    <Compile Include="IRepositories\Fleets\IFleetPartInventoryRepository.cs" />
+    <Compile Include="IRepositories\Fleets\IFleetPartRepository.cs" />
+    <Compile Include="IRepositories\Fleets\IFleetRepository.cs" />
+    <Compile Include="IRepositories\Fleets\IFleetTripRepository.cs" />
+    <Compile Include="IRepositories\Fleets\IMovementDispatchRepository.cs" />
+    <Compile Include="IRepositories\Haulage\IHaulageDistanceMappingPriceRepository.cs" />
+    <Compile Include="IRepositories\Haulage\IPackingListRepository.cs" />
+    <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
+    <Compile Include="IRepositories\IActivationCampaignEmailRepository.cs" />
+    <Compile Include="IRepositories\IAuthRepository.cs" />
+    <Compile Include="IRepositories\IBillsPaymentManagementRepository.cs" />
+    <Compile Include="IRepositories\IFleetPartnerTransactionRepository.cs" />
+    <Compile Include="IRepositories\IGIGGOCODTransferRepository.cs" />
+    <Compile Include="IRepositories\IGIGGOTransferRespository.cs" />
+    <Compile Include="IRepositories\IShipmentCategory.cs" />
+    <Compile Include="IRepositories\ICaptainRepository.cs" />
+    <Compile Include="IRepositories\IShipmentExportRepository.cs" />
+    <Compile Include="IRepositories\IGIGXUserDetailRepository.cs" />
+    <Compile Include="IRepositories\ICaptainBonusByZoneMapingRepository.cs" />
+    <Compile Include="IRepositories\ICategoryRepository.cs" />
+    <Compile Include="IRepositories\ICountryRepository.cs" />
+    <Compile Include="IRepositories\ICouponManagementRepository.cs" />
+    <Compile Include="IRepositories\IDeliveryLocationRepository.cs" />
+    <Compile Include="IRepositories\IDeliveryNumberRepository.cs" />
+    <Compile Include="IRepositories\IGiglgoStationRepository.cs" />
+    <Compile Include="IRepositories\IMessageRepository.cs" />
+    <Compile Include="IRepositories\IMobileRatingRepository.cs" />
+    <Compile Include="IRepositories\INotificationRepository.cs" />
+    <Compile Include="IRepositories\InternationalRequest\IInternationalRequestReceiverRepository.cs" />
+    <Compile Include="IRepositories\IOTPRepository.cs" />
+    <Compile Include="IRepositories\IPaymentMethodRepository.cs" />
+    <Compile Include="IRepositories\IQueryFluent.cs" />
+    <Compile Include="IRepositories\IReferrerCodeRepository.cs" />
+    <Compile Include="IRepositories\IRiderDeliveryRepository.cs" />
+    <Compile Include="IRepositories\IPriceCategoryRepository.cs" />
+    <Compile Include="IRepositories\ITransferDetailsRepository.cs" />
+    <Compile Include="IRepositories\Magaya\IMagayaShipmentItemRepository.cs" />
+    <Compile Include="IRepositories\Partnership\IFleetPartnerRepository.cs" />
+    <Compile Include="IRepositories\Partnership\IPartnerPayoutRepository.cs" />
+    <Compile Include="IRepositories\Partnership\IPartnerTransactionsRepository.cs" />
+    <Compile Include="IRepositories\IRepository.cs" />
+    <Compile Include="IRepositories\IStateRepository.cs" />
+    <Compile Include="IRepositories\ISubCategoryRepository.cs" />
+    <Compile Include="IRepositories\IUnitOfWork.cs" />
+    <Compile Include="IRepositories\IUserLoginEmailRepository.cs" />
+    <Compile Include="IRepositories\JobCards\IJobCardManagementPartRepository.cs" />
+    <Compile Include="IRepositories\JobCards\IJobCardManagementRepository.cs" />
+    <Compile Include="IRepositories\JobCards\IJobCardRepository.cs" />
+    <Compile Include="IRepositories\MessagingLog\IEmailSendLogRepository.cs" />
+    <Compile Include="IRepositories\MessagingLog\ISmsSendLogRepository.cs" />
+    <Compile Include="IRepositories\Nav\IMainNavRepository.cs" />
+    <Compile Include="IRepositories\Nav\ISubNavRepository.cs" />
+    <Compile Include="IRepositories\Nav\ISubSubNavRepository.cs" />
+    <Compile Include="IRepositories\Partnership\IPartnerApplicationRepository.cs" />
+    <Compile Include="IRepositories\Partnership\IPartnerRepository.cs" />
+    <Compile Include="IRepositories\Partnership\IVehicleTypeRepository.cs" />
+    <Compile Include="IRepositories\PaymentTransactions\IPaymentPartialTransactionRepository.cs" />
+    <Compile Include="IRepositories\PaymentTransactions\IPaymentTransactionRepository.cs" />
+    <Compile Include="IRepositories\Routes\IRouteRepository.cs" />
+    <Compile Include="IRepositories\ServiceCentres\ILGARepository.cs" />
+    <Compile Include="IRepositories\ServiceCentres\IPlaceLocationRepository.cs" />
+    <Compile Include="IRepositories\ServiceCentres\IRegionRepository.cs" />
+    <Compile Include="IRepositories\ServiceCentres\IRegionServiceCentreMappingRepository.cs" />
+    <Compile Include="IRepositories\ServiceCentres\IServiceCentreRepository.cs" />
+    <Compile Include="IRepositories\ServiceCentres\IStationRepository.cs" />
+    <Compile Include="IRepositories\ServiceCentres\IUserServiceCentreMappingRepository.cs" />
+    <Compile Include="IRepositories\ShipmentScan\IMobileScanStatusRepository.cs" />
+    <Compile Include="IRepositories\ShipmentScan\IScanStatusRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IDemurrageRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IUnidentifiedItemsForInternationalShippingRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IInternationalCargoManifestRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IInternationalShipmentWaybillRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IMobileGroupCodeWaybillMappingRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IGroupWaybillNumberMappingRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IHUBManifestWaybillMappingRepository.cs" />
+    <Compile Include="IRepositories\Shipments\ILogVisitReasonRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IMobilePickUpRequestsRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IMobileShipmentTrackingRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IOverdueShipmentRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IPickupManifestRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IPickupManifestWaybillMappingRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IPreShipmentItemMobileRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IPreShipmentManifestMappingRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IManifestWaybillMappingRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IManifestGroupWaybillNumberMappingRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IManifestRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IManifestVisitMonitoringRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IPreShipmentMobileRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentContactHistoryRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IInternationalCargoManifestDetailRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentTimeMonitorRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentContactRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentDeliveryOptionMappingRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentCancelRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentCollectionRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IPreShipmentItemRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentHashRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentItemRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IMissingShipmentRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentPackagePriceRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IPreShipmentRepository.cs" />
+    <Compile Include="IRepositories\Magaya\IMagayaShipmentRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentRerouteRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentReturnRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentTrackingRepository.cs" />
+    <Compile Include="IRepositories\Shipments\ITransitWaybillNumberRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IWaybillNumberRepository.cs" />
+    <Compile Include="IRepositories\Sla\ISLARepository.cs" />
+    <Compile Include="IRepositories\Sla\ISLASignedUserRepository.cs" />
+    <Compile Include="IRepositories\Stocks\IStockRequestPartRepository.cs" />
+    <Compile Include="IRepositories\Stocks\IStockRequestRepository.cs" />
+    <Compile Include="IRepositories\Stocks\IStockSupplyDetailsRepository.cs" />
+    <Compile Include="IRepositories\Stores\IShipmentPackagingTransactionsRepository.cs" />
+    <Compile Include="IRepositories\Stores\IServiceCenterPackageRepository.cs" />
+    <Compile Include="IRepositories\Stores\IStoreRepository.cs" />
+    <Compile Include="IRepositories\User\IRankHistoryRepository.cs" />
+    <Compile Include="IRepositories\User\IUserRepository.cs" />
+    <Compile Include="IRepositories\Utility\IQRAndBarcodeRepository.cs" />
+    <Compile Include="IRepositories\Utility\IGlobalPropertyRepository.cs" />
+    <Compile Include="IRepositories\Utility\INumberGeneratorMonitorRepository.cs" />
+    <Compile Include="IRepositories\Vendors\IVendorRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICODTransferLogRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICODGeneratedAccountNoRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICODWalletRepository.cs" />
+    <Compile Include="IRepositories\Wallet\IDemurrageRegisterAccountRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICashOnDeliveryRegisterAccountRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICashOnDeliveryBalanceRepository.cs" />
+    <Compile Include="IRepositories\Wallet\IWalletNumberRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICashOnDeliveryAccountRepository.cs" />
+    <Compile Include="IRepositories\Wallet\IWalletPaymentLogRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICODTransferRegisterRepository.cs" />
+    <Compile Include="IRepositories\Wallet\IWalletRepository.cs" />
+    <Compile Include="IRepositories\Wallet\IWalletTransactionRepository.cs" />
+    <Compile Include="IRepositories\Wallet\IWaybillPaymentLogRepository.cs" />
+    <Compile Include="IRepositories\Workshops\IWorkshopRepository.cs" />
+    <Compile Include="IRepositories\Zone\IDeliveryOptionPriceRepository.cs" />
+    <Compile Include="IRepositories\Zone\IDeliveryOptionRepository.cs" />
+    <Compile Include="IRepositories\Zone\ICountryRouteZoneMapRepository.cs" />
+    <Compile Include="IRepositories\Zone\IDomesticRouteZoneMapRepository.cs" />
+    <Compile Include="IRepositories\Zone\IDomesticZonePriceRepository.cs" />
+    <Compile Include="IRepositories\Haulage\IHaulageDistanceMappingRepository.cs" />
+    <Compile Include="IRepositories\Zone\ISpecialDomesticPackageRepository.cs" />
+    <Compile Include="IRepositories\Zone\ISpecialDomesticZonePriceRepository.cs" />
+    <Compile Include="IRepositories\Zone\IWeightLimitPriceRepository.cs" />
+    <Compile Include="IRepositories\Zone\IWeightLimitRepository.cs" />
+    <Compile Include="IRepositories\Zone\IZoneRepository.cs" />
+    <Compile Include="IServices\Account\IExpenditureService.cs" />
+    <Compile Include="IServices\Account\IFinancialReportService.cs" />
+    <Compile Include="IServices\Account\IGeneralLedgerService.cs" />
+    <Compile Include="IServices\Account\IIncomeService.cs" />
+    <Compile Include="IServices\Account\IInsuranceService.cs" />
+    <Compile Include="IServices\Account\IInvoiceService.cs" />
+    <Compile Include="IServices\Account\IInvoiceShipmentService.cs" />
+    <Compile Include="IServices\Account\IVATService.cs" />
+    <Compile Include="IServices\Alpha\IAlphaService.cs" />
+    <Compile Include="IServices\BankSettlement\IBankService.cs" />
+    <Compile Include="IServices\BankSettlement\ICODSettlementSheetService.cs" />
+    <Compile Include="IServices\Business\IGIGGoPricingService.cs" />
+    <Compile Include="IServices\Business\IInternationalPriceService.cs" />
+    <Compile Include="IServices\Business\IPaymentService.cs" />
+    <Compile Include="IServices\Business\IPricingService.cs" />
+    <Compile Include="IServices\Business\IScanService.cs" />
+    <Compile Include="IServices\Business\IShipmentTrackService.cs" />
+    <Compile Include="IServices\Client\IClientNodeService.cs" />
+    <Compile Include="IServices\CustomerPortal\ICustomerPortalService.cs" />
+    <Compile Include="IServices\CustomerPortal\IPartnerPortalService.cs" />
+    <Compile Include="IServices\Customers\ICompanyContactPersonService.cs" />
+    <Compile Include="IServices\Customers\ICompanyService.cs" />
+    <Compile Include="IServices\Customers\ICustomerService.cs" />
+    <Compile Include="IServices\Customers\IIndividualCustomerService.cs" />
+    <Compile Include="IServices\Dashboard\IDashboardService.cs" />
+    <Compile Include="IServices\Devices\IDeviceManagementService.cs" />
+    <Compile Include="IServices\Devices\IDeviceService.cs" />
+    <Compile Include="IServices\DHL\IDHLService.cs" />
+    <Compile Include="IServices\Expenses\IExpenseTypeService.cs" />
+    <Compile Include="IServices\Fleets\IDispatchActivityService.cs" />
+    <Compile Include="IServices\Fleets\IDispatchService.cs" />
+    <Compile Include="IServices\Fleets\IFleetDisputeMessageService.cs" />
+    <Compile Include="IServices\Fleets\IFleetJobCardService.cs" />
+    <Compile Include="IServices\Fleets\IFleetMakeService.cs" />
+    <Compile Include="IServices\Fleets\IFleetManagementService.cs" />
+    <Compile Include="IServices\Fleets\IFleetModelService.cs" />
+    <Compile Include="IServices\Fleets\IFleetPartInventoryHistoryService.cs" />
+    <Compile Include="IServices\Fleets\IFleetPartInventoryService.cs" />
+    <Compile Include="IServices\Fleets\IFleetPartService.cs" />
+    <Compile Include="IServices\Fleets\IFleetService.cs" />
+    <Compile Include="IServices\Fleets\IFleetTripService.cs" />
+    <Compile Include="IServices\Haulage\IHaulageDistanceMappingPriceService.cs" />
+    <Compile Include="IServices\Haulage\IHaulageService.cs" />
+    <Compile Include="IServices\Haulage\IPackingListService.cs" />
+    <Compile Include="IServices\IActivationCampaignEmailService.cs" />
+    <Compile Include="IServices\ICaptainService.cs" />
+    <Compile Include="IServices\IGIGXUserDetailService.cs" />
+    <Compile Include="IServices\ICaptainBonusByZoneMapingService.cs" />
+    <Compile Include="IServices\ICategoryService.cs" />
+    <Compile Include="IServices\ICountryService.cs" />
+    <Compile Include="IServices\IDeliveryLocationService.cs" />
+    <Compile Include="IServices\IDeliveryNumberService.cs" />
+    <Compile Include="IServices\IGiglgoStationService.cs" />
+    <Compile Include="IServices\IMessageService.cs" />
+    <Compile Include="IServices\IMobileRatingService.cs" />
+    <Compile Include="IServices\IMobileResponse.cs" />
+    <Compile Include="IServices\INotificationService.cs" />
+    <Compile Include="IServices\InternationalRequest\IInternationalRequestReceiverService.cs" />
+    <Compile Include="IServices\IOTPService.cs" />
+    <Compile Include="IServices\IPaymentMethodService.cs" />
+    <Compile Include="IServices\IReferrerCodeService.cs" />
+    <Compile Include="IServices\IRiderDeliveryService.cs" />
+    <Compile Include="IServices\IServiceDependencyMarker.cs" />
+    <Compile Include="IServices\IServiceReponse.cs" />
+    <Compile Include="IServices\IStateService.cs" />
+    <Compile Include="IServices\IPriceCategoryService.cs" />
+    <Compile Include="IServices\ISubCategoryService.cs" />
+    <Compile Include="IServices\ITicketMannService.cs" />
+    <Compile Include="IServices\JobCards\IJobCardManagementPartService.cs" />
+    <Compile Include="IServices\JobCards\IJobCardManagementService.cs" />
+    <Compile Include="IServices\JobCards\IJobCardService.cs" />
+    <Compile Include="IServices\MessagingLog\IEmailSendLogService.cs" />
+    <Compile Include="IServices\MessagingLog\ISmsSendLogService.cs" />
+    <Compile Include="IServices\Nav\IMainNavService.cs" />
+    <Compile Include="IServices\Nav\ISubNavService.cs" />
+    <Compile Include="IServices\Nav\ISubSubNavService.cs" />
+    <Compile Include="IServices\Node\INodeService.cs" />
+    <Compile Include="IServices\Partnership\IFleetPartnerService.cs" />
+    <Compile Include="IServices\Partnership\IPartnerApplicationService.cs" />
+    <Compile Include="IServices\Partnership\IPartnerPayoutService.cs" />
+    <Compile Include="IServices\Partnership\IPartnerService.cs" />
+    <Compile Include="IServices\Partnership\IPartnerTransactionsService.cs" />
+    <Compile Include="IServices\Partnership\IVehicleTypeService.cs" />
+    <Compile Include="IServices\PaymentTransactions\IPaymentPartialTransactionService.cs" />
+    <Compile Include="IServices\PaymentTransactions\IPaymentTransactionService.cs" />
+    <Compile Include="IServices\Report\IAccountReportService.cs" />
+    <Compile Include="IServices\Report\IAdminReportService.cs" />
+    <Compile Include="IServices\Report\IShipmentReportService.cs" />
+    <Compile Include="IServices\RouteServices\IRouteService.cs" />
+    <Compile Include="IServices\ServiceCentres\ILGAService.cs" />
+    <Compile Include="IServices\ServiceCentres\IPlaceLocationService.cs" />
+    <Compile Include="IServices\ServiceCentres\IRegionService.cs" />
+    <Compile Include="IServices\ServiceCentres\IRegionServiceCentreMappingService.cs" />
+    <Compile Include="IServices\ServiceCentres\IServiceCentreService.cs" />
+    <Compile Include="IServices\ServiceCentres\IStationService.cs" />
+    <Compile Include="IServices\ServiceCentres\IUserServiceCentreMappingService.cs" />
+    <Compile Include="IServices\ShipmentScan\IMobileScanStatusService.cs" />
+    <Compile Include="IServices\ShipmentScan\IScanStatusService.cs" />
+    <Compile Include="IServices\Shipments\IInternationalShipmentWaybillService.cs" />
+    <Compile Include="IServices\Shipments\IMobileGroupCodeWaybillMappingService.cs" />
+    <Compile Include="IServices\Shipments\IGroupWaybillNumberMappingService.cs" />
+    <Compile Include="IServices\Shipments\IGroupWaybillNumberService.cs" />
+    <Compile Include="IServices\Shipments\IHUBManifestWaybillMappingService.cs" />
+    <Compile Include="IServices\Shipments\ILogVisitReasonService.cs" />
+    <Compile Include="IServices\Shipments\IMobilePickUpRequestsService.cs" />
+    <Compile Include="IServices\Shipments\IMobileShipmentTrackingService.cs" />
+    <Compile Include="IServices\Shipments\IOverdueShipmentService.cs" />
+    <Compile Include="IServices\Shipments\IPreShipmentManifestMappingService.cs" />
+    <Compile Include="IServices\Shipments\IManifestWaybillMappingService.cs" />
+    <Compile Include="IServices\Shipments\IManifestGroupWaybillNumberMappingService.cs" />
+    <Compile Include="IServices\Shipments\IManifestService.cs" />
+    <Compile Include="IServices\Shipments\IManifestVisitMonitoringService.cs" />
+    <Compile Include="IServices\Shipments\IMissingShipmentService.cs" />
+    <Compile Include="IServices\Shipments\IPreShipmentMobileService.cs" />
+    <Compile Include="IServices\Shipments\IShipmentDeliveryOptionMappingService.cs" />
+    <Compile Include="IServices\Shipments\IShipmentCancelService.cs" />
+    <Compile Include="IServices\Shipments\IShipmentCollectionService.cs" />
+    <Compile Include="IServices\Shipments\IShipmentPackagePriceService.cs" />
+    <Compile Include="IServices\Shipments\IShipmentPackageService.cs" />
+    <Compile Include="IServices\Shipments\IShipmentContactService.cs" />
+    <Compile Include="IServices\Shipments\IShipmentReturnService.cs" />
+    <Compile Include="IServices\Shipments\IShipmentRerouteService.cs" />
+    <Compile Include="IServices\Shipments\IPreShipmentService.cs" />
+    <Compile Include="IServices\Shipments\IInternationalCargoManifestService.cs" />
+    <Compile Include="IServices\Shipments\IShipmentService.cs" />
+    <Compile Include="IServices\Shipments\IShipmentTrackingService.cs" />
+    <Compile Include="IServices\Shipments\ISuperManifestService.cs" />
+    <Compile Include="IServices\Shipments\ITransitWaybillNumberService.cs" />
+    <Compile Include="IServices\Shipments\IWaybillNumberService.cs" />
+    <Compile Include="IServices\Sla\ISLAService.cs" />
+    <Compile Include="IServices\Stocks\IStockRequestPartService.cs" />
+    <Compile Include="IServices\Stocks\IStockRequestService.cs" />
+    <Compile Include="IServices\Stocks\IStockSupplyDetailsService.cs" />
+    <Compile Include="IServices\Stores\IStoreService.cs" />
+    <Compile Include="IServices\ThirdPartyAPI\IThirdPartyAPIService.cs" />
+    <Compile Include="IServices\TickectMan\ITickectManService.cs" />
+    <Compile Include="IServices\UPS\IUPSService.cs" />
+    <Compile Include="IServices\User\IRankHistoryService.cs" />
+    <Compile Include="IServices\User\IUserService.cs" />
+    <Compile Include="IServices\Utility\IAutoManifestAndGroupingService.cs" />
+    <Compile Include="IServices\Utility\IQRAndBarcodeService.cs" />
+    <Compile Include="IServices\Utility\IGlobalPropertyService.cs" />
+    <Compile Include="IServices\Utility\INumberGeneratorMonitorService.cs" />
+    <Compile Include="IServices\Utility\IPasswordGenerator.cs" />
+    <Compile Include="IServices\Vendors\IVendorService.cs" />
+    <Compile Include="IServices\BankSettlement\IBankShipmentSettlementService.cs" />
+    <Compile Include="IServices\Wallet\IAzapayPaymentService.cs" />
+    <Compile Include="IServices\Wallet\ICellulantPaymentService.cs" />
+    <Compile Include="IServices\Wallet\ICODGeneratedAccountNoService.cs" />
+    <Compile Include="IServices\Wallet\ICODTransferLogService.cs" />
+    <Compile Include="IServices\Wallet\ICODTransferRegisterService.cs" />
+    <Compile Include="IServices\Wallet\IStellasService.cs" />
+    <Compile Include="IServices\Wallet\IKorapayPaymentService.cs" />
+    <Compile Include="IServices\Wallet\ISterlingPaymentService.cs" />
+    <Compile Include="IServices\Wallet\IFlutterwavePaymentService.cs" />
+    <Compile Include="IServices\Wallet\IUssdService.cs" />
+    <Compile Include="IServices\Wallet\IWalletNumberService.cs" />
+    <Compile Include="IServices\Wallet\ICashOnDeliveryBalanceService.cs" />
+    <Compile Include="IServices\Wallet\ICashOnDeliveryAccountService.cs" />
+    <Compile Include="IServices\Wallet\IPaystackPaymentService.cs" />
+    <Compile Include="IServices\Wallet\IWalletPaymentLogService.cs" />
+    <Compile Include="IServices\Wallet\ICODWalletService.cs" />
+    <Compile Include="IServices\Wallet\IWalletService.cs" />
+    <Compile Include="IServices\Wallet\IWalletTransactionService.cs" />
+    <Compile Include="IServices\Wallet\IWaybillPaymentLogService.cs" />
+    <Compile Include="IServices\Website\IWebsiteService.cs" />
+    <Compile Include="IServices\Workshops\IWorkshopService.cs" />
+    <Compile Include="IServices\Zone\IDeliveryOptionPriceService.cs" />
+    <Compile Include="IServices\Zone\IDeliveryOptionService.cs" />
+    <Compile Include="IServices\Zone\ICountryRouteZoneMapService.cs" />
+    <Compile Include="IServices\Zone\IDomesticRouteZoneMapService.cs" />
+    <Compile Include="IServices\Zone\IDomesticZonePriceService.cs" />
+    <Compile Include="IServices\Haulage\IHaulageDistanceMappingService.cs" />
+    <Compile Include="IServices\Zone\ISpecialDomesticPackageService.cs" />
+    <Compile Include="IServices\Zone\ISpecialDomesticZonePriceService.cs" />
+    <Compile Include="IServices\Zone\IWeightLimitPriceService.cs" />
+    <Compile Include="IServices\Zone\IWeightLimitService.cs" />
+    <Compile Include="IServices\Zone\IZoneService.cs" />
+    <Compile Include="MapperConfigurationExtension.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="View\AdminReportView\AllTimeSalesByCountry.cs" />
+    <Compile Include="View\Archived\InvoiceArchiveView.cs" />
+    <Compile Include="View\CustomerView.cs" />
+    <Compile Include="View\InvoiceView.cs" />
+    <Compile Include="View\ShipmentTrackingView.cs" />
+    <Compile Include="View\WalletPaymentLogView.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <Compile Include="DTO\Customers\EcommerceWalletDTO.cs" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ThirdParty.WebServices\ThirdParty.WebServices.csproj">
+      <Project>{03529607-e784-45a7-b684-158ea13fb5e0}</Project>
+      <Name>ThirdParty.WebServices</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
