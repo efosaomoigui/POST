@@ -44,12 +44,12 @@ namespace POST.WebApi.Controllers.CustomerInvoice
                 using (var client = new System.Net.Http.HttpClient())
                 {
                     //setup client
-                    string apiBaseUri = ""; // "http://localhost/giglsresourceapi/";
+                    string apiBaseUri = "http://localhost/deltapost/";
                    // string apiBaseUri = "https://api.gigagilitysystems.com/";
                     client.BaseAddress = new Uri(apiBaseUri);
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    System.Net.Http.HttpResponseMessage responseMessage = client.GetAsync("api/report/getcustomerinvoice").Result;
+                    var responseMessage = client.GetAsync("api/report/getcustomerinvoice").Result;
                     if (!responseMessage.IsSuccessStatusCode)
                     {
                         return false;

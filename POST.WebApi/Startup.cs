@@ -50,7 +50,7 @@ namespace POST.WebApi
             //});
             //app.UseHangfireServer();
             //app.UseHangfireDashboard();
-            MethodCaller_Timer();
+            //MethodCaller_Timer();
 
         }
 
@@ -63,22 +63,22 @@ namespace POST.WebApi
             jsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
         }
 
-        protected void MethodCaller_Timer()
-        {
-            Timer timerforMail = new Timer(120000);
-            Timer tminute = new Timer(minute);
+        //protected void MethodCaller_Timer()
+        //{
+        //    Timer timerforMail = new Timer(120000);
+        //    Timer tminute = new Timer(minute);
 
-            timerforMail.Elapsed += new ElapsedEventHandler(timerforMail_Elapsed);
-            timerforMail.Enabled = true;
-        }
+        //    timerforMail.Elapsed += new ElapsedEventHandler(timerforMail_Elapsed);
+        //    timerforMail.Enabled = true;
+        //}
 
-        private void timerforMail_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            using (Controllers.CustomerInvoice.CustomerInvoiceController req = new Controllers.CustomerInvoice.CustomerInvoiceController(service))
-            {
-                req.GenerateCustomerInvoice();
-            }
-        }
+        //private void timerforMail_Elapsed(object sender, ElapsedEventArgs e)
+        //{
+        //    using (Controllers.CustomerInvoice.CustomerInvoiceController req = new Controllers.CustomerInvoice.CustomerInvoiceController(service))
+        //    {
+        //        req.GenerateCustomerInvoice();
+        //    }
+        //}
 
     }
 }

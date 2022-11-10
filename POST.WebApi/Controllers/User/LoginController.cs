@@ -34,8 +34,8 @@ namespace POST.WebApi.Controllers.User
                 userLoginModel.Password = userLoginModel.Password.Trim();
             }
 
-            //const string apiBaseUri = "http://localhost/POST.WebApi/";
-            const string apiBaseUri = "http://giglsresourceapi.azurewebsites.net/api/";
+            const string apiBaseUri = "http://localhost/deltapost/api";
+            //const string apiBaseUri = "http://giglsresourceapi.azurewebsites.net/api/";
             string getTokenResponse;
 
             return await HandleApiOperationAsync(async () =>
